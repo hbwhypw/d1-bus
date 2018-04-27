@@ -1,0 +1,29 @@
+package com.tmtc.service;
+
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.web.multipart.MultipartFile;
+
+import com.tmtc.frame.ServiceException;
+import com.tmtc.po.Car;
+import com.tmtc.po.CarRepository;
+import com.tmtc.vo.CarVo;
+
+public interface CarService extends IService<Car, CarRepository>,PageService<CarRepository>{
+	public int delete(Car car);
+	
+	int insert(Car record,MultipartFile[] car_pic,MultipartFile[] car_registration_pic,MultipartFile[] appearance_pic,MultipartFile[] trim_pic,HttpServletRequest request)throws ServiceException;
+
+	int update(Car record,MultipartFile[] car_pic,MultipartFile[] car_registration_pic,MultipartFile[] appearance_pic,MultipartFile[] trim_pic,HttpServletRequest request)throws ServiceException;
+
+	Map<String, List<String>> img(String id);
+	
+	int updateRecover(String id);
+	
+	int deleteForEver(String id);
+	
+	List<CarVo> selectDetail(CarRepository example);
+}

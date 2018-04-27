@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0,user-scalable=no,maximum-scale=1,width=device-width" />
+    <title></title>
+    <link href="/dist/css/app/Web.css" type="text/css" rel="stylesheet" />
+    <script src="/dist/lib/client.js"></script>
+    <script src="/dist/lib/jquery/jquery-2.1.0.min.js"></script>
+    <script>
+        $(function(){
+            if (client.system.iphone) {
+                $('#closeBtn').on('click', function(){
+                    window.webkit.messageHandlers.AppModel.postMessage({body: 'xxx'});
+                });
+            } else if (client.system.android) {
+                $('#closeBtn').on('click', function(){
+                    window.control.finishWebView();
+                });
+            } else {
+                alert("您的设备不支持");
+            }
+        });
+    </script>
+</head>
+<body>
+<div class="PageHeader">
+    <img src="../images/app/backicon.png" onclick="javascript: history.go(-1);" style="cursor:pointer;">嘀一科技
+    <a id="closeBtn">关闭</a>
+</div>
+<div align="center">
+    <div class="pic error"></div>
+</div>
+<div align="center">
+    <label style="font-size: 18px"> 支付失败 </label>
+</div>
+</body>
+</html>

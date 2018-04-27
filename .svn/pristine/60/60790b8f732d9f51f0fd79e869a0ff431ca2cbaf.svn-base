@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=9" />
+<title>car</title>
+</head>
+<body>
+	<script type="text/javascript" src="/dist/js/subPages/exp.js"></script>
+	<table id="expDg" class="easyui-datagrid"
+		data-options="url:'./../exp/query',rownumbers:true,toolbar:'#expDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false">
+		<thead>
+			<tr>
+				<th data-options="field:'user_id',width:80,hidden:true">车牌号</th>
+				<th data-options="field:'exp_type',width:80,hidden:true">乘客座位数</th>
+				<th data-options="field:'id',width:80">编号</th>
+				<th data-options="field:'userName',width:80">用户手机号</th>
+				<th data-options="field:'exp_type_name',width:80">类型</th>
+				<th data-options="field:'score',width:80">积分</th>
+				<th data-options="field:'opt_time',width:80">创建时间</th>
+				<th
+					data-options="field:'is_check',width:80,formatter: common.is_checkFormatter">是否有效</th>
+			</tr>
+		</thead>
+	</table>
+	<div id="expDgTbar">
+		<table width="100%">
+			<tr>
+				<td align="left">&nbsp;&nbsp;手机号：&nbsp;&nbsp; <input
+					id="phoneParam" name="phoneParam" class="easyui-validatebox"
+					style="width: 150px;"> <a class="easyui-linkbutton"
+					href="javascript:void(0);" iconCls="icon-search" plain="true">查询</a>
+				</td>
+			</tr>
+		</table>
+	</div>
+</body>
+</html>

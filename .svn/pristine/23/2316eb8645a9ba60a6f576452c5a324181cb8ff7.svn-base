@@ -1,0 +1,168 @@
+package com.tmtc.serviceImpl.appAPI;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.dao.*;
+import com.tmtc.frame.ServiceRuntimeException;
+import com.tmtc.po.*;
+import com.tmtc.po.LineOrderRepository.Criteria;
+import com.tmtc.service.appAPI.CollectMoneyService;
+import com.tmtc.utils.DateUtil;
+import com.tmtc.utils.IdWorker;
+import com.tmtc.utils.OrderNumUtil;
+import com.tmtc.utils.VerificationUtil;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.Date;
+import java.util.List;
+
+@Service
+public class CollerctMoneyServiceImpl implements CollectMoneyService {
+
+	@Autowired
+	UserDetailDao userDetailDao;
+
+	@Autowired
+	UserDao userDao;
+
+	@Autowired
+	LineDao lineDao;
+
+	@Autowired
+	ScanDao scanDao;
+
+	@Autowired
+	LineOrderDao lineOrderDao;
+
+	@Autowired
+	MoneyOrderDao moneyOrderDao;
+
+	@Autowired
+	ExpScoreRecordDao expScoreRecordDao;
+
+	@Autowired
+	CompanyDao companyDao;
+
+	@Autowired
+	DictionaryDao dictionaryDao;
+
+	/**
+	 * 获取线路价格 针对 万科城市花园 刷卡优惠
+	 * 
+	 * @param company_id
+	 *            公司id
+	 * @param line
+	 *            线路实体
+	 * @return 线路价格
+	 */
+	private Integer getPrice(String company_id, Line line) {
+		Company company = companyDao.selectByPrimaryKey(company_id);
+		if (company.getId().equals("682076763697848320")) {
+			return ParameterConstant.PUSH_CARD_PRICE;
+		}
+		return line.getPrice();
+	}
+
+	@Override
+	public synchronized int insertCheck(String company_id, String card_num, String line_id, String line_time_id,
+			String line_station_id) throws ServiceRuntimeException {
+
+		String userId = userDao.selectCompanyCardNum(company_id, card_num);
+		if (0 == VerificationUtil.length(userId)) {
+			return 0; // 无效卡
+		}
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(userId);
+		if (null == userDetail) {
+			throw new ServiceRuntimeException("用户id，数据异常");
+		}
+
+		Integer user_type = userDetail.getUser_type();
+
+		if (ParameterConstant.USER_TYPE_COMPANY_NORMAL_100 != user_type
+				|| ParameterConstant.USER_TYPE_COMPANY_NORMAL_20 != user_type) {
+			return 3; // 您不是付费员工
+		}
+
+		LineOrderRepository lineOrderRepository = new LineOrderRepository();
+		Criteria criteria = lineOrderRepository.createCriteria();
+		criteria.andUser_idEqualTo(userId);
+		criteria.andTime_line_idEqualTo(line_time_id);
+		List<LineOrder> list = lineOrderDao.selectByExample(lineOrderRepository);
+		if (0 != VerificationUtil.size(list)) {
+			return 5;
+		}
+
+		Integer balance = userDetail.getBalance();
+		if (null == balance) {
+			userDetail.setBalance(0);
+			userDetailDao.updateByPrimaryKeySelective(userDetail);
+			return 1; // 余额不足
+		}
+
+		Line line = lineDao.selectByPrimaryKey(line_id);
+		if (null == line) {
+			throw new ServiceRuntimeException("线路id，数据异常");
+		}
+
+		Integer price = getPrice(company_id, line);
+
+		DictionaryRepository dictionaryRepository = new DictionaryRepository();
+		com.tmtc.po.DictionaryRepository.Criteria criteria2 = dictionaryRepository.createCriteria();
+		criteria2.andCodeEqualTo(user_type);
+		List<Dictionary> list2 = dictionaryDao.selectByExample(dictionaryRepository);
+		if (0 == VerificationUtil.size(list2)) {
+			throw new ServiceRuntimeException("字典code不存在，数据异常");
+		}
+		Dictionary dictionary = list2.get(0);
+		String city_code = dictionary.getCity_code();
+		price = price * Integer.valueOf(city_code) / 100;
+
+		// Integer price = line.getPrice(); 万科价格修改
+		if (balance < price) {
+			return 1; // 余额不足
+		}
+
+		if (!company_id.equals(line.getCompany_id())) {
+			throw new ServiceRuntimeException("公司id，数据异常；");
+		}
+		Date date = DateUtil.getCurrentDate();
+		// 添加扫描记录
+		// Scan scan = new Scan(IdWorker.nextId(), userDetail.getId(),
+		// line_time_id, line_station_id, date,
+		// ParameterConstant.SCAN_TYPE_FINISH, ParameterConstant.IS_CHECK);
+		// if (scanDao.insert(scan) < 0) {
+		// throw new ServiceRuntimeException("扫描表添加异常");
+		// }
+
+		String orderByXL = OrderNumUtil.getOrderByXL();
+		LineOrder lineOrder = new LineOrder(IdWorker.nextId(), orderByXL, userId, line.getCity_id(), line_id,
+				line_time_id, line_station_id, date, ParameterConstant.ORDER_STATUS, ParameterConstant.ORDER_EXP,
+				ParameterConstant.LINE_ORDER_TYPE_DIRECT, date, ParameterConstant.IS_CHECK);
+		if (lineOrderDao.insert(lineOrder) < 0) {
+			throw new ServiceRuntimeException("线路订单添加异常");
+		}
+
+		MoneyOrder moneyOrder = new MoneyOrder(IdWorker.nextId(), userId, card_num, orderByXL, line.getPrice(),
+				ParameterConstant.PAY_TYPE_BALANCE, ParameterConstant.ORDER_STATUS, date);
+		if (moneyOrderDao.insert(moneyOrder) < 0) {
+			throw new ServiceRuntimeException("消费记录添加异常");
+		}
+
+		ExpScoreRecord expScoreRecord = new ExpScoreRecord(IdWorker.nextId(), userId, ParameterConstant.EXP_CRAD,
+				ParameterConstant.ORDER_EXP, date, ParameterConstant.IS_CHECK);
+
+		if (expScoreRecordDao.insert(expScoreRecord) < 0) {
+			throw new ServiceRuntimeException("积分添加异常(记录)");
+		}
+		userDetail.setExp_score(userDetail.getExp_score() + ParameterConstant.ORDER_EXP);
+		if (userDetailDao.updateByPrimaryKeySelective(userDetail) != 1) {
+			throw new ServiceRuntimeException("积分添加异常(用户)");
+		}
+		userDetail.setBalance(balance - price);
+		if (userDetailDao.updateByPrimaryKeySelective(userDetail) < 0) {
+			return 4; // 扣费失败！请重试
+		}
+		return 2;
+	}
+
+}

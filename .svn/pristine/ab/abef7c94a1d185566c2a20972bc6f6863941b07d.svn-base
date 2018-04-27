@@ -1,0 +1,178 @@
+package com.tmtc.serviceImpl;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.constant.SystemVar;
+import com.tmtc.dao.CompanyDao;
+import com.tmtc.dao.DictionaryDao;
+import com.tmtc.dao.ProductDao;
+import com.tmtc.frame.PageResult;
+import com.tmtc.frame.ServiceException;
+import com.tmtc.po.Company;
+import com.tmtc.po.CompanyRepository;
+import com.tmtc.service.CompanyService;
+import com.tmtc.utils.UploadImg;
+import com.tmtc.utils.VerificationUtil;
+import com.tmtc.vo.CompanyVo;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+/**
+ * Created:  hbwhypw
+ * Date: 2015/10/12 9:56
+ * Function:
+ */
+@Service
+public class CompanyServiceImpl extends ComboBoxServiceImpl implements CompanyService {
+    private static Logger logger = LoggerFactory.getLogger(CompanyServiceImpl.class);
+
+    @Autowired
+    CompanyDao companyDao;
+    
+    @Autowired
+    DictionaryDao dictionaryDao;
+    
+    @Autowired
+    ProductDao productDao;
+
+    @Override
+    public int count(CompanyRepository example) {
+        return companyDao.countByExample(example);
+    }
+
+    @Override
+    public int delete(String id) {
+        return companyDao.deleteByPrimaryKey(id);
+    }
+
+    @Override
+    public int delete(CompanyRepository example) {
+        return companyDao.deleteByExample(example);
+    }
+
+    @Override
+    public int insert(Company record) {
+        return companyDao.insert(record);
+    }
+
+    public int insert(Company record,CommonsMultipartFile logo_pic_file,CommonsMultipartFile business_license_file)
+            throws ServiceException {
+        String logo_pic_url = UploadImg.upload(logo_pic_file, SystemVar.LOCAL_IMG_URL + SystemVar.COMPANY_LOGO);
+        String business_license_url = UploadImg.upload(business_license_file, SystemVar.LOCAL_IMG_URL + SystemVar.COMPANY_LICENSE);
+        logger.info("################logo_pic_url={},business_license_url={}", logo_pic_url, business_license_url);
+        if (StringUtils.isNotEmpty(logo_pic_url)) {
+            record.setLogo_pic(logo_pic_url);
+        }
+        if (StringUtils.isNotEmpty(business_license_url)) {
+            record.setBusiness_license(business_license_url);
+        }
+        record.setCreat_time(new Date());
+        return companyDao.insert(record);
+    }
+
+    @Override
+    public List<Company> select(CompanyRepository example) {
+        return companyDao.selectByExampleWithBLOBs(example);
+    }
+
+    @Override
+    public List<CompanyVo> selectVo(CompanyRepository example) {
+        List<Company> list = companyDao.selectByExampleWithBLOBs(example);
+        List<CompanyVo> listVo = new ArrayList<>();
+        for (Company c:list){
+            CompanyVo companyVo = new CompanyVo(c);
+            if (c.getCity_id() != null){
+                String name = getNameByCode(c.getCity_id());
+                companyVo.setCityName(name);
+            }
+            if (c.getBusiness_license() != null && !c.getBusiness_license().isEmpty()) {
+                companyVo.setBusiness_license(c.getBusiness_license());
+                companyVo.setBusiness_license_url(SystemVar.SERVER_IMG_URL + SystemVar.COMPANY_LICENSE + c.getBusiness_license());
+            }
+            if (c.getLogo_pic() != null && !c.getLogo_pic().isEmpty()) {
+                companyVo.setLogo_pic(c.getLogo_pic());
+                companyVo.setLogo_pic_url(SystemVar.SERVER_IMG_URL + SystemVar.COMPANY_LOGO + c.getLogo_pic());
+            }
+            if(0 != VerificationUtil.integerIsNull(c.getCompany_type())){
+            	String typeName = getNameByCode(c.getCompany_type());
+            	companyVo.setTypeName(typeName);
+            }
+            listVo.add(companyVo);
+        }
+        return listVo;
+    }
+
+    @Override
+    public Company selectByPrimaryKey(String id) {
+        return companyDao.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public int update(Company record) {
+        return companyDao.updateByPrimaryKeySelective(record);
+    }
+
+    public int update(Company record,CommonsMultipartFile logo_pic_file,CommonsMultipartFile business_license_file)
+            throws ServiceException {
+        String logo_pic_url = UploadImg.upload(logo_pic_file, SystemVar.LOCAL_IMG_URL + SystemVar.COMPANY_LOGO);
+        String business_license_url = UploadImg.upload(business_license_file, SystemVar.LOCAL_IMG_URL + SystemVar.COMPANY_LICENSE);
+        logger.info("################logo_pic_url={},business_license_url={}", logo_pic_url, business_license_url);
+        if (StringUtils.isNotEmpty(logo_pic_url)) {
+            record.setLogo_pic(logo_pic_url);
+        }
+        if (StringUtils.isNotEmpty(business_license_url)) {
+            record.setBusiness_license(business_license_url);
+        }
+        return companyDao.updateByPrimaryKeySelective(record);
+    }
+
+    @Override
+    public int update(Company record, CompanyRepository example) {
+        return 0;
+    }
+
+    @Override
+    public PageResult selectByPage(CompanyRepository example) {
+        return new PageResult(count(example), selectVo(example), 1);
+    }
+
+	@Override
+	public List<CompanyVo> selectDetail(CompanyRepository example) {
+		List<Company> list = companyDao.selectByExampleWithBLOBs(example);
+        List<CompanyVo> listVo = new ArrayList<>();
+        for (Company c:list){
+            CompanyVo companyVo = new CompanyVo(c);
+            if (c.getCity_id() != null){
+                String name = getNameByCode(c.getCity_id());
+                companyVo.setCityName(name);
+            }
+            if (c.getBusiness_license() != null && !c.getBusiness_license().isEmpty()) {
+                companyVo.setBusiness_license(c.getBusiness_license());
+                companyVo.setBusiness_license_url(SystemVar.SERVER_IMG_URL + SystemVar.COMPANY_LICENSE + c.getBusiness_license());
+            }
+            if (c.getLogo_pic() != null && !c.getLogo_pic().isEmpty()) {
+                companyVo.setLogo_pic(c.getLogo_pic());
+                companyVo.setLogo_pic_url(SystemVar.SERVER_IMG_URL + SystemVar.COMPANY_LOGO + c.getLogo_pic());
+            }
+            listVo.add(companyVo);
+        }
+        return listVo;
+	}
+
+	@Override
+	public PageResult select() {
+		List<Long> companyList = productDao.selectCompany();
+		CompanyRepository companyRepository = new CompanyRepository();
+		CompanyRepository.Criteria criteria = companyRepository.createCriteria();
+		criteria.andIdIn(companyList);
+		criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+		return new PageResult(count(companyRepository), selectVo(companyRepository), 1);
+	}
+}

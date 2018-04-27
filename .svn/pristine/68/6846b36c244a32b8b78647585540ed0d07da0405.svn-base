@@ -1,0 +1,15 @@
+package com.tmtc.serviceImpl.appAPI;
+
+import org.springframework.stereotype.Service;
+
+import com.tmtc.service.appAPI.ValidTimeService;
+
+@Service
+public class ValidTimeServiceImpl implements ValidTimeService {
+
+	@Override
+	public int time(String company_id, String card_num, Integer user_type) {
+		return 0;
+	}
+
+}

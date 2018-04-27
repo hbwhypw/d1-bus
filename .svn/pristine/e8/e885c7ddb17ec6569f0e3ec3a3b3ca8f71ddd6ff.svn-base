@@ -1,0 +1,147 @@
+package com.tmtc.annotation.verity;
+
+import java.text.DecimalFormat;
+import java.util.List;
+
+import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.Pointcut;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.dao.UserDao;
+import com.tmtc.dao.UserDetailDao;
+import com.tmtc.frame.ServiceRuntimeException;
+import com.tmtc.po.User;
+import com.tmtc.po.UserDetail;
+import com.tmtc.po.UserDetailRepository;
+import com.tmtc.po.UserDetailRepository.Criteria;
+import com.tmtc.po.UserRepository;
+import com.tmtc.utils.VerificationUtil;
+import com.tmtc.utils.secret.MD5;
+
+@Component
+@Aspect
+public class VerifyUserImpl extends VerifyUserBase {
+
+	@Autowired
+	UserDao userDao;
+
+	@Autowired
+	UserDetailDao userDetailDao;
+	
+	// Controller层切点
+	@Pointcut("@annotation(com.tmtc.annotation.verity.VerifyUser)")
+	public void aspect() {
+	}
+
+	@Before("aspect()")
+	public User doBefore(JoinPoint joinPoint) {
+		User user = null;
+		try {
+			user = (User) joinPoint.getArgs()[0];
+		} catch (Exception e) {
+			throw new ServiceRuntimeException("用户信息有误");
+		}
+		if (null == user) {
+			throw new ServiceRuntimeException("用户信息不可以为空");
+		}
+		vUser(user);
+		return user;
+	}
+
+	public void vUser(User user) {
+		vCityId(user);
+		vCompanyId(user);
+		vUserNameAndNumberAndPassword(user);
+	}
+
+	private void vUserNameAndNumberAndPassword(User user) {
+		String userName = user.getUsername();
+		String number = user.getNumber();
+		if (userName != null || number != null) {
+			user.setPassword(getDefaultPassword(userName, number));
+		}
+		if (0 == VerificationUtil.length(user.getUsername())) {
+			user.setUsername("");
+		} else {
+			if (!VerificationUtil.checkMobilePhone(userName)) {
+				throw new ServiceRuntimeException("手机号有误！");
+			}
+			UserDetailRepository userDetailRepository = new UserDetailRepository();
+			Criteria criteria = userDetailRepository.createCriteria();
+			criteria.andUsernameEqualTo(userName);
+			criteria.andIs_checkIn(integerList);
+			List<UserDetail> list = userDetailDao.selectByExample(userDetailRepository);
+			switch (VerificationUtil.size(list)) {
+			case 0:
+				break;
+			case 1:
+				throw new ServiceRuntimeException("该手机号已存在！");
+			default:
+				throw new ServiceRuntimeException("用户表数据有错，开发人员请尽快解决");
+			}
+		}
+		if (0 == VerificationUtil.length(number)) {
+			user.setNumber("");
+		} else {
+			UserRepository userRepository = new UserRepository();
+			com.tmtc.po.UserRepository.Criteria criteria = userRepository.createCriteria();
+			criteria.andNumberEqualTo(number);
+			criteria.andCompany_idEqualTo(user.getCompany_id());
+			List<User> list = userDao.selectByExample(userRepository);
+			if (0 != VerificationUtil.size(list)) {
+				throw new ServiceRuntimeException("员工号重复");
+			}
+		}
+	}
+
+	private void vCompanyId(User user) {
+		String company_id = user.getCompany_id();
+		if (0 == VerificationUtil.length(company_id)) {
+			user.setCompany_id(ParameterConstant.C_COMPANY_ID);
+		}
+	}
+
+	/**
+	 * 设置用户的地区
+	 * 
+	 * @param user
+	 */
+	private void vCityId(User user) {
+		Integer cityId = user.getCity_id();
+		if (ParameterConstant.SHENZHEN != cityId) {
+			user.setCity_id(ParameterConstant.BEIJING);
+		}
+	}
+
+	/**
+	 * 生成默认密码
+	 * 
+	 * @param userName
+	 *            用户名
+	 * @param number
+	 *            密码
+	 * @return
+	 */
+	private String getDefaultPassword(String userName, String number) {
+		// 添加user表
+		String password = null;
+
+		if (0 != VerificationUtil.length(userName)) {
+			password = userName.substring(userName.length() - 6, userName.length());
+			return MD5.makeMd5(password);
+		}
+
+		if (number.length() >= 6) {
+			password = number.substring(number.length() - 6, number.length());
+		} else {
+			// password="000000"+number; 密码6位，不足6位的，用0补足
+			password = new DecimalFormat("000000").format(Integer.parseInt(number));
+		}
+		password = password.substring(password.length() - 6, password.length());
+		return MD5.makeMd5(password);
+	}
+}

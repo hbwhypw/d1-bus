@@ -1,0 +1,30 @@
+package com.tmtc.controller.driver;
+
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.tmtc.controller.appAPI.BaseController;
+
+@Controller
+@RequestMapping("/App/valid")
+public class ValidTimeController extends BaseController {
+
+	/**
+	 * 验证卡的有效时间   url:/App/valid/time
+	 * @param request
+	 * @param company_id
+	 * @param card_num
+	 * @param user_type
+	 * @return
+	 */
+	@RequestMapping("/time")
+	public Map<String, Object> time(HttpServletRequest request, @RequestParam String company_id,
+			@RequestParam String card_num, @RequestParam Integer user_type) {
+		return getMap(request, "");
+	}
+}

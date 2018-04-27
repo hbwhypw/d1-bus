@@ -1,0 +1,258 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tmtc.dao.AreaAdminDao" >
+  <resultMap id="BaseResultMap" type="com.tmtc.po.AreaAdmin" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="city_id" property="city_id" jdbcType="INTEGER" />
+    <result column="username" property="username" jdbcType="VARCHAR" />
+    <result column="password" property="password" jdbcType="VARCHAR" />
+    <result column="login_time" property="login_time" jdbcType="TIMESTAMP" />
+    <result column="login_num" property="login_num" jdbcType="INTEGER" />
+    <result column="is_check" property="is_check" jdbcType="INTEGER" />
+    <result column="nick_name" property="nick_name" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, city_id, username, password, login_time, login_num, is_check, nick_name
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.tmtc.po.AreaAdminRepository" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_area_admin
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_area_admin
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from t_area_admin
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.tmtc.po.AreaAdminRepository" >
+    delete from t_area_admin
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.tmtc.po.AreaAdmin" >
+    insert into t_area_admin (id, city_id, username, 
+      password, login_time, login_num, 
+      is_check, nick_name)
+    values (#{id,jdbcType=BIGINT}, #{city_id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, 
+      #{password,jdbcType=VARCHAR}, #{login_time,jdbcType=TIMESTAMP}, #{login_num,jdbcType=INTEGER}, 
+      #{is_check,jdbcType=INTEGER}, #{nick_name,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.tmtc.po.AreaAdmin" >
+    insert into t_area_admin
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="city_id != null" >
+        city_id,
+      </if>
+      <if test="username != null" >
+        username,
+      </if>
+      <if test="password != null" >
+        password,
+      </if>
+      <if test="login_time != null" >
+        login_time,
+      </if>
+      <if test="login_num != null" >
+        login_num,
+      </if>
+      <if test="is_check != null" >
+        is_check,
+      </if>
+      <if test="nick_name != null" >
+        nick_name,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="city_id != null" >
+        #{city_id,jdbcType=INTEGER},
+      </if>
+      <if test="username != null" >
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="login_time != null" >
+        #{login_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="login_num != null" >
+        #{login_num,jdbcType=INTEGER},
+      </if>
+      <if test="is_check != null" >
+        #{is_check,jdbcType=INTEGER},
+      </if>
+      <if test="nick_name != null" >
+        #{nick_name,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.tmtc.po.AreaAdminRepository" resultType="java.lang.Integer" >
+    select count(*) from t_area_admin
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update t_area_admin
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.city_id != null" >
+        city_id = #{record.city_id,jdbcType=INTEGER},
+      </if>
+      <if test="record.username != null" >
+        username = #{record.username,jdbcType=VARCHAR},
+      </if>
+      <if test="record.password != null" >
+        password = #{record.password,jdbcType=VARCHAR},
+      </if>
+      <if test="record.login_time != null" >
+        login_time = #{record.login_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.login_num != null" >
+        login_num = #{record.login_num,jdbcType=INTEGER},
+      </if>
+      <if test="record.is_check != null" >
+        is_check = #{record.is_check,jdbcType=INTEGER},
+      </if>
+      <if test="record.nick_name != null" >
+        nick_name = #{record.nick_name,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update t_area_admin
+    set id = #{record.id,jdbcType=BIGINT},
+      city_id = #{record.city_id,jdbcType=INTEGER},
+      username = #{record.username,jdbcType=VARCHAR},
+      password = #{record.password,jdbcType=VARCHAR},
+      login_time = #{record.login_time,jdbcType=TIMESTAMP},
+      login_num = #{record.login_num,jdbcType=INTEGER},
+      is_check = #{record.is_check,jdbcType=INTEGER},
+      nick_name = #{record.nick_name,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tmtc.po.AreaAdmin" >
+    update t_area_admin
+    <set >
+      <if test="city_id != null" >
+        city_id = #{city_id,jdbcType=INTEGER},
+      </if>
+      <if test="username != null" >
+        username = #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="password != null" >
+        password = #{password,jdbcType=VARCHAR},
+      </if>
+      <if test="login_time != null" >
+        login_time = #{login_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="login_num != null" >
+        login_num = #{login_num,jdbcType=INTEGER},
+      </if>
+      <if test="is_check != null" >
+        is_check = #{is_check,jdbcType=INTEGER},
+      </if>
+      <if test="nick_name != null" >
+        nick_name = #{nick_name,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tmtc.po.AreaAdmin" >
+    update t_area_admin
+    set city_id = #{city_id,jdbcType=INTEGER},
+      username = #{username,jdbcType=VARCHAR},
+      password = #{password,jdbcType=VARCHAR},
+      login_time = #{login_time,jdbcType=TIMESTAMP},
+      login_num = #{login_num,jdbcType=INTEGER},
+      is_check = #{is_check,jdbcType=INTEGER},
+      nick_name = #{nick_name,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

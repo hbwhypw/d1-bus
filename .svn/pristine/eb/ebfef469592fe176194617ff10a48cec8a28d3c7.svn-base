@@ -1,0 +1,118 @@
+package com.tmtc.serviceImpl.appAPI;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.dao.BaiduTempDao;
+import com.tmtc.dao.ScanTempDao;
+import com.tmtc.frame.PageResult;
+import com.tmtc.frame.ServiceRuntimeException;
+import com.tmtc.po.BaiduTemp;
+import com.tmtc.po.BaiduTempRepository;
+import com.tmtc.po.ScanTemp;
+import com.tmtc.service.appAPI.BaiduScanService;
+import com.tmtc.service.appAPI.DriveAppService;
+import com.tmtc.utils.DateUtil;
+import com.tmtc.utils.IdWorker;
+
+@Service
+public class BaiduScanServiceImpl implements BaiduScanService {
+
+	@Autowired
+	BaiduTempDao baiduTempDao;
+
+	@Autowired
+	ScanTempDao scanTempDao;
+	
+	@Autowired
+	DriveAppService driveAppService;
+
+	@Override
+	public int count(BaiduTempRepository example) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int delete(String id) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int delete(BaiduTempRepository example) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int insert(BaiduTemp record) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public List<BaiduTemp> select(BaiduTempRepository example) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public BaiduTemp selectByPrimaryKey(String id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int update(BaiduTemp record) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int update(BaiduTemp record, BaiduTempRepository example) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public PageResult selectByPage(BaiduTempRepository example) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int insert(BaiduTemp baiduTemp, String arrival_time, String depart_time, String param) throws ServiceRuntimeException{
+		String a[] = param.split(",");
+		if (0 != a.length % 4) {
+			return 0;
+		}
+		baiduTemp.setArrival_time(DateUtil.getLongDate(arrival_time));
+		baiduTemp.setDepart_time(DateUtil.getLongDate(depart_time));
+		for (int i = 0; i < a.length; i = i + 4) {
+			baiduTemp.setId(IdWorker.nextId());
+			baiduTemp.setCard_num(a[i]);
+			baiduTemp.setLine_station_id(a[i + 1]);
+			baiduTemp.setLine_station_name(a[i + 2]);
+			baiduTemp.setScan_time(DateUtil.getLongDate(a[i + 3]));
+			baiduTemp.setIs_check(ParameterConstant.IS_CHECK);
+			if (baiduTempDao.insert(baiduTemp) <= 0) {
+				throw new ServiceRuntimeException("百度临时数据插入错误！");
+			}
+			ScanTemp scanTemp = new ScanTemp(IdWorker.nextId(), null, baiduTemp.getLine_time_id(),
+					baiduTemp.getLine_station_id(), baiduTemp.getScan_time(), ParameterConstant.SCAN_TYPE_FINISH,
+					ParameterConstant.IS_CHECK);
+			if(scanTempDao.insert(scanTemp) <= 0 ){
+				throw new ServiceRuntimeException("临时扫描表数据插入错误！");
+			}
+		}
+		if(null != driveAppService.updateEnd(baiduTemp.getLine_time_id())){
+			throw new ServiceRuntimeException("班次结束驾驶失败");
+		}
+		return 1;
+	}
+
+}

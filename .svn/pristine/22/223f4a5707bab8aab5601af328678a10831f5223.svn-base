@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>company</title>
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/company.js"></script>
+<table id="companyDg" class="easyui-datagrid" data-options="url:'./../company/queryAll',rownumbers:true,toolbar:'#companyDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false">
+    <thead>
+    <tr>
+        <th data-options="checkbox:true"></th>
+        <th data-options="field:'id',width:80">编号</th>
+        <th data-options="field:'name',width:80">公司名称</th>
+        <th data-options="field:'city_id',width:80,hidden: true">城市</th>
+        <th data-options="field:'cityName',width:80">城市</th>
+        <th data-options="field:'address',width:80">公司地址</th>
+        <th data-options="field:'chairman_name',width:80">联系人</th>
+        <th data-options="field:'chairman_phone',width:80">联系电话</th>
+        <th data-options="field:'company_chairman',width:80">法人代表</th>
+        <th data-options="field:'company_telphone',width:80">公司座机</th>
+        <th data-options="field:'qq',width:80">QQ</th>
+        <th data-options="field:'email',width:80">邮箱</th>
+        <th data-options="field:'business_fax',width:80">公司传真</th>
+        <th data-options="field:'typeName',width:80">公司类型</th>
+        <th data-options="field:'start_time',width:80">合同开始时间</th>
+        <th data-options="field:'end_time',width:80">合同结束时间</th>
+        <th data-options="field:'logo_pic',width:80,hidden:true">logo图片</th>
+        <th data-options="field:'logo_pic_url',width:80, formatter: company.logoFormatter">logo图片</th>
+        <th data-options="field:'business_license',width:80,hidden:true">营业执照</th>
+        <th data-options="field:'business_license_url',width:80, formatter: company.licenseFormatter">营业执照</th>
+        <th data-options="field:'intro',width:80">简介</th>
+        <th data-options="field:'website',width:80">网址</th>
+        <th data-options="field:'creat_time',width:80">创建时间</th>
+        <th data-options="field:'is_check',width:40,formatter: common.is_checkFormatter">是否有效</th>
+    </tr>
+    </thead>
+</table>
+<div id="companyDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+                &nbsp;&nbsp;公司名称：&nbsp;&nbsp;
+                <input id="nameParam" name="nameParam" class="easyui-validatebox" style="width: 150px;">
+                &nbsp;&nbsp;城市：&nbsp;&nbsp;
+                <input id="city_idParam" class="easyui-combobox" name="city_id" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=10',
+								loader: common.comboBoxLoader, editable: false,
+								onBeforeLoad: function(param){
+									param.page = 1;param.rows = 100; 
+								} " />
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查 询</a>
+            </td>
+            <td align="right" width="280px">
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-add" plain="true">添加</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">删除</a>
+                <a id="export" class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-excel" plain="true">导 出</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+<div id="companyDlg" class="easyui-dialog" style="width:410px;height:650px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#companyDlgBtn">
+    <div class="ftitle">
+        公司信息
+    </div>
+    <form id="companyFm" class="fm" method="post" enctype="multipart/form-data">
+        <div class="fitem">
+            <label> 公司名称： </label>
+            <input id="id" name="id" type="hidden">
+            <input id="name" name="name" class="easyui-validatebox" required="true"
+            	data-options="validType: ['maxLength[18]', 'specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 城市： </label>
+            <input id="city_id" name="city_id" class="easyui-combobox" data-options="
+                valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=10',
+                loader: common.comboBoxLoader, editable: false, panelHeight: 100" required="true"/>
+        </div>
+        <div class="fitem">
+            <label> 公司地址： </label>
+            <input id="address" name="address" class="easyui-validatebox" 
+            	data-options="validType: ['specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 联系人： </label>
+            <input id="chairman_name" name="chairman_name" class="easyui-validatebox" 
+            	data-options="validType: ['maxLength[12]', 'specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 联系电话： </label>
+            <input id="chairman_phone" name="chairman_phone" class="easyui-validatebox" 
+            	data-options="validType: ['mobilephone']">
+        </div>
+        <div class="fitem">
+            <label> 法人代表： </label>
+            <input id="company_chairman" name="company_chairman" class="easyui-validatebox" 
+            	data-options="validType: ['maxLength[12]', 'specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 公司座机： </label>
+            <input id="company_telphone" name="company_telphone" class="easyui-validatebox"  
+            	data-options="validType: ['telephone']">
+        </div>
+        <div class="fitem">
+            <label> QQ： </label>
+            <input id="qq" name="qq" class="easyui-validatebox"  
+            	data-options="validType: ['QQ']">
+        </div>
+        <div class="fitem">
+            <label> 邮箱： </label>
+            <input id="email" name="email" class="easyui-validatebox"  
+            	data-options="validType: ['email']">
+        </div>
+        <div class="fitem">
+            <label> 公司传真： </label>
+            <input id="business_fax" name="business_fax" class="easyui-validatebox"  
+            	data-options="validType: ['telephone']">
+        </div>
+        <div class="fitem">
+            <label> 公司类型： </label>
+            <input id="company_type" class="easyui-combobox" name="company_type" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=20',
+								loader: common.comboBoxLoader,required: true,editable: false,
+								onBeforeLoad: function(param){
+									param.page = 1;param.rows = 100; 
+								} " />
+        </div>
+        <div class="fitem">
+            <label> 合同开始时间： </label>
+            <input id="start_time" name="start_time" class="Wdate" type="text"
+                   style="width: 172px" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"/>
+        </div>
+        <div class="fitem">
+            <label> 合同结束时间： </label>
+            <input id="end_time" name="end_time" class="Wdate" type="text"
+                   style="width: 172px" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"/>
+        </div>
+        <div class="fitem">
+            <label> logo图片： </label>
+            <input id="logo_pic" name="logo_pic" type="hidden">
+            <input id="logo_pic_file" name="logo_pic_file" type="file" accept="image/jpeg,image/png" style="width: 170px">
+        </div>
+        <div class="fitem">
+            <label> 营业执照： </label>
+            <input id="business_license" name="business_license" type="hidden">
+            <input id="business_license_file" name="business_license_file" type="file" accept="image/jpeg,image/png" style="width: 170px">
+        </div>
+        <div class="fitem">
+            <label> 简介： </label>
+            <input id="intro" name="intro" class="easyui-validatebox"  
+            	data-options="validType: ['specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 网址： </label>
+            <input id="website" name="website" class="easyui-validatebox"  
+            	data-options="validType: ['url']">
+        </div>
+    </form>
+    <div id="companyDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,201 @@
+package com.tmtc.vo;
+
+import java.util.Date;
+
+import com.tmtc.po.UserDetail;
+
+public class UserVo extends UserDetail{
+	
+	private Integer city_id;
+
+    private String company_id;
+
+    private Integer user_type;
+
+    private Integer login_source;
+
+    private Integer lock_time;
+
+    private Integer lock_cnt;
+
+    private Date login_time;
+
+    private Integer login_cnt;
+
+    private String ip_address;
+	
+	private String city_name;
+	private String company_name;
+	private String number;
+	private String register_source_name;
+	private String sex_name;
+	private String user_type_name;
+	private String login_source_name;
+	public UserVo() {	}
+	
+	public UserVo(UserDetail userDetail,Integer city_id, String company_id, Integer user_type, Integer login_source, Integer lock_time,
+			Integer lock_cnt, Date login_time, Integer login_cnt, String ip_address, String city_name,
+			String company_name, String number, String register_source_name, String sex_name, String user_type_name,String login_source_name) {
+		super(userDetail.getUser_type(), userDetail.getId(), userDetail.getLink_num(), userDetail.getRegister_time(),
+				userDetail.getRegister_source(),userDetail.getUsername(), userDetail.getNick_name(),
+				userDetail.getReal_name(), userDetail.getQr_code(), userDetail.getQr_code_secret(), userDetail.getSex(),
+				userDetail.getId_code(), userDetail.getBirthday(), userDetail.getPortrait(), userDetail.getBackground(),
+				userDetail.getEmail(), userDetail.getAddress(), userDetail.getRemaining_cnt(), userDetail.getExp_score(),
+				userDetail.getRemark(), userDetail.getInvitation_code(), userDetail.getLast_order_time(),
+				userDetail.getIs_check());
+		this.city_id = city_id;
+		this.company_id = company_id;
+		this.user_type = user_type;
+		this.login_source = login_source;
+		this.lock_time = lock_time;
+		this.lock_cnt = lock_cnt;
+		this.login_time = login_time;
+		this.login_cnt = login_cnt;
+		this.ip_address = ip_address;
+		this.city_name = city_name;
+		this.company_name = company_name;
+		this.number = number;
+		this.register_source_name = register_source_name;
+		this.sex_name = sex_name;
+		this.user_type_name = user_type_name;
+		this.login_source_name = login_source_name;
+	}
+
+	public Integer getCity_id() {
+		return city_id;
+	}
+
+	public void setCity_id(Integer city_id) {
+		this.city_id = city_id;
+	}
+
+	public String getCompany_id() {
+		return company_id;
+	}
+
+	public void setCompany_id(String company_id) {
+		this.company_id = company_id;
+	}
+
+	public Integer getUser_type() {
+		return user_type;
+	}
+
+	public void setUser_type(Integer user_type) {
+		this.user_type = user_type;
+	}
+
+	public Integer getLogin_source() {
+		return login_source;
+	}
+
+	public void setLogin_source(Integer login_source) {
+		this.login_source = login_source;
+	}
+
+	public Integer getLock_time() {
+		return lock_time;
+	}
+
+	public void setLock_time(Integer lock_time) {
+		this.lock_time = lock_time;
+	}
+
+	public Integer getLock_cnt() {
+		return lock_cnt;
+	}
+
+	public void setLock_cnt(Integer lock_cnt) {
+		this.lock_cnt = lock_cnt;
+	}
+
+	public Date getLogin_time() {
+		return login_time;
+	}
+
+	public void setLogin_time(Date login_time) {
+		this.login_time = login_time;
+	}
+
+	public Integer getLogin_cnt() {
+		return login_cnt;
+	}
+
+	public void setLogin_cnt(Integer login_cnt) {
+		this.login_cnt = login_cnt;
+	}
+
+	public String getIp_address() {
+		return ip_address;
+	}
+
+	public void setIp_address(String ip_address) {
+		this.ip_address = ip_address;
+	}
+
+	public String getCity_name() {
+		return city_name;
+	}
+
+	public void setCity_name(String city_name) {
+		this.city_name = city_name;
+	}
+
+	public String getCompany_name() {
+		return company_name;
+	}
+
+	public void setCompany_name(String company_name) {
+		this.company_name = company_name;
+	}
+
+	public String getNumber() {
+		return number;
+	}
+
+	public void setNumber(String number) {
+		this.number = number;
+	}
+
+	public String getRegister_source_name() {
+		return register_source_name;
+	}
+
+	public void setRegister_source_name(String register_source_name) {
+		this.register_source_name = register_source_name;
+	}
+
+	public String getSex_name() {
+		return sex_name;
+	}
+
+	public void setSex_name(String sex_name) {
+		this.sex_name = sex_name;
+	}
+
+	public String getUser_type_name() {
+		return user_type_name;
+	}
+
+	public void setUser_type_name(String user_type_name) {
+		this.user_type_name = user_type_name;
+	}
+
+	public String getLogin_source_name() {
+		return login_source_name;
+	}
+
+	public void setLogin_source_name(String login_source_name) {
+		this.login_source_name = login_source_name;
+	}
+
+	@Override
+	public String toString() {
+		return "UserVo [city_id=" + city_id + ", company_id=" + company_id + ", user_type=" + user_type
+				+ ", login_source=" + login_source + ", lock_time=" + lock_time + ", lock_cnt=" + lock_cnt
+				+ ", login_time=" + login_time + ", login_cnt=" + login_cnt + ", ip_address=" + ip_address
+				+ ", city_name=" + city_name + ", company_name=" + company_name + ", number=" + number
+				+ ", register_source_name=" + register_source_name + ", sex_name=" + sex_name + ", user_type_name="
+				+ user_type_name + ", login_source_name=" + login_source_name + "]";
+	}
+}

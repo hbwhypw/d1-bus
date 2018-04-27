@@ -1,0 +1,275 @@
+package com.tmtc.serviceImpl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.constant.SystemVar;
+import com.tmtc.dao.CarDao;
+import com.tmtc.dao.DictionaryDao;
+import com.tmtc.dao.LineTimeDao;
+import com.tmtc.frame.PageResult;
+import com.tmtc.frame.ServiceException;
+import com.tmtc.po.Car;
+import com.tmtc.po.CarRepository;
+import com.tmtc.po.Dictionary;
+import com.tmtc.po.DictionaryRepository;
+import com.tmtc.po.LineTime;
+import com.tmtc.po.LineTimeRepository;
+import com.tmtc.service.CarService;
+import com.tmtc.utils.UploadImg;
+import com.tmtc.utils.VerificationUtil;
+import com.tmtc.vo.CarVo;
+
+@Service
+public class CarServiceImpl implements CarService {
+	@Autowired
+	CarDao carDao;
+	@Autowired
+	DictionaryDao dictionaryDao;
+	@Autowired
+	LineTimeDao lineTimeDao;
+
+	@Override
+	public int count(CarRepository example) {
+		return carDao.countByExample(example);
+	}
+
+	@Override
+	public int delete(String id) {
+		return 0;
+	}
+
+	@Override
+	public int delete(CarRepository example) {
+		return 0;
+	}
+
+	@Override
+	public int insert(Car record) {
+		return carDao.insert(record);
+	}
+
+	@Override
+	public List<Car> select(CarRepository example) {
+		return carDao.selectByExample(example);
+	}
+
+	@Override
+	public Car selectByPrimaryKey(String id) {
+		return null;
+	}
+
+	@Override
+	public int update(Car record) {
+		return carDao.updateByPrimaryKeySelective(record);
+	}
+
+	@Override
+	public int update(Car record, CarRepository example) {
+		return 0;
+	}
+
+	@Override
+	public PageResult selectByPage(CarRepository example) {
+		List<Car> list = carDao.selectByExample(example);
+		
+		if (0 == VerificationUtil.size(list)) {
+			return new PageResult(0, "", 1);
+		}
+		
+		List<CarVo> listVo = new ArrayList<>();
+		
+		String from_company_name = null;
+		String car_type_name = null;
+		String car_status_name = null;
+		
+		for (Car car : list) {
+			if (0 != VerificationUtil.integerIsNull(car.getFrom_company())) {
+				from_company_name = getName(car.getFrom_company());
+			} else {
+				from_company_name = null;
+			}
+			if (0 != VerificationUtil.integerIsNull(car.getCar_type())) {
+				car_type_name = getName(car.getFrom_company());
+			} else {
+				car_type_name = null;
+			}
+			if (0 != VerificationUtil.integerIsNull(car.getCar_status())) {
+				car_status_name = getName(car.getCar_status());
+			} else {
+				car_status_name = null;
+			}
+			CarVo carVo = new CarVo(car, car_type_name, from_company_name, car_status_name);
+			listVo.add(carVo);
+		}
+		return new PageResult(carDao.countByExample(example), listVo, 1);
+	}
+
+	private String getName(int code) {
+		String name = null;
+		List<Dictionary> listDictionary = dictionaryDao.selectByExample(new DictionaryRepository());
+		for (Dictionary dictionary : listDictionary) {
+			if (dictionary.getCode().equals(code)) {
+				name = dictionary.getName();
+			}
+		}
+		return name;
+	}
+
+	/**
+	 * 车辆删除
+	 */
+	@Override
+	public int delete(Car car) {
+		return this.update(car);
+	}
+
+	@Override
+	public int insert(Car record, MultipartFile[] car_pic, MultipartFile[] car_registration_pic,
+			MultipartFile[] appearance_pic, MultipartFile[] trim_pic, HttpServletRequest request)
+					throws ServiceException {
+		String car_picUrl = UploadImg.upload(car_pic, SystemVar.LOCAL_IMG_URL + SystemVar.CAR_PIC);
+		String car_registration_picUrl = UploadImg.upload(car_registration_pic,
+				SystemVar.LOCAL_IMG_URL + SystemVar.REGISTRATION_PIC);
+		String appearance_picUrl = UploadImg.upload(appearance_pic, SystemVar.LOCAL_IMG_URL + SystemVar.APPEARANCE_PIC);
+		String trim_picUrl = UploadImg.upload(trim_pic, SystemVar.LOCAL_IMG_URL + SystemVar.TRIM_PIC);
+		record.setCar_pic(car_picUrl);
+		record.setCar_registration_pic(car_registration_picUrl);
+		record.setAppearance_pic(appearance_picUrl);
+		record.setTrim_pic(trim_picUrl);
+		return carDao.insert(record);
+	}
+
+	@Override
+	public int update(Car record, MultipartFile[] car_pic, MultipartFile[] car_registration_pic,
+			MultipartFile[] appearance_pic, MultipartFile[] trim_pic, HttpServletRequest request)
+					throws ServiceException {
+		String car_picUrl = UploadImg.upload(car_pic, SystemVar.LOCAL_IMG_URL + SystemVar.CAR_PIC);
+		String car_registration_picUrl = UploadImg.upload(car_registration_pic,
+				SystemVar.LOCAL_IMG_URL + SystemVar.REGISTRATION_PIC);
+		String appearance_picUrl = UploadImg.upload(appearance_pic, SystemVar.LOCAL_IMG_URL + SystemVar.APPEARANCE_PIC);
+		String trim_picUrl = UploadImg.upload(trim_pic, SystemVar.LOCAL_IMG_URL + SystemVar.TRIM_PIC);
+		if (StringUtils.isNotEmpty(car_picUrl)) {
+			record.setCar_pic(car_picUrl);
+		}
+		if (StringUtils.isNotEmpty(car_registration_picUrl)) {
+			record.setCar_registration_pic(car_registration_picUrl);
+		}
+		if (StringUtils.isNotEmpty(appearance_picUrl)) {
+			record.setAppearance_pic(appearance_picUrl);
+		}
+		if (StringUtils.isNotEmpty(trim_picUrl)) {
+			record.setTrim_pic(trim_picUrl);
+		}
+		return this.update(record);
+	}
+
+	@Override
+	public Map<String, List<String>> img(String id) {
+		Long carId = Long.valueOf(id);
+		Car car = carDao.selectByPrimaryKey(carId);
+		Map<String, List<String>> map = new HashMap<String, List<String>>();
+		List<String> carPicList = new ArrayList<String>();
+		List<String> registrationPicList = new ArrayList<String>();
+		List<String> appearancePicList = new ArrayList<String>();
+		List<String> trimPicList = new ArrayList<String>();
+		if (null != car) {
+			if (null != car.getCar_pic() && !car.getCar_pic().isEmpty()) {
+				String a[] = car.getCar_pic().split(",");
+				for (int i = 0; i < a.length; i++) {
+					carPicList.add(SystemVar.SERVER_IMG_URL + SystemVar.CAR_PIC + a[i]);
+				}
+			}
+			if (null != car.getCar_registration_pic() && !car.getCar_registration_pic().isEmpty()) {
+				String b[] = car.getCar_registration_pic().split(",");
+				for (int i = 0; i < b.length; i++) {
+					registrationPicList.add(SystemVar.SERVER_IMG_URL + SystemVar.REGISTRATION_PIC + b[i]);
+				}
+			}
+			if (null != car.getAppearance_pic() && !car.getAppearance_pic().isEmpty()) {
+				String c[] = car.getAppearance_pic().split(",");
+				for (int i = 0; i < c.length; i++) {
+					appearancePicList.add(SystemVar.SERVER_IMG_URL + SystemVar.APPEARANCE_PIC + c[i]);
+				}
+			}
+			if (null != car.getTrim_pic() && !car.getTrim_pic().isEmpty()) {
+				String d[] = car.getTrim_pic().split(",");
+				for (int i = 0; i < d.length; i++) {
+					trimPicList.add(SystemVar.SERVER_IMG_URL + SystemVar.TRIM_PIC + d[i]);
+				}
+			}
+			map.put("carPic", carPicList);
+			map.put("registration", registrationPicList);
+			map.put("appearancePic", appearancePicList);
+			map.put("trimPic", trimPicList);
+		}
+		return map;
+	}
+
+	@Override
+	public int updateRecover(String id) {
+		Long carId = Long.valueOf(id);
+		Car car = carDao.selectByPrimaryKey(carId);
+		car.setIs_check(ParameterConstant.IS_CHECK);
+		return this.update(car);
+	}
+
+	@Override
+	public int deleteForEver(String id) {
+		Long carId = Long.valueOf(id);
+		return carDao.deleteByPrimaryKey(carId);
+	}
+
+	@Override
+	public List<CarVo> selectDetail(CarRepository example) {
+		List<Car> list = carDao.selectByExample(example);
+		List<CarVo> listVo = new ArrayList<>();
+		for (Car car : list) {
+			String from_company_name = getName(car.getFrom_company());
+			String car_type_name = getName(car.getCar_type());
+			String car_status_name = getName(car.getCar_status());
+			CarVo carVo = new CarVo(car, car_type_name, from_company_name, car_status_name);
+			listVo.add(carVo);
+		}
+		return listVo;
+	}
+
+	@Override
+	public int update(String id) {
+		CarRepository carRepository = new CarRepository();
+		CarRepository.Criteria criteria = carRepository.createCriteria();
+		criteria.andIdEqualTo(id);
+		criteria.andCar_statusEqualTo(ParameterConstant.CAR_STATUS_IS);
+		criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+		List<Car> list = carDao.selectByExample(carRepository);
+		if(0 != VerificationUtil.size(list)){
+			Car car = list.get(0);
+			car.setCar_status(ParameterConstant.CAR_STATUS_END);
+			carDao.updateByPrimaryKeySelective(car);
+			LineTimeRepository lineTimeRepository = new LineTimeRepository();
+			LineTimeRepository.Criteria criteria2 = lineTimeRepository.createCriteria();
+			criteria2.andCar_idEqualTo(id);
+			criteria2.andDriving_stateEqualTo(ParameterConstant.CAR_STATUS_IS);
+			criteria2.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+			List<LineTime> lineTimeList = lineTimeDao.selectByExample(lineTimeRepository);
+			if(0 != VerificationUtil.size(lineTimeList)){
+				LineTime lineTime = lineTimeList.get(0);
+				lineTime.setDriving_state(ParameterConstant.CAR_STATUS_END);
+				int num = lineTimeDao.updateByPrimaryKeySelective(lineTime);
+				return num;
+			}
+			return 0;
+		}
+		return 0;
+	}
+}

@@ -1,0 +1,77 @@
+package com.tmtc.serviceImpl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.tmtc.dao.MoneyOrderDao;
+import com.tmtc.dao.UserDetailDao;
+import com.tmtc.frame.PageResult;
+import com.tmtc.po.MoneyOrder;
+import com.tmtc.po.MoneyOrderRepository;
+import com.tmtc.po.UserDetail;
+import com.tmtc.service.ReChargeService;
+
+@Service
+public class ReChargeServiceImpl implements ReChargeService {
+
+	@Autowired
+	MoneyOrderDao moneyOrderDao;
+
+	@Autowired
+	UserDetailDao userDetailDao;
+
+	@Override
+	public int count(MoneyOrderRepository example) {
+		return moneyOrderDao.countByExample(example);
+	}
+
+	@Override
+	public int delete(String id) {
+		return 0;
+	}
+
+	@Override
+	public int delete(MoneyOrderRepository example) {
+		return 0;
+	}
+
+	@Override
+	public int insert(MoneyOrder record) {
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(record.getUserId());
+		if (null == userDetail || !String.valueOf(userDetail.getRemaining_cnt().toString()).equals(record.getCard_no())) {
+			// 测试使用
+			System.err.println(String.valueOf(userDetail.getRemaining_cnt()));
+			return 0;
+		}
+		return moneyOrderDao.insert(record);
+	}
+
+	@Override
+	public List<MoneyOrder> select(MoneyOrderRepository example) {
+		List<MoneyOrder> list = moneyOrderDao.selectByExample(example);
+		return list;
+	}
+
+	@Override
+	public MoneyOrder selectByPrimaryKey(String id) {
+		return moneyOrderDao.selectByPrimaryKey(id);
+	}
+
+	@Override
+	public int update(MoneyOrder record) {
+		return moneyOrderDao.updateByPrimaryKeySelective(record);
+	}
+
+	@Override
+	public int update(MoneyOrder record, MoneyOrderRepository example) {
+		return 0;
+	}
+
+	@Override
+	public PageResult selectByPage(MoneyOrderRepository example) {
+		return null;
+	}
+
+}

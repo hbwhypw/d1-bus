@@ -1,0 +1,31 @@
+package com.tmtc.controller.appAPI;
+
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+
+import com.tmtc.utils.secret.SRSACoder;
+
+@Controller
+@RequestMapping("/App/Recharge")
+public class ReChargeAppController extends BaseController {
+
+	/**
+	 * 测试 RSA url ： /App/Recharge/test？
+	 * 
+	 * @param request
+	 * @param key
+	 *            String类型(密文)
+	 * @return
+	 */
+	@RequestMapping("/test")
+	public Map<String, Object> test(HttpServletRequest request, @RequestParam(value = "key") String key) {
+		String string = SRSACoder.decryptByPrivateKey(key);
+		System.out.println(string);
+		return getMap(request, "shildjl");
+	}
+}

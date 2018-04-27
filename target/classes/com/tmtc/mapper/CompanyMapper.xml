@@ -1,0 +1,524 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tmtc.dao.CompanyDao" >
+  <resultMap id="BaseResultMap" type="com.tmtc.po.Company" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="city_id" property="city_id" jdbcType="INTEGER" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="chairman_name" property="chairman_name" jdbcType="VARCHAR" />
+    <result column="chairman_phone" property="chairman_phone" jdbcType="VARCHAR" />
+    <result column="company_chairman" property="company_chairman" jdbcType="VARCHAR" />
+    <result column="company_telphone" property="company_telphone" jdbcType="VARCHAR" />
+    <result column="qq" property="qq" jdbcType="VARCHAR" />
+    <result column="email" property="email" jdbcType="VARCHAR" />
+    <result column="business_fax" property="business_fax" jdbcType="VARCHAR" />
+    <result column="company_type" property="company_type" jdbcType="INTEGER" />
+    <result column="start_time" property="start_time" jdbcType="TIMESTAMP" />
+    <result column="end_time" property="end_time" jdbcType="TIMESTAMP" />
+    <result column="logo_pic" property="logo_pic" jdbcType="VARCHAR" />
+    <result column="business_license" property="business_license" jdbcType="VARCHAR" />
+    <result column="website" property="website" jdbcType="VARCHAR" />
+    <result column="creat_time" property="creat_time" jdbcType="TIMESTAMP" />
+    <result column="is_check" property="is_check" jdbcType="INTEGER" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.tmtc.po.Company" extends="BaseResultMap" >
+    <result column="intro" property="intro" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, name, city_id, address, chairman_name, chairman_phone, company_chairman, company_telphone, 
+    qq, email, business_fax, company_type, start_time, end_time, logo_pic, business_license, 
+    website, creat_time, is_check
+  </sql>
+  <sql id="Blob_Column_List" >
+    intro
+  </sql>
+  <select id="selectByExampleWithBLOBs" resultMap="ResultMapWithBLOBs" parameterType="com.tmtc.po.CompanyRepository" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_company
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <if test="rowIndex!=null and pageSize!=null">
+      limit ${rowIndex},${pageSize}
+    </if>
+  </select>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.tmtc.po.CompanyRepository" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_company
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <if test="rowIndex!=null and pageSize!=null">
+      limit ${rowIndex},${pageSize}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_company
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from t_company
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.tmtc.po.CompanyRepository" >
+    delete from t_company
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.tmtc.po.Company" >
+    insert into t_company (id, name, city_id, 
+      address, chairman_name, chairman_phone, 
+      company_chairman, company_telphone, qq, 
+      email, business_fax, company_type, 
+      start_time, end_time, logo_pic, 
+      business_license, website, creat_time, 
+      is_check, intro)
+    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{city_id,jdbcType=INTEGER}, 
+      #{address,jdbcType=VARCHAR}, #{chairman_name,jdbcType=VARCHAR}, #{chairman_phone,jdbcType=VARCHAR}, 
+      #{company_chairman,jdbcType=VARCHAR}, #{company_telphone,jdbcType=VARCHAR}, #{qq,jdbcType=VARCHAR}, 
+      #{email,jdbcType=VARCHAR}, #{business_fax,jdbcType=VARCHAR}, #{company_type,jdbcType=INTEGER}, 
+      #{start_time,jdbcType=TIMESTAMP}, #{end_time,jdbcType=TIMESTAMP}, #{logo_pic,jdbcType=VARCHAR}, 
+      #{business_license,jdbcType=VARCHAR}, #{website,jdbcType=VARCHAR}, #{creat_time,jdbcType=TIMESTAMP}, 
+      #{is_check,jdbcType=INTEGER}, #{intro,jdbcType=LONGVARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.tmtc.po.Company" >
+    insert into t_company
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="city_id != null" >
+        city_id,
+      </if>
+      <if test="address != null" >
+        address,
+      </if>
+      <if test="chairman_name != null" >
+        chairman_name,
+      </if>
+      <if test="chairman_phone != null" >
+        chairman_phone,
+      </if>
+      <if test="company_chairman != null" >
+        company_chairman,
+      </if>
+      <if test="company_telphone != null" >
+        company_telphone,
+      </if>
+      <if test="qq != null" >
+        qq,
+      </if>
+      <if test="email != null" >
+        email,
+      </if>
+      <if test="business_fax != null" >
+        business_fax,
+      </if>
+      <if test="company_type != null" >
+        company_type,
+      </if>
+      <if test="start_time != null" >
+        start_time,
+      </if>
+      <if test="end_time != null" >
+        end_time,
+      </if>
+      <if test="logo_pic != null" >
+        logo_pic,
+      </if>
+      <if test="business_license != null" >
+        business_license,
+      </if>
+      <if test="website != null" >
+        website,
+      </if>
+      <if test="creat_time != null" >
+        creat_time,
+      </if>
+      <if test="is_check != null" >
+        is_check,
+      </if>
+      <if test="intro != null" >
+        intro,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="city_id != null" >
+        #{city_id,jdbcType=INTEGER},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="chairman_name != null" >
+        #{chairman_name,jdbcType=VARCHAR},
+      </if>
+      <if test="chairman_phone != null" >
+        #{chairman_phone,jdbcType=VARCHAR},
+      </if>
+      <if test="company_chairman != null" >
+        #{company_chairman,jdbcType=VARCHAR},
+      </if>
+      <if test="company_telphone != null" >
+        #{company_telphone,jdbcType=VARCHAR},
+      </if>
+      <if test="qq != null" >
+        #{qq,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="business_fax != null" >
+        #{business_fax,jdbcType=VARCHAR},
+      </if>
+      <if test="company_type != null" >
+        #{company_type,jdbcType=INTEGER},
+      </if>
+      <if test="start_time != null" >
+        #{start_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="end_time != null" >
+        #{end_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="logo_pic != null" >
+        #{logo_pic,jdbcType=VARCHAR},
+      </if>
+      <if test="business_license != null" >
+        #{business_license,jdbcType=VARCHAR},
+      </if>
+      <if test="website != null" >
+        #{website,jdbcType=VARCHAR},
+      </if>
+      <if test="creat_time != null" >
+        #{creat_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="is_check != null" >
+        #{is_check,jdbcType=INTEGER},
+      </if>
+      <if test="intro != null" >
+        #{intro,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.tmtc.po.CompanyRepository" resultType="java.lang.Integer" >
+    select count(*) from t_company
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update t_company
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.name != null" >
+        name = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.city_id != null" >
+        city_id = #{record.city_id,jdbcType=INTEGER},
+      </if>
+      <if test="record.address != null" >
+        address = #{record.address,jdbcType=VARCHAR},
+      </if>
+      <if test="record.chairman_name != null" >
+        chairman_name = #{record.chairman_name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.chairman_phone != null" >
+        chairman_phone = #{record.chairman_phone,jdbcType=VARCHAR},
+      </if>
+      <if test="record.company_chairman != null" >
+        company_chairman = #{record.company_chairman,jdbcType=VARCHAR},
+      </if>
+      <if test="record.company_telphone != null" >
+        company_telphone = #{record.company_telphone,jdbcType=VARCHAR},
+      </if>
+      <if test="record.qq != null" >
+        qq = #{record.qq,jdbcType=VARCHAR},
+      </if>
+      <if test="record.email != null" >
+        email = #{record.email,jdbcType=VARCHAR},
+      </if>
+      <if test="record.business_fax != null" >
+        business_fax = #{record.business_fax,jdbcType=VARCHAR},
+      </if>
+      <if test="record.company_type != null" >
+        company_type = #{record.company_type,jdbcType=INTEGER},
+      </if>
+      <if test="record.start_time != null" >
+        start_time = #{record.start_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.end_time != null" >
+        end_time = #{record.end_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.logo_pic != null" >
+        logo_pic = #{record.logo_pic,jdbcType=VARCHAR},
+      </if>
+      <if test="record.business_license != null" >
+        business_license = #{record.business_license,jdbcType=VARCHAR},
+      </if>
+      <if test="record.website != null" >
+        website = #{record.website,jdbcType=VARCHAR},
+      </if>
+      <if test="record.creat_time != null" >
+        creat_time = #{record.creat_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.is_check != null" >
+        is_check = #{record.is_check,jdbcType=INTEGER},
+      </if>
+      <if test="record.intro != null" >
+        intro = #{record.intro,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map" >
+    update t_company
+    set id = #{record.id,jdbcType=BIGINT},
+      name = #{record.name,jdbcType=VARCHAR},
+      city_id = #{record.city_id,jdbcType=INTEGER},
+      address = #{record.address,jdbcType=VARCHAR},
+      chairman_name = #{record.chairman_name,jdbcType=VARCHAR},
+      chairman_phone = #{record.chairman_phone,jdbcType=VARCHAR},
+      company_chairman = #{record.company_chairman,jdbcType=VARCHAR},
+      company_telphone = #{record.company_telphone,jdbcType=VARCHAR},
+      qq = #{record.qq,jdbcType=VARCHAR},
+      email = #{record.email,jdbcType=VARCHAR},
+      business_fax = #{record.business_fax,jdbcType=VARCHAR},
+      company_type = #{record.company_type,jdbcType=INTEGER},
+      start_time = #{record.start_time,jdbcType=TIMESTAMP},
+      end_time = #{record.end_time,jdbcType=TIMESTAMP},
+      logo_pic = #{record.logo_pic,jdbcType=VARCHAR},
+      business_license = #{record.business_license,jdbcType=VARCHAR},
+      website = #{record.website,jdbcType=VARCHAR},
+      creat_time = #{record.creat_time,jdbcType=TIMESTAMP},
+      is_check = #{record.is_check,jdbcType=INTEGER},
+      intro = #{record.intro,jdbcType=LONGVARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update t_company
+    set id = #{record.id,jdbcType=BIGINT},
+      name = #{record.name,jdbcType=VARCHAR},
+      city_id = #{record.city_id,jdbcType=INTEGER},
+      address = #{record.address,jdbcType=VARCHAR},
+      chairman_name = #{record.chairman_name,jdbcType=VARCHAR},
+      chairman_phone = #{record.chairman_phone,jdbcType=VARCHAR},
+      company_chairman = #{record.company_chairman,jdbcType=VARCHAR},
+      company_telphone = #{record.company_telphone,jdbcType=VARCHAR},
+      qq = #{record.qq,jdbcType=VARCHAR},
+      email = #{record.email,jdbcType=VARCHAR},
+      business_fax = #{record.business_fax,jdbcType=VARCHAR},
+      company_type = #{record.company_type,jdbcType=INTEGER},
+      start_time = #{record.start_time,jdbcType=TIMESTAMP},
+      end_time = #{record.end_time,jdbcType=TIMESTAMP},
+      logo_pic = #{record.logo_pic,jdbcType=VARCHAR},
+      business_license = #{record.business_license,jdbcType=VARCHAR},
+      website = #{record.website,jdbcType=VARCHAR},
+      creat_time = #{record.creat_time,jdbcType=TIMESTAMP},
+      is_check = #{record.is_check,jdbcType=INTEGER}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tmtc.po.Company" >
+    update t_company
+    <set >
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="city_id != null" >
+        city_id = #{city_id,jdbcType=INTEGER},
+      </if>
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="chairman_name != null" >
+        chairman_name = #{chairman_name,jdbcType=VARCHAR},
+      </if>
+      <if test="chairman_phone != null" >
+        chairman_phone = #{chairman_phone,jdbcType=VARCHAR},
+      </if>
+      <if test="company_chairman != null" >
+        company_chairman = #{company_chairman,jdbcType=VARCHAR},
+      </if>
+      <if test="company_telphone != null" >
+        company_telphone = #{company_telphone,jdbcType=VARCHAR},
+      </if>
+      <if test="qq != null" >
+        qq = #{qq,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="business_fax != null" >
+        business_fax = #{business_fax,jdbcType=VARCHAR},
+      </if>
+      <if test="company_type != null" >
+        company_type = #{company_type,jdbcType=INTEGER},
+      </if>
+      <if test="start_time != null" >
+        start_time = #{start_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="end_time != null" >
+        end_time = #{end_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="logo_pic != null" >
+        logo_pic = #{logo_pic,jdbcType=VARCHAR},
+      </if>
+      <if test="business_license != null" >
+        business_license = #{business_license,jdbcType=VARCHAR},
+      </if>
+      <if test="website != null" >
+        website = #{website,jdbcType=VARCHAR},
+      </if>
+      <if test="creat_time != null" >
+        creat_time = #{creat_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="is_check != null" >
+        is_check = #{is_check,jdbcType=INTEGER},
+      </if>
+      <if test="intro != null" >
+        intro = #{intro,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.tmtc.po.Company" >
+    update t_company
+    set name = #{name,jdbcType=VARCHAR},
+      city_id = #{city_id,jdbcType=INTEGER},
+      address = #{address,jdbcType=VARCHAR},
+      chairman_name = #{chairman_name,jdbcType=VARCHAR},
+      chairman_phone = #{chairman_phone,jdbcType=VARCHAR},
+      company_chairman = #{company_chairman,jdbcType=VARCHAR},
+      company_telphone = #{company_telphone,jdbcType=VARCHAR},
+      qq = #{qq,jdbcType=VARCHAR},
+      email = #{email,jdbcType=VARCHAR},
+      business_fax = #{business_fax,jdbcType=VARCHAR},
+      company_type = #{company_type,jdbcType=INTEGER},
+      start_time = #{start_time,jdbcType=TIMESTAMP},
+      end_time = #{end_time,jdbcType=TIMESTAMP},
+      logo_pic = #{logo_pic,jdbcType=VARCHAR},
+      business_license = #{business_license,jdbcType=VARCHAR},
+      website = #{website,jdbcType=VARCHAR},
+      creat_time = #{creat_time,jdbcType=TIMESTAMP},
+      is_check = #{is_check,jdbcType=INTEGER},
+      intro = #{intro,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tmtc.po.Company" >
+    update t_company
+    set name = #{name,jdbcType=VARCHAR},
+      city_id = #{city_id,jdbcType=INTEGER},
+      address = #{address,jdbcType=VARCHAR},
+      chairman_name = #{chairman_name,jdbcType=VARCHAR},
+      chairman_phone = #{chairman_phone,jdbcType=VARCHAR},
+      company_chairman = #{company_chairman,jdbcType=VARCHAR},
+      company_telphone = #{company_telphone,jdbcType=VARCHAR},
+      qq = #{qq,jdbcType=VARCHAR},
+      email = #{email,jdbcType=VARCHAR},
+      business_fax = #{business_fax,jdbcType=VARCHAR},
+      company_type = #{company_type,jdbcType=INTEGER},
+      start_time = #{start_time,jdbcType=TIMESTAMP},
+      end_time = #{end_time,jdbcType=TIMESTAMP},
+      logo_pic = #{logo_pic,jdbcType=VARCHAR},
+      business_license = #{business_license,jdbcType=VARCHAR},
+      website = #{website,jdbcType=VARCHAR},
+      creat_time = #{creat_time,jdbcType=TIMESTAMP},
+      is_check = #{is_check,jdbcType=INTEGER}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

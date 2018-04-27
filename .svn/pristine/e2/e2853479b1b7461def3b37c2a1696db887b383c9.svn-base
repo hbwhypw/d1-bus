@@ -1,0 +1,312 @@
+package com.tmtc.utils;
+
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map.Entry;
+
+//import core.category.utility.StringUtility;
+
+public class Parser {
+	
+	private static HashMap<String, SimpleDateFormat> formatters
+	= new HashMap<String, SimpleDateFormat>();
+	
+	public enum DateType {
+		Full,
+		Day,
+		Time;
+		
+		public static String patternFromType (DateType type) {
+			switch (type) {
+			case Day: return "yyyy-MM-dd";
+			case Time: return "HH:mm:ss";
+			default: return "yyyy-MM-dd HH:mm:ss";
+			}
+		}
+	}
+	
+	public static int defaultInt = -99999999;
+	
+	
+	//basic section	
+	public static int getInt (Object obj, int defaultValue) {
+		if ( obj != null ) {
+			try {
+				if (obj instanceof Integer) {
+					return ((Integer)obj).intValue();
+				}
+				if (obj instanceof String) {
+					String str = (String)obj;
+					if ( str != null && !str.equals("") && str.matches("\\d+")) {
+						return Integer.parseInt(str);
+					}
+				}
+				if (obj instanceof Long) {
+					return (int)((Long)obj).longValue();
+				}
+				if (obj instanceof Float) {
+					return (int)((Float)obj).floatValue();
+				}
+				if (obj instanceof Double) {
+					return (int)((Double)obj).doubleValue();
+				}
+				if (obj instanceof BigDecimal) {
+					return (int)((BigDecimal)obj).intValue();
+				}	
+			} catch (Exception e) {
+				return defaultValue;
+			}
+		}
+		return defaultValue;
+	}
+
+	public static long getLong (Object obj, int defaultValue) {
+		if ( obj != null ) {
+			try {
+				if (obj instanceof Integer) {
+					return ((Integer)obj).intValue();
+				}
+				if (obj instanceof String) {
+					String str = (String)obj;
+					if ( str != null && !str.equals("") && str.matches("\\d+")) {
+						return Long.parseLong(str);
+					}
+				}
+				if (obj instanceof Long) {
+					return ((Long)obj).longValue();
+				}
+				if (obj instanceof Float) {
+					return (long)((Float)obj).floatValue();
+				}
+				if (obj instanceof Double) {
+					return (long)((Double)obj).doubleValue();
+				}
+				if (obj instanceof BigDecimal) {
+					return (long)((BigDecimal)obj).intValue();
+				}	
+			} catch (Exception e) {
+				return defaultValue;
+			}
+		}
+		return defaultValue;
+	}
+	
+	public static float getFloat (Object obj, float defaulValue) {
+		try {
+			if ( obj != null ) {
+				if (obj instanceof Integer) {
+					return ((Integer)obj).intValue();
+				}
+				if (obj instanceof String) {
+					if (VerificationUtil.length((String)obj) == 0) {
+						return defaulValue;
+					}
+					return Float.parseFloat((String)obj);
+				}
+				if (obj instanceof Long) {
+					return ((Long)obj).longValue();
+				}
+				if (obj instanceof Float) {
+					return ((Float)obj).floatValue();
+				}
+				if (obj instanceof Double) {
+					return (float)((Double)obj).doubleValue();
+				}
+				if (obj instanceof BigDecimal) {
+					return ((BigDecimal)obj).floatValue();
+				}
+				return defaulValue;
+			}
+		} catch (Exception e) {
+//			Logger.me().error("Parser", "parse float error:" + obj);
+		}
+		return defaulValue;
+	}
+	
+	public static double getDouble (Object obj, double defaultValue) {
+		if ( obj != null ) {
+			if (obj instanceof Integer) {
+				return ((Integer)obj).intValue();
+			}
+			if (obj instanceof String) {
+				if (VerificationUtil.length((String)obj) == 0) {
+					return defaultValue;
+				}
+				return Float.parseFloat((String)obj);
+			}
+			if (obj instanceof Long) {
+				return ((Long)obj).longValue();
+			}
+			if (obj instanceof Float) {
+				return ((Float)obj).floatValue();
+			}
+			if (obj instanceof Double) {
+				return ((Double)obj).doubleValue();
+			}
+			if (obj instanceof BigDecimal) {
+				return ((BigDecimal)obj).doubleValue();
+			}
+			return defaultValue;
+		} else {
+			return defaultValue;
+		}
+	}
+	
+	public static String getString (Object obj) {
+		if (obj == null) {
+			return null;
+		}
+		if (obj instanceof String) return (String)obj;
+		else if (obj instanceof Date) return getString((Date)obj, DateType.Full);
+		else return String.valueOf(obj);
+	}
+
+	public static boolean getBool (Object obj) {
+		Boolean b = getBoolean(obj);
+		return b == null? false: b.booleanValue();
+	}
+	
+	public static Boolean getBoolean (Object obj) {
+		if ( obj != null ) {
+			if (obj instanceof String) {
+				String str = (String)obj;
+				if ( str != null && !str.equals("") ) {
+					if (str.compareToIgnoreCase("yes") == 0 
+						|| str.compareToIgnoreCase("true") == 0) {
+						return true;
+					}
+					if (str.compareToIgnoreCase("no") == 0 
+						|| str.compareToIgnoreCase("false") == 0) {
+						return false;
+					}
+					return getInt(str, 0)>0;
+				}
+				return Boolean.valueOf(getBool((String)obj));
+			} else if (obj instanceof Integer) {
+				return Boolean.valueOf(((Integer)obj).intValue() > 0);
+			} else if (obj instanceof Long) {
+				return Boolean.valueOf(((Long)obj).longValue() > 0);
+			} else if (obj instanceof Float) {
+				return Boolean.valueOf(((Float)obj).floatValue() > 0);
+			} else if (obj instanceof Double) {
+				return Boolean.valueOf((int)((Double)obj).doubleValue() > 0);
+			} else if (obj instanceof Boolean) {
+				return (Boolean)obj;
+			}
+		}
+		return null;
+	}
+
+	public static Object getObject (Object obj, Class<?> type) {
+		if (obj == null || obj.getClass() == type) {
+			return obj;
+		}
+		
+		if (type.isPrimitive()) {
+			int defaultInt = -1;
+			if (type.getName().equals("int")) {
+				return getInt(obj, defaultInt);
+			} else if (type.getName().equals("float")) {
+				return getFloat(obj, defaultInt);
+			} else if (type.getName().equals("long")) {
+				return getLong(obj, defaultInt);
+			} else if (type.getName().equals("double")) {
+				return getDouble(obj, defaultInt);
+			} else if (type.getName().equals("boolean")) {
+				return getBool(obj);
+			}
+		} else {
+			if (type.isAssignableFrom(String.class)) {
+				return getString(obj);
+			} else if (type.isAssignableFrom(Date.class)) {
+				return getDate(obj, DateType.Full);
+			} else if (type.isAssignableFrom(Boolean.class)) {
+				return getBoolean(obj);
+			} else {
+				System.err.println("unhandle type!! " + type.getName());
+			}
+		}
+		return null;
+	}
+	
+	
+	//string 2 date
+	public static String getString (Date date, String pattern) {
+		if ( date != null ) {
+			SimpleDateFormat formatter = formatters.get(pattern);
+			if (formatter == null) {
+				formatter = new SimpleDateFormat(pattern);
+				formatters.put(pattern, formatter);
+			}
+			return formatter.format(date);
+		}
+		return null;
+	}
+	
+	public static String getString (Date date, DateType type) {
+		return getString(date, DateType.patternFromType(type));
+	}
+	
+	public static Date getDate (Object obj, String pattern) {
+		if (obj == null) {
+			return null;
+		}
+
+		if (obj instanceof String) {
+			try {
+				SimpleDateFormat formatter = formatters.get(pattern);
+				if (formatter == null) {
+					formatter = new SimpleDateFormat(pattern);
+					formatters.put(pattern, formatter);
+				}
+				return formatter.parse((String)obj);
+			} catch (ParseException e) {
+//				Logger.me().error("Parser", "wrong date:" + obj);
+				e.printStackTrace();
+			}
+		} else if (obj instanceof Date) {
+			return (Date)obj;
+		} else if (obj instanceof Long) {
+			return new Date(((Long)obj).longValue());
+		}
+
+		return null;
+	}
+	
+	public static Date getDate (Object obj, DateType type) {
+		return getDate(obj, DateType.patternFromType(type));
+	}
+	
+	
+	//others
+	public static HashMap<String, Object> trimHashMap (HashMap<String, Object> set) {
+		Iterator<Entry<String, Object>> it =  set.entrySet().iterator();
+        while( it.hasNext() ) {
+        	Entry<String, Object> obj = it.next();
+        	Object value = obj.getValue();
+        	if (value == null) {
+        		it.remove();
+        		continue;
+        	}
+        	if (value instanceof Integer) {
+        		if ( ((Integer)value).intValue() == defaultInt ) {
+					it.remove();
+				}
+			}
+         }
+         return set;
+	}
+	
+	public static void main (String[] args) {
+//		System.out.println(getInt("1.1"));
+//		System.out.println(getBool("true"));
+//		System.out.println(roundChange(1.99533f, 2));
+//		System.out.println(getFloat(""));
+		System.out.println(getBool(1));
+	}
+	
+}

@@ -1,0 +1,121 @@
+package com.tmtc.controller;
+
+import java.util.Date;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.tmtc.annotation.SystemControllerLog;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.frame.JsonResult;
+import com.tmtc.frame.PageResult;
+import com.tmtc.po.Line;
+import com.tmtc.po.LineRepository;
+import com.tmtc.service.LineService;
+import com.tmtc.utils.IdWorker;
+
+/**
+ * 线路管理
+ * 
+ * @author qiukai
+ *
+ */
+@Controller
+@RequestMapping("/line")
+public class LineController extends BaseController {
+
+	@Autowired
+	LineService lineService;
+
+	/**
+	 * 添加或者修改
+	 * 
+	 * @param request
+	 * @param response
+	 * @param edit
+	 * @param admin
+	 * @param bindingResult
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping(value = "/{edit}")
+	@SystemControllerLog("线路的添加或修改")
+	public JsonResult add(HttpServletRequest request, HttpServletResponse response, @PathVariable String edit,
+			@Valid @ModelAttribute Line line, BindingResult bindingResult) {
+
+		if (bindingResult.hasErrors()) {
+			return handlerErrors(bindingResult);
+		}
+		if (edit.equals("add")) {
+			line.setId(IdWorker.nextId());
+			line.setIs_check(ParameterConstant.IS_CHECK);
+			line.setCreate_time(new Date());
+			lineService.insert(line);
+		} else if (edit.equals("update")) {
+			lineService.update(line);
+		}
+		return new JsonResult();
+	}
+
+	/**
+	 * 线路查询
+	 * @param request
+	 * @param response
+	 * @param page
+	 * @param rows
+	 * @param username
+	 * @return
+	 */
+	@RequestMapping("/query")
+	@ResponseBody
+	@SystemControllerLog("线路查询")
+	public PageResult query(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(required = false) Integer page, @RequestParam(required = false) Integer rows,
+			@RequestParam(required = false) String line_name,String company_name) {
+		LineRepository lineRepository = new LineRepository();
+        PageResult page2 = lineService.selectByPage(lineRepository, page, rows,line_name,company_name);
+        return page2;
+	}
+	
+	/**
+	 * 线路删除
+	 * @param request
+	 * @param response
+	 * @param id
+	 * @return
+	 */
+	@ResponseBody
+    @RequestMapping(value = "/delete")
+	@SystemControllerLog("线路删除")
+    public JsonResult delete(HttpServletRequest request, HttpServletResponse response,
+                             @RequestParam(required = false) String id) {
+		lineService.delete(id);
+        return new JsonResult();
+    }
+	
+	/**
+	 * 线路的永久删除
+	 * @param request
+	 * @param response
+	 * @param id
+	 * @return
+	 */
+	@ResponseBody
+    @RequestMapping(value = "/forEverDelete")
+	@SystemControllerLog("线路的永久删除")
+    public JsonResult forEverDelete(HttpServletRequest request, HttpServletResponse response,
+                             @RequestParam(required = false) String id) {
+		lineService.deleteForEver(id);
+        return new JsonResult();
+    }
+}

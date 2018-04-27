@@ -1,0 +1,48 @@
+package com.tmtc.controller.driver;
+
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.tmtc.controller.appAPI.BaseController;
+import com.tmtc.frame.ServiceRuntimeException;
+import com.tmtc.po.BaiduTemp;
+import com.tmtc.service.appAPI.BaiduScanService;
+
+@Controller
+@RequestMapping("/App/baiduScan")
+public class BaiduScanController extends BaseController {
+
+	@Autowired
+	BaiduScanService baiduScanService;
+
+	/**
+	 * * 刷卡 /App/baiduScan/add?
+	 * 
+	 * @param request
+	 * @param response
+	 * @param baiduTemp
+	 * @param param
+	 *            卡号，站点ID，站点名，刷卡时间，
+	 * @return
+	 */
+	@RequestMapping("/add")
+	@ResponseBody
+	public Map<String, Object> add(HttpServletRequest request, HttpServletResponse response,
+			@Valid @ModelAttribute BaiduTemp baiduTemp, @RequestParam String arrival_time,
+			@RequestParam String depart_time, @RequestParam String param) throws ServiceRuntimeException {
+		if (baiduScanService.insert(baiduTemp, arrival_time, depart_time, param) != 1) {
+			return getMap(request, "百度临时数据插入错误！", 0);
+		}
+		return getMap(request, "插入成功");
+	}
+}

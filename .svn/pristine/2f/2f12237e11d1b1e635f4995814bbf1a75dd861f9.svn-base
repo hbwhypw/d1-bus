@@ -1,0 +1,354 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tmtc.dao.UserDao">
+	<resultMap id="BaseResultMap" type="com.tmtc.po.User">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="city_id" property="city_id" jdbcType="INTEGER" />
+		<result column="company_id" property="company_id" jdbcType="BIGINT" />
+		<result column="username" property="username" jdbcType="VARCHAR" />
+		<result column="password" property="password" jdbcType="VARCHAR" />
+		<result column="number" property="number" jdbcType="VARCHAR" />
+		<result column="user_type" property="user_type" jdbcType="INTEGER" />
+		<result column="login_source" property="login_source" jdbcType="INTEGER" />
+		<result column="lock_time" property="lock_time" jdbcType="INTEGER" />
+		<result column="lock_cnt" property="lock_cnt" jdbcType="INTEGER" />
+		<result column="login_time" property="login_time" jdbcType="TIMESTAMP" />
+		<result column="login_cnt" property="login_cnt" jdbcType="INTEGER" />
+		<result column="ip_address" property="ip_address" jdbcType="VARCHAR" />
+	</resultMap>
+	<sql id="Example_Where_Clause">
+		<where>
+			<foreach collection="oredCriteria" item="criteria" separator="or">
+				<if test="criteria.valid">
+					<trim prefix="(" suffix=")" prefixOverrides="and">
+						<foreach collection="criteria.criteria" item="criterion">
+							<choose>
+								<when test="criterion.noValue">
+									and ${criterion.condition}
+								</when>
+								<when test="criterion.singleValue">
+									and ${criterion.condition} #{criterion.value}
+								</when>
+								<when test="criterion.betweenValue">
+									and ${criterion.condition} #{criterion.value} and
+									#{criterion.secondValue}
+								</when>
+								<when test="criterion.listValue">
+									and ${criterion.condition}
+									<foreach collection="criterion.value" item="listItem"
+										open="(" close=")" separator=",">
+										#{listItem}
+									</foreach>
+								</when>
+							</choose>
+						</foreach>
+					</trim>
+				</if>
+			</foreach>
+		</where>
+	</sql>
+	<sql id="Update_By_Example_Where_Clause">
+		<where>
+			<foreach collection="example.oredCriteria" item="criteria"
+				separator="or">
+				<if test="criteria.valid">
+					<trim prefix="(" suffix=")" prefixOverrides="and">
+						<foreach collection="criteria.criteria" item="criterion">
+							<choose>
+								<when test="criterion.noValue">
+									and ${criterion.condition}
+								</when>
+								<when test="criterion.singleValue">
+									and ${criterion.condition} #{criterion.value}
+								</when>
+								<when test="criterion.betweenValue">
+									and ${criterion.condition} #{criterion.value} and
+									#{criterion.secondValue}
+								</when>
+								<when test="criterion.listValue">
+									and ${criterion.condition}
+									<foreach collection="criterion.value" item="listItem"
+										open="(" close=")" separator=",">
+										#{listItem}
+									</foreach>
+								</when>
+							</choose>
+						</foreach>
+					</trim>
+				</if>
+			</foreach>
+		</where>
+	</sql>
+	<sql id="Base_Column_List">
+		id, city_id, company_id, username, password, number, user_type,
+		login_source, lock_time,
+		lock_cnt, login_time, login_cnt, ip_address
+	</sql>
+	<select id="selectByExample" resultMap="BaseResultMap"
+		parameterType="com.tmtc.po.UserRepository">
+		select
+		<if test="distinct">
+			distinct
+		</if>
+		<include refid="Base_Column_List" />
+		from t_user
+		<if test="_parameter != null">
+			<include refid="Example_Where_Clause" />
+		</if>
+		<if test="orderByClause != null">
+			order by ${orderByClause}
+		</if>
+	</select>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from t_user
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from t_user
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<delete id="deleteByExample" parameterType="com.tmtc.po.UserRepository">
+		delete from t_user
+		<if test="_parameter != null">
+			<include refid="Example_Where_Clause" />
+		</if>
+	</delete>
+	<insert id="insert" parameterType="com.tmtc.po.User">
+		insert into t_user (id, city_id, company_id,
+		username, password, number,
+		user_type, login_source, lock_time,
+		lock_cnt, login_time, login_cnt,
+		ip_address)
+		values (#{id,jdbcType=BIGINT}, #{city_id,jdbcType=INTEGER},
+		#{company_id,jdbcType=BIGINT},
+		#{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, #{number,jdbcType=VARCHAR},
+		#{user_type,jdbcType=INTEGER}, #{login_source,jdbcType=INTEGER},
+		#{lock_time,jdbcType=INTEGER},
+		#{lock_cnt,jdbcType=INTEGER}, #{login_time,jdbcType=TIMESTAMP}, #{login_cnt,jdbcType=INTEGER},
+		#{ip_address,jdbcType=VARCHAR})
+	</insert>
+	<insert id="insertSelective" parameterType="com.tmtc.po.User">
+		insert into t_user
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="city_id != null">
+				city_id,
+			</if>
+			<if test="company_id != null">
+				company_id,
+			</if>
+			<if test="username != null">
+				username,
+			</if>
+			<if test="password != null">
+				password,
+			</if>
+			<if test="number != null">
+				number,
+			</if>
+			<if test="user_type != null">
+				user_type,
+			</if>
+			<if test="login_source != null">
+				login_source,
+			</if>
+			<if test="lock_time != null">
+				lock_time,
+			</if>
+			<if test="lock_cnt != null">
+				lock_cnt,
+			</if>
+			<if test="login_time != null">
+				login_time,
+			</if>
+			<if test="login_cnt != null">
+				login_cnt,
+			</if>
+			<if test="ip_address != null">
+				ip_address,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=BIGINT},
+			</if>
+			<if test="city_id != null">
+				#{city_id,jdbcType=INTEGER},
+			</if>
+			<if test="company_id != null">
+				#{company_id,jdbcType=BIGINT},
+			</if>
+			<if test="username != null">
+				#{username,jdbcType=VARCHAR},
+			</if>
+			<if test="password != null">
+				#{password,jdbcType=VARCHAR},
+			</if>
+			<if test="number != null">
+				#{number,jdbcType=VARCHAR},
+			</if>
+			<if test="user_type != null">
+				#{user_type,jdbcType=INTEGER},
+			</if>
+			<if test="login_source != null">
+				#{login_source,jdbcType=INTEGER},
+			</if>
+			<if test="lock_time != null">
+				#{lock_time,jdbcType=INTEGER},
+			</if>
+			<if test="lock_cnt != null">
+				#{lock_cnt,jdbcType=INTEGER},
+			</if>
+			<if test="login_time != null">
+				#{login_time,jdbcType=TIMESTAMP},
+			</if>
+			<if test="login_cnt != null">
+				#{login_cnt,jdbcType=INTEGER},
+			</if>
+			<if test="ip_address != null">
+				#{ip_address,jdbcType=VARCHAR},
+			</if>
+		</trim>
+	</insert>
+	<select id="countByExample" parameterType="com.tmtc.po.UserRepository"
+		resultType="java.lang.Integer">
+		select count(*) from t_user
+		<if test="_parameter != null">
+			<include refid="Example_Where_Clause" />
+		</if>
+	</select>
+	<update id="updateByExampleSelective" parameterType="map">
+		update t_user
+		<set>
+			<if test="record.id != null">
+				id = #{record.id,jdbcType=BIGINT},
+			</if>
+			<if test="record.city_id != null">
+				city_id = #{record.city_id,jdbcType=INTEGER},
+			</if>
+			<if test="record.company_id != null">
+				company_id = #{record.company_id,jdbcType=BIGINT},
+			</if>
+			<if test="record.username != null">
+				username = #{record.username,jdbcType=VARCHAR},
+			</if>
+			<if test="record.password != null">
+				password = #{record.password,jdbcType=VARCHAR},
+			</if>
+			<if test="record.number != null">
+				number = #{record.number,jdbcType=VARCHAR},
+			</if>
+			<if test="record.user_type != null">
+				user_type = #{record.user_type,jdbcType=INTEGER},
+			</if>
+			<if test="record.login_source != null">
+				login_source = #{record.login_source,jdbcType=INTEGER},
+			</if>
+			<if test="record.lock_time != null">
+				lock_time = #{record.lock_time,jdbcType=INTEGER},
+			</if>
+			<if test="record.lock_cnt != null">
+				lock_cnt = #{record.lock_cnt,jdbcType=INTEGER},
+			</if>
+			<if test="record.login_time != null">
+				login_time = #{record.login_time,jdbcType=TIMESTAMP},
+			</if>
+			<if test="record.login_cnt != null">
+				login_cnt = #{record.login_cnt,jdbcType=INTEGER},
+			</if>
+			<if test="record.ip_address != null">
+				ip_address = #{record.ip_address,jdbcType=VARCHAR},
+			</if>
+		</set>
+		<if test="_parameter != null">
+			<include refid="Update_By_Example_Where_Clause" />
+		</if>
+	</update>
+	<update id="updateByExample" parameterType="map">
+		update t_user
+		set id = #{record.id,jdbcType=BIGINT},
+		city_id = #{record.city_id,jdbcType=INTEGER},
+		company_id = #{record.company_id,jdbcType=BIGINT},
+		username = #{record.username,jdbcType=VARCHAR},
+		password = #{record.password,jdbcType=VARCHAR},
+		number = #{record.number,jdbcType=VARCHAR},
+		user_type = #{record.user_type,jdbcType=INTEGER},
+		login_source = #{record.login_source,jdbcType=INTEGER},
+		lock_time = #{record.lock_time,jdbcType=INTEGER},
+		lock_cnt = #{record.lock_cnt,jdbcType=INTEGER},
+		login_time = #{record.login_time,jdbcType=TIMESTAMP},
+		login_cnt = #{record.login_cnt,jdbcType=INTEGER},
+		ip_address = #{record.ip_address,jdbcType=VARCHAR}
+		<if test="_parameter != null">
+			<include refid="Update_By_Example_Where_Clause" />
+		</if>
+	</update>
+	<update id="updateByPrimaryKeySelective" parameterType="com.tmtc.po.User">
+		update t_user
+		<set>
+			<if test="city_id != null">
+				city_id = #{city_id,jdbcType=INTEGER},
+			</if>
+			<if test="company_id != null">
+				company_id = #{company_id,jdbcType=BIGINT},
+			</if>
+			<if test="username != null">
+				username = #{username,jdbcType=VARCHAR},
+			</if>
+			<if test="password != null">
+				password = #{password,jdbcType=VARCHAR},
+			</if>
+			<if test="number != null">
+				number = #{number,jdbcType=VARCHAR},
+			</if>
+			<if test="user_type != null">
+				user_type = #{user_type,jdbcType=INTEGER},
+			</if>
+			<if test="login_source != null">
+				login_source = #{login_source,jdbcType=INTEGER},
+			</if>
+			<if test="lock_time != null">
+				lock_time = #{lock_time,jdbcType=INTEGER},
+			</if>
+			<if test="lock_cnt != null">
+				lock_cnt = #{lock_cnt,jdbcType=INTEGER},
+			</if>
+			<if test="login_time != null">
+				login_time = #{login_time,jdbcType=TIMESTAMP},
+			</if>
+			<if test="login_cnt != null">
+				login_cnt = #{login_cnt,jdbcType=INTEGER},
+			</if>
+			<if test="ip_address != null">
+				ip_address = #{ip_address,jdbcType=VARCHAR},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.tmtc.po.User">
+		update t_user
+		set city_id = #{city_id,jdbcType=INTEGER},
+		company_id = #{company_id,jdbcType=BIGINT},
+		username = #{username,jdbcType=VARCHAR},
+		password = #{password,jdbcType=VARCHAR},
+		number = #{number,jdbcType=VARCHAR},
+		user_type = #{user_type,jdbcType=INTEGER},
+		login_source = #{login_source,jdbcType=INTEGER},
+		lock_time = #{lock_time,jdbcType=INTEGER},
+		lock_cnt = #{lock_cnt,jdbcType=INTEGER},
+		login_time = #{login_time,jdbcType=TIMESTAMP},
+		login_cnt = #{login_cnt,jdbcType=INTEGER},
+		ip_address = #{ip_address,jdbcType=VARCHAR}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	
+	<!-- 自定义 -->
+	<select id="selectEmployee" parameterType="string" resultType="string">
+		select remaining_cnt from t_user tu left join t_user_detail tud on tu.id = tud.id where tu.company_id = #{company_id}
+	</select>
+</mapper>

@@ -1,0 +1,35 @@
+* { margin: 0px; padding: 0px; }
+body, h1, h2, h3, h4, h5, h6, hr, p, blockquote, dl, dt, dd, ul, ol, li, pre, form, fieldset, legend, button, textarea, th, td, img
+{ border: medium none; margin: 0; padding: 0; font-size: 12px; }
+body { /*background: #EAEAEA;*/ }
+body, button, textarea { font-family: 'Microsoft YaHei' ,Arial,Helvetica,sans-serif; }
+h2, h3, h4, h5, h6 { font-size: 100%; }
+em { font-style: normal; }
+ul, ol { list-style: none; }
+a { text-decoration: none; color: #333; }
+a:hover { text-decoration: none; cursor: pointer; }
+img { border: 0px; }
+table { border-collapse: collapse; border-spacing: 0; }
+.ClearFloat { clear: both; }
+
+
+/*----Logo------------------------*/
+.PageHeader { position: relative; width: 100%; height: 44px; line-height: 44px; text-align: center; font-family: 'Microsoft YaHei'; font-size: 11pt; background-color: #266DBB; color: #FFFFFF; }
+.PageHeader input { width: 25px; height: 25px; position: absolute; left: 10px; top: 9px; }
+.PageHeader a { position: absolute; right: 10px; top: 0px; display: block; font-family: 'Microsoft YaHei'; font-size: 11pt; cursor: pointer; color: #FFFFFF; }
+.PageHeader a:hover { color: #FFFFFF; }
+.PageHeader img { width: 25px; height: 25px; position: absolute; left: 10px; top: 9px; }
+.PageHeader span { position: absolute; right: 10px; top: 0px; display: block; font-family: 'Microsoft YaHei'; font-size: 11pt; }
+
+.pic {
+    width: 130px;height: 130px; margin: 50px;
+    background-size: 80%;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+.ok {
+    background-image: url(/images/app/success.png);
+}
+.error {
+    background-image: url(/images/app/fail.png);
+}

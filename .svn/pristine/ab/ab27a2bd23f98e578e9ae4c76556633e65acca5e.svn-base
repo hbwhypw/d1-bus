@@ -1,0 +1,87 @@
+package com.tmtc.serviceImpl;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.dao.ResourceDao;
+import com.tmtc.frame.PageResult;
+import com.tmtc.po.Resource;
+import com.tmtc.po.ResourceRepository;
+import com.tmtc.service.ResourceService;
+import com.tmtc.vo.ResourceVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Created:  hbwhypw
+ * Date: 2015/9/23 9:27
+ * Function:
+ */
+@Service
+public class ResourceServiceImpl implements ResourceService {
+    @Autowired
+    ResourceDao resourceDao;
+    @Override
+    public int count(ResourceRepository example) {
+        return resourceDao.countByExample(example);
+    }
+
+    @Override
+    public int delete(String id) {
+        return resourceDao.deleteByPrimaryKey(id);
+    }
+
+    @Override
+    public int delete(ResourceRepository example) {
+        return resourceDao.deleteByExample(example);
+    }
+
+    @Override
+    public int insert(Resource record) {
+        return resourceDao.insert(record);
+    }
+
+    @Override
+    public List<Resource> select(ResourceRepository example) {
+        return resourceDao.selectByExample(example);
+    }
+
+    @Override
+    public Resource selectByPrimaryKey(String id) {
+        return resourceDao.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public int update(Resource record) {
+        return resourceDao.updateByPrimaryKeySelective(record);
+    }
+
+    @Override
+    public int update(Resource record, ResourceRepository example) {
+        return resourceDao.updateByExampleSelective(record, example);
+    }
+
+    @Override
+    public PageResult selectByPage(ResourceRepository example) {
+        List<Resource> list = select(example);
+        List<ResourceVo> listVo = new ArrayList<>();
+        ResourceVo vo = null;
+        for (Resource resource : list) {
+            vo = new ResourceVo(resource);
+            //若是根节点，添加子节点
+            if (vo.getIs_root() == ParameterConstant.IS_ROOT) {
+                List<Resource> subList = new ArrayList<>();
+                for (Resource subResource : list) {
+                    if (subResource.getIs_root() == ParameterConstant.NOT_ROOT
+                            && vo.getId().equals(subResource.getParent())) {
+                        subList.add(subResource);
+                    }
+                }
+                vo.setChildren(subList);
+                listVo.add(vo);
+            }
+        }
+        return new PageResult(count(example),listVo, 1);
+    }
+
+}

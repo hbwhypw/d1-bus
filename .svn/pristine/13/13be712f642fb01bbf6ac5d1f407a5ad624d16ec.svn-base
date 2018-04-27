@@ -1,0 +1,265 @@
+package com.tmtc.controller;
+
+import com.tmtc.annotation.SystemControllerLog;
+import com.tmtc.constant.MessageVar;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.frame.JsonResult;
+import com.tmtc.frame.PageResult;
+import com.tmtc.po.Admins;
+import com.tmtc.po.AdminsRepository;
+import com.tmtc.po.Role;
+import com.tmtc.service.AdminsService;
+import com.tmtc.service.RoleService;
+import com.tmtc.utils.IdWorker;
+import com.tmtc.utils.VerificationUtil;
+import com.tmtc.utils.secret.MD5;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
+import java.io.IOException;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Creater: hbwhypw
+ * Date: 2015/9/18 15:54
+ * Function:
+ */
+@Controller
+@RequestMapping("/admins")
+public class AdminsController extends BaseController {
+    @Autowired
+    AdminsService adminsService;
+    @Autowired
+    RoleService roleService;
+
+    @ResponseBody
+    @RequestMapping("/query")
+    @SystemControllerLog("管理员-查询")
+    public PageResult query(HttpServletRequest request, HttpServletResponse response,
+                        @RequestParam(required = false) Integer page,
+                        @RequestParam(required = false) Integer rows,
+                        @RequestParam(required = false) String username,
+                        @RequestParam(required = false) String nick_name) {
+        Map<String, Object> map = new HashMap<>();
+        if (null != page && null != rows) {
+            map.put("rowIndex", String.valueOf((page - 1) * rows));
+            map.put("pageSize", String.valueOf(rows));
+        }
+        if (StringUtils.isNotEmpty(username)) {
+            map.put("username", "%" + username + "%");
+        }
+        if (StringUtils.isNotEmpty(nick_name)) {
+        	map.put("nick_name", "%" + nick_name + "%");
+        }
+        map.put("type", ParameterConstant.TRUE);
+        map.put("is_check", ParameterConstant.IS_CHECK);
+        return adminsService.selectByPage(map);
+    }
+
+    @ResponseBody
+    @RequestMapping("/company/query")
+    @SystemControllerLog("管理员-查询")
+    public PageResult querycompany(HttpServletRequest request, HttpServletResponse response,
+                            @RequestParam(required = false) Integer page,
+                            @RequestParam(required = false) Integer rows,
+                            @RequestParam(required = false) String username,
+                            @RequestParam(required = false) String nick_name) {
+        Map<String, Object> map = new HashMap<>();
+        if (null != page && null != rows) {
+            map.put("rowIndex", String.valueOf((page - 1) * rows));
+            map.put("pageSize", String.valueOf(rows));
+        }
+        if (StringUtils.isNotEmpty(username)) {
+            map.put("username", "%" + username + "%");
+        }
+        if (StringUtils.isNotEmpty(nick_name)) {
+        	map.put("nick_name", "%" + nick_name + "%");
+        }
+        map.put("type", ParameterConstant.FALSE);
+        map.put("is_check", ParameterConstant.IS_CHECK);
+        return adminsService.selectByPage(map);
+    }
+
+    @ResponseBody
+    @RequestMapping("/permission")
+    @SystemControllerLog("管理员-查询左侧菜单")
+    public JsonResult permission(HttpServletRequest request, HttpServletResponse response){
+        Admins admins = (Admins) request.getSession().getAttribute("admins");
+        if (admins == null) {
+            return new JsonResult(0, null, 2);
+        }
+        String role_id = admins.getRole_id();
+        return roleService.selectResource(role_id);
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/{edit}")
+    @SystemControllerLog("管理员-编辑")
+    public JsonResult add(HttpServletRequest request, HttpServletResponse response,@PathVariable String edit,
+                          @Valid @ModelAttribute Admins admins, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            super.handlerErrors(bindingResult);
+        }
+        if (edit.equals(ADD)){
+            AdminsRepository adminsRepository = new AdminsRepository();
+            adminsRepository.or().andUsernameEqualTo(admins.getUsername());
+            if (adminsService.count(adminsRepository) > 0){
+                return new JsonResult(2, MessageVar.ADMINS_USERNAME_REPEAT, null);
+            }
+            admins.setId(IdWorker.nextId());
+            String password = MD5.makeMd5(admins.getUsername());
+            admins.setPassword(password);
+            admins.setCreate_time(new Date());
+            admins.setType(ParameterConstant.TRUE);
+            adminsService.insert(admins);
+        } else if (edit.equals(UPDATE)){
+            AdminsRepository adminsRepository = new AdminsRepository();
+            adminsRepository.or().andUsernameEqualTo(admins.getUsername())
+                    .andIdNotEqualTo(admins.getId());
+            if (adminsService.count(adminsRepository) > 0){
+                return new JsonResult(2, MessageVar.ADMINS_USERNAME_REPEAT, null);
+            }
+            adminsService.update(admins);
+        }
+        return new JsonResult();
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/company/{edit}")
+    @SystemControllerLog("集团公司管理员-编辑")
+    public JsonResult addcompany(HttpServletRequest request, HttpServletResponse response,@PathVariable String edit,
+                          @Valid @ModelAttribute Admins admins, BindingResult bindingResult) {
+        if (bindingResult.hasErrors()) {
+            super.handlerErrors(bindingResult);
+        }
+        if (edit.equals(ADD)){
+            admins.setId(IdWorker.nextId());
+            String password = MD5.makeMd5(admins.getUsername());
+            admins.setPassword(password);
+            admins.setCreate_time(new Date());
+            admins.setType(ParameterConstant.FALSE);
+            adminsService.insert(admins);
+        } else if (edit.equals(UPDATE)){
+            adminsService.update(admins);
+        }
+        return new JsonResult();
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/delete")
+    @SystemControllerLog("管理员-删除")
+    public JsonResult delete(HttpServletRequest request, HttpServletResponse response,
+                             @RequestParam(required = true) String id) {
+        adminsService.delete(id);
+        return new JsonResult();
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/company/delete")
+    @SystemControllerLog("集团公司管理员-删除")
+    public JsonResult deletecompany(HttpServletRequest request, HttpServletResponse response,
+                             @RequestParam(required = true) String id) {
+        adminsService.delete(id);
+        return new JsonResult();
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/updatepwd")
+    @SystemControllerLog("管理员-修改密码")
+    public JsonResult updatepwd(HttpServletRequest request, HttpServletResponse response,
+                                @RequestParam String oldPassword,
+                                @RequestParam String newPassword) {
+        HttpSession session = request.getSession();
+        Admins admins = (Admins) session.getAttribute("admins");
+        Admins admins1 = adminsService.selectByPrimaryKey(admins.getId());
+        if (admins1.getPassword().equals(MD5.makeMd5(oldPassword))) {
+            if (newPassword.length() < 6) {
+                return new JsonResult(2, JsonResult.FAIL, null);
+            }
+            admins1.setPassword(MD5.makeMd5(newPassword));
+            if (adminsService.update(admins1) == 1) {
+                session.setAttribute("admins", null);
+                session.setAttribute("role", null);
+                return new JsonResult();
+            } else {
+                return new JsonResult(2, JsonResult.FAIL, null);
+            }
+        } else {
+            return new JsonResult(2, JsonResult.FAIL, null);
+        }
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/login")
+    @SystemControllerLog("管理员-登录")
+    public JsonResult login(HttpServletRequest request, HttpServletResponse response,
+                            @RequestParam String username, @RequestParam String password) {
+        AdminsRepository adminsRepository = new AdminsRepository();
+        adminsRepository.or()
+                .andUsernameEqualTo(username)
+                .andPasswordEqualTo(MD5.getMD5(password))
+                .andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+        if(adminsService.count(adminsRepository) == 0){
+            return new JsonResult(2, JsonResult.FAIL, null);
+        } else if(adminsService.count(adminsRepository) == 1){
+            HttpSession session = request.getSession();
+            Admins admins = adminsService.select(adminsRepository).get(0);
+            admins.setLogin_date(new Date());
+            admins.setLogin_cunt(admins.getLogin_cunt() + 1);
+            adminsService.update(admins);
+            Role role = roleService.selectByPrimaryKey(admins.getRole_id());
+            session.setAttribute("admins", admins);
+            session.setAttribute("role", role);
+            return new JsonResult();
+        } else {
+            return new JsonResult(3,"该用户重复",null);
+        }
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/logout")
+    @SystemControllerLog("管理员-登出")
+    public void logout(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        HttpSession session = request.getSession();
+        session.setAttribute("admins", null);
+        response.setContentType("text/html;charset=UTF-8");
+        response.sendRedirect("/admin/index.jsp");
+    }
+    
+    @ResponseBody
+    @RequestMapping(value = "/reset")
+    @SystemControllerLog("管理员-重置密码")
+    public JsonResult reset(HttpServletRequest request, HttpServletResponse response,
+    		@RequestParam String id){
+    	int updateNum = adminsService.updatePassWord(id);
+    	return new JsonResult(1, MessageVar.ADMINSUPDATEPW, updateNum);
+    }
+    
+    @ResponseBody
+    @RequestMapping(value = "/selectByUserName")
+    public JsonResult selectByUserName(HttpServletRequest request, HttpServletResponse response,
+    		@RequestParam(required = false) String username){
+    	if(0 != VerificationUtil.length(username)){
+    		AdminsRepository adminsRepository = new AdminsRepository();
+    		AdminsRepository.Criteria criteria = adminsRepository.createCriteria();
+    		criteria.andUsernameEqualTo(username);
+    		List<Admins> list = adminsService.select(adminsRepository);
+    		if(0 != VerificationUtil.size(list)){
+    			return new JsonResult(0, MessageVar.ADMINS_USERNAME_REPEAT, list);
+    		}
+    		return new JsonResult();
+    	}
+    	return new JsonResult(0, MessageVar.ADMINS_USERNAME_NULL, null);
+    }
+}

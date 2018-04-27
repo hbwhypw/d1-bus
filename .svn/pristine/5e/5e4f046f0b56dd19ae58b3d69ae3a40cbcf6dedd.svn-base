@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tmtc.dao.ScanDao">
+	<resultMap id="BaseResultMap" type="com.tmtc.po.Scan">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="user_id" property="user_id" jdbcType="BIGINT" />
+		<result column="linetime_id" property="linetime_id" jdbcType="BIGINT" />
+		<result column="station_id" property="station_id" jdbcType="BIGINT" />
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+		<result column="status" property="status" jdbcType="INTEGER" />
+		<result column="is_check" property="is_check" jdbcType="INTEGER" />
+	</resultMap>
+
+	<resultMap id="upCar" type="com.tmtc.vo.UpCar">
+		<id column="username" property="username" jdbcType="VARCHAR" />
+		<result column="real_name" property="real_name" jdbcType="VARCHAR" />
+		<result column="name" property="name" jdbcType="VARCHAR" />
+		<result column="card_num" property="card_num" jdbcType="VARCHAR" />
+		<result column="station_name" property="station_name" jdbcType="VARCHAR" />
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+	</resultMap>
+	<sql id="Example_Where_Clause">
+		<where>
+			<foreach collection="oredCriteria" item="criteria" separator="or">
+				<if test="criteria.valid">
+					<trim prefix="(" suffix=")" prefixOverrides="and">
+						<foreach collection="criteria.criteria" item="criterion">
+							<choose>
+								<when test="criterion.noValue">
+									and ${criterion.condition}
+								</when>
+								<when test="criterion.singleValue">
+									and ${criterion.condition} #{criterion.value}
+								</when>
+								<when test="criterion.betweenValue">
+									and ${criterion.condition} #{criterion.value}
+									and
+									#{criterion.secondValue}
+								</when>
+								<when test="criterion.listValue">
+									and ${criterion.condition}
+									<foreach collection="criterion.value" item="listItem"
+										open="(" close=")" separator=",">
+										#{listItem}
+									</foreach>
+								</when>
+							</choose>
+						</foreach>
+					</trim>
+				</if>
+			</foreach>
+		</where>
+	</sql>
+	<sql id="Update_By_Example_Where_Clause">
+		<where>
+			<foreach collection="example.oredCriteria" item="criteria"
+				separator="or">
+				<if test="criteria.valid">
+					<trim prefix="(" suffix=")" prefixOverrides="and">
+						<foreach collection="criteria.criteria" item="criterion">
+							<choose>
+								<when test="criterion.noValue">
+									and ${criterion.condition}
+								</when>
+								<when test="criterion.singleValue">
+									and ${criterion.condition} #{criterion.value}
+								</when>
+								<when test="criterion.betweenValue">
+									and ${criterion.condition} #{criterion.value}
+									and
+									#{criterion.secondValue}
+								</when>
+								<when test="criterion.listValue">
+									and ${criterion.condition}
+									<foreach collection="criterion.value" item="listItem"
+										open="(" close=")" separator=",">
+										#{listItem}
+									</foreach>
+								</when>
+							</choose>
+						</foreach>
+					</trim>
+				</if>
+			</foreach>
+		</where>
+	</sql>
+	<sql id="Base_Column_List">
+		id, user_id, linetime_id, station_id, create_time, status,
+		is_check
+	</sql>
+	<select id="selectByExample" resultMap="BaseResultMap"
+		parameterType="com.tmtc.po.ScanRepository">
+		select
+		<if test="distinct">
+			distinct
+		</if>
+		<include refid="Base_Column_List" />
+		from t_scan
+		<if test="_parameter != null">
+			<include refid="Example_Where_Clause" />
+		</if>
+		<if test="orderByClause != null">
+			order by ${orderByClause}
+		</if>
+		<if test="rowIndex!=null and pageSize!=null">
+			limit ${rowIndex},${pageSize}
+		</if>
+	</select>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from t_scan
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from t_scan
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<delete id="deleteByExample" parameterType="com.tmtc.po.ScanRepository">
+		delete from t_scan
+		<if test="_parameter != null">
+			<include refid="Example_Where_Clause" />
+		</if>
+	</delete>
+	<insert id="insert" parameterType="com.tmtc.po.Scan">
+		insert into t_scan (id,
+		user_id, linetime_id,
+		station_id, create_time, status,
+		is_check)
+		values
+		(#{id,jdbcType=BIGINT}, #{user_id,jdbcType=BIGINT},
+		#{linetime_id,jdbcType=BIGINT},
+		#{station_id,jdbcType=BIGINT},
+		#{create_time,jdbcType=TIMESTAMP}, #{status,jdbcType=INTEGER},
+		#{is_check,jdbcType=INTEGER})
+	</insert>
+	<insert id="insertSelective" parameterType="com.tmtc.po.Scan">
+		insert into t_scan
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="user_id != null">
+				user_id,
+			</if>
+			<if test="linetime_id != null">
+				linetime_id,
+			</if>
+			<if test="station_id != null">
+				station_id,
+			</if>
+			<if test="create_time != null">
+				create_time,
+			</if>
+			<if test="status != null">
+				status,
+			</if>
+			<if test="is_check != null">
+				is_check,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=BIGINT},
+			</if>
+			<if test="user_id != null">
+				#{user_id,jdbcType=BIGINT},
+			</if>
+			<if test="linetime_id != null">
+				#{linetime_id,jdbcType=BIGINT},
+			</if>
+			<if test="station_id != null">
+				#{station_id,jdbcType=BIGINT},
+			</if>
+			<if test="create_time != null">
+				#{create_time,jdbcType=TIMESTAMP},
+			</if>
+			<if test="status != null">
+				#{status,jdbcType=INTEGER},
+			</if>
+			<if test="is_check != null">
+				#{is_check,jdbcType=INTEGER},
+			</if>
+		</trim>
+	</insert>
+	<select id="countByExample" parameterType="com.tmtc.po.ScanRepository"
+		resultType="java.lang.Integer">
+		select count(*) from t_scan
+		<if test="_parameter != null">
+			<include refid="Example_Where_Clause" />
+		</if>
+	</select>
+	<update id="updateByExampleSelective" parameterType="map">
+		update t_scan
+		<set>
+			<if test="record.id != null">
+				id = #{record.id,jdbcType=BIGINT},
+			</if>
+			<if test="record.user_id != null">
+				user_id = #{record.user_id,jdbcType=BIGINT},
+			</if>
+			<if test="record.linetime_id != null">
+				linetime_id = #{record.linetime_id,jdbcType=BIGINT},
+			</if>
+			<if test="record.station_id != null">
+				station_id = #{record.station_id,jdbcType=BIGINT},
+			</if>
+			<if test="record.create_time != null">
+				create_time = #{record.create_time,jdbcType=TIMESTAMP},
+			</if>
+			<if test="record.status != null">
+				status = #{record.status,jdbcType=INTEGER},
+			</if>
+			<if test="record.is_check != null">
+				is_check = #{record.is_check,jdbcType=INTEGER},
+			</if>
+		</set>
+		<if test="_parameter != null">
+			<include refid="Update_By_Example_Where_Clause" />
+		</if>
+	</update>
+	<update id="updateByExample" parameterType="map">
+		update t_scan
+		set id = #{record.id,jdbcType=BIGINT},
+		user_id =
+		#{record.user_id,jdbcType=BIGINT},
+		linetime_id =
+		#{record.linetime_id,jdbcType=BIGINT},
+		station_id =
+		#{record.station_id,jdbcType=BIGINT},
+		create_time =
+		#{record.create_time,jdbcType=TIMESTAMP},
+		status =
+		#{record.status,jdbcType=INTEGER},
+		is_check =
+		#{record.is_check,jdbcType=INTEGER}
+		<if test="_parameter != null">
+			<include refid="Update_By_Example_Where_Clause" />
+		</if>
+	</update>
+	<update id="updateByPrimaryKeySelective" parameterType="com.tmtc.po.Scan">
+		update t_scan
+		<set>
+			<if test="user_id != null">
+				user_id = #{user_id,jdbcType=BIGINT},
+			</if>
+			<if test="linetime_id != null">
+				linetime_id = #{linetime_id,jdbcType=BIGINT},
+			</if>
+			<if test="station_id != null">
+				station_id = #{station_id,jdbcType=BIGINT},
+			</if>
+			<if test="create_time != null">
+				create_time = #{create_time,jdbcType=TIMESTAMP},
+			</if>
+			<if test="status != null">
+				status = #{status,jdbcType=INTEGER},
+			</if>
+			<if test="is_check != null">
+				is_check = #{is_check,jdbcType=INTEGER},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.tmtc.po.Scan">
+		update t_scan
+		set
+		user_id = #{user_id,jdbcType=BIGINT},
+		linetime_id =
+		#{linetime_id,jdbcType=BIGINT},
+		station_id =
+		#{station_id,jdbcType=BIGINT},
+		create_time =
+		#{create_time,jdbcType=TIMESTAMP},
+		status = #{status,jdbcType=INTEGER},
+		is_check = #{is_check,jdbcType=INTEGER}
+		where id =
+		#{id,jdbcType=BIGINT}
+	</update>
+
+	<select id="count" parameterType="map" resultType="java.lang.Integer">
+		SELECT
+		count(*)
+		<include refid="UP_CAR_SQL" />
+	</select>
+
+	<select id="select" parameterType="map" resultMap="upCar">
+		SELECT
+		t_user_detail.username,
+		t_user_detail.real_name,
+		t_user_detail.card_num,
+		t_company.`name`,
+		t_line_station.station_name,
+		v_up_car.create_time
+		<include refid="UP_CAR_SQL" />
+		ORDER BY v_up_car.create_time DESC
+		LIMIT ${page},${rows}
+	</select>
+
+	<sql id="UP_CAR_SQL">
+		FROM
+		t_user
+		INNER JOIN v_up_car
+		INNER JOIN t_line_station
+		INNER JOIN
+		t_company
+		INNER JOIN t_user_detail ON t_user.id = v_up_car.user_id
+		AND
+		t_line_station.id = v_up_car.station_id
+		AND t_user_detail.id =
+		v_up_car.user_id
+		AND t_user.company_id = t_company.id
+		WHERE
+		v_up_car.create_time
+		BETWEEN '${begin_time}' and
+		'${end_time}'
+		<if test="name != null">
+			AND t_company.`name` LIKE '%${name}%'
+		</if>
+		<if test="username != null">
+			and t_user_detail.username LIKE '%${username}%'
+		</if>
+		<if test="real_name != null">
+			AND t_user_detail.real_name LIKE '%${real_name}%'
+		</if>
+		<if test="station_name != null">
+			AND t_line_station.station_name LIKE '%${station_name}%'
+		</if>
+	</sql>
+
+</mapper>

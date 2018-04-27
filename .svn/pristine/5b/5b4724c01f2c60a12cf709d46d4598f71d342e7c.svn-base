@@ -1,0 +1,68 @@
+package com.tmtc.serviceImpl;
+
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.dao.VersionDao;
+import com.tmtc.frame.PageResult;
+import com.tmtc.po.Version;
+import com.tmtc.po.VersionRepository;
+import com.tmtc.po.VersionRepository.Criteria;
+import com.tmtc.service.VersionService;
+import com.tmtc.utils.IdWorker;
+import com.tmtc.utils.VerificationUtil;
+
+@Service
+public class VersionServiceImpl implements VersionService {
+
+	@Autowired
+	VersionDao versionDao;
+
+	@Override
+	public int insert(Version version) {
+		version.setId(IdWorker.nextId());
+		version.setCreate_time(new Date());
+		version.setIs_check(ParameterConstant.IS_CHECK);
+		int a = versionDao.insert(version);
+		return a;
+	}
+
+	@Override
+	public int update(Version version) {
+		int a = versionDao.updateByPrimaryKeySelective(version);
+		return a;
+	}
+
+	@Override
+	public PageResult selectByPage(Integer page, Integer rows, String version) {
+		VersionRepository versionRepository = new VersionRepository();
+		VersionRepository.Criteria criteria = versionRepository.createCriteria();
+		versionRepository.setPageSize(rows);
+		versionRepository.setRowIndex((page - 1) * rows);
+		if (0 != VerificationUtil.length(version)) {
+			criteria.andVersionLike("%" + version + "%");
+		}
+		criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+		versionRepository.setOrderByClause("create_time desc");
+		List<Version> list = versionDao.selectByExample(versionRepository);
+		return new PageResult(versionDao.countByExample(versionRepository), list, 1);
+	}
+
+	@Override
+	public Version selectByNew() {
+		VersionRepository versionRepository = new VersionRepository();
+		versionRepository.setPageSize(1);
+		versionRepository.setRowIndex(1);
+		versionRepository.setOrderByClause("create_time desc");
+		List<Version> list = versionDao.selectByExample(versionRepository);
+		if (1 == VerificationUtil.size(list)) {
+			return list.get(0);
+		}
+		return null;
+	}
+
+}

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>feedbackVo</title>
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/feedback.js"></script>
+<table id="feedbackVoDg" class="easyui-datagrid" data-options="url:'./../feedback/query',rownumbers:true,toolbar:'#feedbackVoDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false,rowStyler: feedbackVo.rowStyler">
+    <thead>
+    <tr>
+        <th data-options="field:'id',width:80">编号</th>
+        <th data-options="field:'real_name',width:80">用户名</th>
+        <th data-options="field:'content',width:80">反馈内容</th>
+        <th data-options="field:'is_handle',width:80,formatter: feedbackVo.is_handleFormatter">是否处理</th>
+        <th data-options="field:'contact',width:80">联系方式</th>
+        <th data-options="field:'create_time',width:80">创建时间</th>
+        <th data-options="field:'is_check',width:80,formatter: feedbackVo.is_checkFormatter">是否有效</th>
+    </tr>
+    </thead>
+</table>
+<div id="feedbackVoDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+               	 &nbsp;&nbsp;是否处理：&nbsp;&nbsp;
+               	<select id="is_handleParam" name="is_handle" style="width: 150px;">
+                    <option value="" selected="selected">全部</option>
+                    <option value="1">已处理</option>
+                    <option value="0">未处理</option>
+                </select>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查 询</a>
+            </td>
+            <td align="right" width="320px">
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">删除</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">恢复</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">永久删除</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+<div id="feedbackVoDlg" class="easyui-dialog" style="width:400px;height:250px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#feedbackVoDlgBtn">
+    <form id="feedbackVoFm" class="fm" method="post" novalidate enctype="multipart/form-data">
+        <div class="fitem">
+            <label> 反馈内容： </label>
+            <input id="id" name="id" type="hidden">
+            <input id="content" name="content" class="easyui-validatebox"
+            	data-options="validType: ['specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 是否处理： </label>
+            <select id="is_handle" name="is_handle" style="width: 150px;">
+                    <option value="" selected="selected">全部</option>
+                    <option value="1">已处理</option>
+                    <option value="0">未处理</option>
+            </select>
+        </div>
+        <div class="fitem">
+            <label> 联系方式： </label>
+            <input id="contact" name="contact" class="easyui-validatebox"
+            	data-options="validType: ['specialChar']">
+        </div>
+    </form>
+    <div id="feedbackVoDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+</div>
+</body>
+</html>

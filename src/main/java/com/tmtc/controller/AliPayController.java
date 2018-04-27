@@ -1,0 +1,178 @@
+package com.tmtc.controller;
+
+import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.po.ShopOrder;
+import com.tmtc.po.ShopOrderRepository;
+import com.tmtc.po.ShopOrderRepository.Criteria;
+import com.tmtc.service.ShopOrderService;
+import com.tmtc.utils.VerificationUtil;
+import com.tmtc.utils.alipay.AlipayConfig;
+import com.tmtc.utils.alipay.AlipayNotify;
+
+/**
+ * 支付（已经不用）
+ * @author Administrator
+ *
+ */
+
+@Controller
+@RequestMapping("/pay")
+public class AliPayController {
+
+	private static Logger logger = LoggerFactory.getLogger(AliPayController.class);
+
+	@Autowired
+	ShopOrderService shopOrderService;
+	
+	@SuppressWarnings("rawtypes")
+	@RequestMapping("/wxAdd")
+	public void wxpay(HttpServletRequest request,HttpServletResponse response){
+		Map<String, String> params = new HashMap<String, String>();
+		Map requestParams = request.getParameterMap();
+		for (Iterator iter = requestParams.keySet().iterator(); iter.hasNext();) {
+			String name = (String) iter.next();
+			String[] values = (String[]) requestParams.get(name);
+			// logger.error("#name------########"+name);
+			String valueStr = "";
+			for (int i = 0; i < values.length; i++) {
+				valueStr = (i == values.length - 1) ? valueStr + values[i] : valueStr + values[i] + ",";
+				// logger.error("#----------------value------########"+valueStr);
+			}
+			// 乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
+			// valueStr = new String(valueStr.getBytes("ISO-8859-1"),"gbk");
+			params.put(name, valueStr);
+		}
+	}
+	
+	/**
+	 * 支付宝支付回调！！
+	 * @param request
+	 * @param response
+	 */
+	@SuppressWarnings("rawtypes")
+	@RequestMapping("/add")
+	public void alipay(HttpServletRequest request, HttpServletResponse response) {
+
+		try {
+			PrintWriter out = response.getWriter();
+			Map<String, String> params = new HashMap<String, String>();
+			Map requestParams = request.getParameterMap();
+			for (Iterator iter = requestParams.keySet().iterator(); iter.hasNext();) {
+				String name = (String) iter.next();
+				String[] values = (String[]) requestParams.get(name);
+				String valueStr = "";
+				for (int i = 0; i < values.length; i++) {
+					valueStr = (i == values.length - 1) ? valueStr + values[i] : valueStr + values[i] + ",";
+				}
+				// 乱码解决，这段代码在出现乱码时使用。如果mysign和sign不相等也可以使用这段代码转化
+				// valueStr = new String(valueStr.getBytes("ISO-8859-1"),"gbk");
+				params.put(name, valueStr);
+			}
+
+			// 获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以下仅供参考)//
+			// 商户订单号
+			String out_trade_no = new String(request.getParameter("out_trade_no").getBytes("ISO-8859-1"), "UTF-8");
+
+			// 支付宝交易号 String trade_no = new
+			// String(request.getParameter("trade_no").getBytes("ISO-8859-1"),"UTF-8");
+
+			// 交易状态
+			String trade_status = new String(request.getParameter("trade_status").getBytes("ISO-8859-1"), "UTF-8");
+			String total_fee = new String(request.getParameter("total_fee").getBytes("ISO-8859-1"), "UTF-8");
+			String seller_id = new String(request.getParameter("seller_id").getBytes("ISO-8859-1"), "UTF-8");
+			logger.info("#--交易状态----########" + trade_status);
+			// 获取支付宝的通知返回参数，可参考技术文档中页面跳转同步通知参数列表(以上仅供参考)//
+
+			if (AlipayNotify.verify(params)) {// 验证成功
+				//////////////////////////////////////////////////////////////////////////////////////////
+				// 请在这里加上商户的业务逻辑程序代码
+				logger.info("#--RSA验证成功----########" + trade_status);
+				// ——请根据您的业务逻辑来编写程序（以下代码仅作参考）——
+
+				if (trade_status.equals("TRADE_FINISHED")) {
+					// 判断该笔订单是否在商户网站中已经做过处理
+					// 如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
+					// 如果有做过处理，不执行商户的业务程序
+					
+					if (this.updateOrder(out_trade_no, total_fee, seller_id) == 0) {
+						logger.info("#--交易失败----########" + trade_status);
+						out.println("fail");
+						return;
+					} else {
+						logger.info("#--交易完成----########" + trade_status);
+					}
+					
+					// 注意：
+					// 退款日期超过可退款期限后（如三个月可退款），支付宝系统发送该交易状态通知
+					// 请务必判断请求时的total_fee、seller_id与通知时获取的total_fee、seller_id为一致的
+				} else if (trade_status.equals("TRADE_SUCCESS")) {
+					// 判断该笔订单是否在商户网站中已经做过处理
+					// 如果没有做过处理，根据订单号（out_trade_no）在商户网站的订单系统中查到该笔订单的详细，并执行商户的业务程序
+					// 如果有做过处理，不执行商户的业务程序
+
+					if (this.updateOrder(out_trade_no, total_fee, seller_id) == 0) {
+						logger.info("#--交易失败----########" + trade_status);
+						out.println("fail");
+						return;
+					} else {
+						logger.info("#--交易完成----########" + trade_status);
+					}
+					// 注意：
+					// 付款完成后，支付宝系统发送该交易状态通知
+					// 请务必判断请求时的total_fee、seller_id与通知时获取的total_fee、seller_id为一致的
+				}
+
+				// ——请根据您的业务逻辑来编写程序（以上代码仅作参考）——
+
+				out.println("success");// 请不要修改或删除
+
+				//////////////////////////////////////////////////////////////////////////////////////////
+			} else {// 验证失败
+				out.println("fail");
+			}
+		} catch (Exception e) {
+		}
+
+	}
+
+	/**
+	 * 修改订单状态
+	 * @param out_trade_no
+	 * @param total_fee
+	 * @param seller_id
+	 * @return
+	 */
+	private int updateOrder(String out_trade_no, String total_fee, String seller_id) {
+
+		if (!AlipayConfig.partner.equals(seller_id)) {
+			return 0;
+		}
+		ShopOrderRepository shopOrderRepository = new ShopOrderRepository();
+		Criteria criteria = shopOrderRepository.createCriteria();
+		criteria.andOrder_noEqualTo(out_trade_no);
+		List<ShopOrder> list = shopOrderService.select(shopOrderRepository);
+		if (0 == VerificationUtil.size(list)) {
+			return 0;
+		}
+		ShopOrder shopOrder = list.get(0);
+		if (!Double.valueOf(total_fee).equals(shopOrder.getMoney())) {
+			return 0;
+		}
+		shopOrder.setOrder_status(ParameterConstant.SHOP_ORDER_PAY);
+		return shopOrderService.update(shopOrder);
+	}
+}

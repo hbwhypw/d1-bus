@@ -1,0 +1,86 @@
+package com.tmtc.serviceImpl.appAPI;
+
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.dao.LineDao;
+import com.tmtc.dao.ScanDao;
+import com.tmtc.dao.UserDao;
+import com.tmtc.dao.UserDetailDao;
+import com.tmtc.frame.ServiceRuntimeException;
+import com.tmtc.po.Line;
+import com.tmtc.po.Scan;
+import com.tmtc.po.UserDetail;
+import com.tmtc.service.appAPI.CollectMoneyService;
+import com.tmtc.utils.IdWorker;
+import com.tmtc.utils.VerificationUtil;
+
+@Service
+public class CollerctMoneyServiceImpl implements CollectMoneyService {
+
+	@Autowired
+	UserDetailDao userDetailDao;
+
+	@Autowired
+	UserDao userDao;
+
+	@Autowired
+	LineDao lineDao;
+	
+	@Autowired
+	ScanDao scanDao;
+
+	@Override
+	public synchronized int check(String company_id, String card_num, String line_id, String line_time_id,
+			String line_station_id) throws ServiceRuntimeException {
+
+		String userId = userDao.selectCompanyCardNum(company_id, card_num);
+		if (0 == VerificationUtil.length(userId)) {
+			return 0;  // 无效卡
+		}
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(userId);
+		if (ParameterConstant.USER_TYPE_COMPANY_NORMAL != userDetail.getUser_type()) {
+			return 3;  // 不是免费用户
+		}
+
+		Integer balance = userDetail.getBalance();
+		if (null == balance) {
+			userDetail.setBalance(0);
+			userDetailDao.updateByPrimaryKeySelective(userDetail);
+			return 1;  // 余额不足
+		}
+		Line line = lineDao.selectByPrimaryKey(line_id);
+		if (null == line) {
+			throw new ServiceRuntimeException("数据库，数据异常");
+		}
+
+		if (!company_id.equals(line.getCompany_id())) {
+			throw new ServiceRuntimeException("公司id，数据异常；线路id，数据异常");
+		}
+
+		// 添加扫描记录
+		Scan scan = new Scan(IdWorker.nextId(), userDetail.getId(), line_time_id, line_station_id, new Date(),
+				ParameterConstant.SCAN_TYPE_FINISH, ParameterConstant.IS_CHECK);
+		if (scanDao.insert(scan) < 0) {
+			throw new ServiceRuntimeException("扫描表异常");
+		}
+		
+//		new 
+		
+		Integer price = line.getPrice();
+		if (balance < price) {
+			return 1;  // 余额不足
+		}
+		userDetail.setBalance(balance - price);
+		if (userDetailDao.updateByPrimaryKeySelective(userDetail) < 0) {
+			return 4; // 扣费失败！请重试
+		}
+
+		
+		return 2;
+	}
+
+}

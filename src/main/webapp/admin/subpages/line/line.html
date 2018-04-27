@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>line</title>
+</head>
+<body>
+	<script type="text/javascript" src="/dist/js/subPages/line.js"></script>
+
+	<!-- 数据表格 -->
+	<table id="lineDg" class="easyui-datagrid"
+		data-options="url:'./../line/query',rownumbers:true,toolbar:'#lineDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false">
+		<thead>
+			<tr>
+				<th data-options="field:'line_path',width:80,hidden: true">线路轨迹</th>
+				<th data-options="field:'start_id',width:80,hidden: true">出发点id</th>
+				<th data-options="field:'end_id',width:80,hidden: true">到达点id</th>
+				<th data-options="field:'lineStation',width:80,hidden: true">站点列表</th>
+				<th data-options="field:'city_id',width:80,hidden: true">所在城市</th>
+				<th data-options="field:'company_id',width:80,hidden: true">公司</th>
+				<th data-options="field:'line_category',width:80,hidden: true">线路类别</th>
+				<th data-options="field:'line_type',width:80,hidden: true">线路类型</th>
+				<th data-options="field:'user_type',width:80,hidden: true">用户类型</th>
+
+				<th data-options="width:80, checkbox: true">全选/反选</th>
+				<th data-options="field:'id',width:80">编号</th>
+				<th data-options="field:'line_name',width:80">线路名</th>
+				<th data-options="field:'lineStationBeginName',width:80">出发点</th>
+				<th data-options="field:'lineStationEndName',width:80">到达点</th>
+				<th data-options="field:'km',width:80">公里数</th>
+				<th data-options="field:'price',width:80">线路价格</th>
+				<th
+					data-options="field:'on_time_rate',width:80,formatter: line.rate_Formatter">准点率</th>
+				<th data-options="field:'city_name',width:80">所在城市</th>
+				<th data-options="field:'company_name',width:80">公司</th>
+				<th data-options="field:'line_category_name',width:80">线路类别</th>
+				<th data-options="field:'line_type_name',width:80">线路类型</th>
+				<th data-options="field:'user_type_name',width:80">用户类型</th>
+				<th data-options="field:'end_time',width:80">结束时间</th>
+				<th data-options="field:'start_time',width:80">开始时间</th>
+				<th data-options="field:'create_time',width:80">创建时间</th>
+				<th data-options="field:'sort',width:80">排序</th>
+				<th data-options="field:'remark',width:80">备注</th>
+				<th
+					data-options="field:'is_check',width:80,formatter: common.is_checkFormatter">是否有效</th>
+			</tr>
+		</thead>
+	</table>
+
+	<!-- 按钮 -->
+	<div id="lineDgTbar">
+		<table width="100%">
+			<tr>
+				<td align="left">&nbsp;&nbsp;线路名：&nbsp;&nbsp; <input
+					id="line_nameParam" name="line_nameParam" class="easyui-validatebox"
+					style="width: 150px;">
+					&nbsp;&nbsp;公司名：&nbsp;&nbsp; <input
+					id="company_nameParam" name="company_nameParam" class="easyui-validatebox"
+					style="width: 150px;">
+					<a class="easyui-linkbutton"
+					href="javascript:void(0);" iconCls="icon-search" plain="true">查
+						询</a>
+				</td>
+				<td align="right" width="600px"><a class="easyui-linkbutton"
+					href="javascript:void(0);" iconCls="icon-add" plain="true">添加</a> <a
+					class="easyui-linkbutton" href="javascript:void(0);"
+					iconCls="icon-edit" plain="true">修改</a> <a
+					class="easyui-linkbutton" href="javascript:void(0);"
+					iconCls="icon-remove" plain="true">删除</a> <a
+					class="easyui-linkbutton" href="javascript:void(0);"
+					iconCls="icon-add" plain="true">发布站点</a> <a
+					class="easyui-linkbutton" href="javascript:void(0);"
+					iconCls="icon-add" plain="true">发布班次</a> <!-- <a
+					class="easyui-linkbutton" href="javascript:void(0);"
+					iconCls="icon-remove" plain="true">永久删除</a> --> <a
+					class="easyui-linkbutton" href="javascript:void(0);"
+					iconCls="icon-remove" plain="true">查看线路详情</a></td>
+				<td align="right" width="10px">&nbsp;</td>
+			</tr>
+		</table>
+	</div>
+
+	<!-- 添加线路 -->
+	<div id="lineDlg" class="easyui-dialog"
+		style="width: 100%; height: 100%;"
+		data-options="resizable:true,modal:true" closed="true"
+		buttons="#lineDlgBtn">
+		<div style="background: #fafafa; padding: 15px;" align="center"
+			id="nomap">
+			<form id="lineFm" method="post">
+				<input type="hidden" name="id">
+				<table style="padding: 10px 0px;">
+					<tr>
+						<th>线路名称:</th>
+						<td><input type="text" class="easyui-validatebox"
+							data-options="required:true" name="line_name" id="line_name"
+							style="width: 140px;" /></td>
+					</tr>
+					<tr>
+						<th>线路轨迹:</th>
+						<td><input class="easyui-validatebox"
+							data-options="required:true" type="text" name="line_path"
+							id="lineTrail" style="width: 140px;" /> <a
+							href="#" class="easyui-linkbutton icon-add" onclick="go_map()"
+							id="Addmap">添加轨迹</a></td>
+					</tr>
+					<tr>
+						<th>公里数:</th>
+						<td><input class="easyui-validatebox"
+							data-options="required:true,validType: ['num']" type="text"
+							name="km" id="lineKm" style="width: 140px;" /></td>
+					</tr>
+					<tr>
+						<th>线路价格:</th>
+						<td><input class="easyui-validatebox"
+							data-options="required:true,validType: ['num']" type="text"
+							name="price" id="price" style="width: 140px;" /></td>
+					</tr>
+					<tr>
+						<th>准点率:</th>
+						<td><input class="easyui-validatebox"
+							data-options="required:true,validType: ['decimals']" type="text"
+							name="on_time_rate" id="on_time_rate" style="width: 140px;" /></td>
+					</tr>
+					<tr>
+						<th>城市:</th>
+						<td><input id="cc" class="easyui-combobox" name="city_id"
+							style="width: 142px;" readonly="readonly"
+							data-options="valueField:'code',
+											 textField:'name',
+											 url:'./../dictionary/selectByCode?code=10',
+											 loader: common.comboBoxLoader,
+											 onBeforeLoad: function(param){
+											 								param.page = 0;
+											 								param.rows = 100;
+											 								}
+											 "required="true"  />
+						</td>
+					</tr>
+					<tr>
+						<th>公司:</th>
+						<td><input id="company_id" class="easyui-combobox"
+							name="company_id" style="width: 142px;"
+							data-options="
+									valueField:'id',textField:'name',url:'./../company/query',
+									loader: common.comboBoxLoaderPage,
+									onBeforeLoad: function(param){
+										param.page = 1;param.rows = 100; 
+									} "
+							required="true" /></td>
+					</tr>
+					<tr>
+						<th>线路类别:</th>
+						<td><input id="cc" class="easyui-combobox"
+							name="line_category" style="width: 142px;"
+							data-options="valueField:'code',
+											 textField:'name',
+											 url:'./../dictionary/selectByCode?code=33',
+											 loader: common.comboBoxLoader,
+											 onBeforeLoad: function(param){
+											 								param.page = 0;
+											 								param.rows = 100;
+											 								}
+											 "required="true"  />
+
+						</td>
+					</tr>
+					<tr>
+						<th>线路类型:</th>
+						<td><input id="line_type" class="easyui-combobox"
+							name="line_type" style="width: 142px;"
+							data-options="valueField:'code',
+							  				 textField:'name',
+							  				 url:'./../dictionary/selectByCode?code=24',
+											loader: common.comboBoxLoader,
+											onBeforeLoad: function(param){
+																		param.page = 0;
+																		param.rows = 100;
+							        							}
+							        "required="true"  />
+						</td>
+					</tr>
+					<tr>
+						<th>用户类型:</th>
+						<td><input id="user_type" class="easyui-combobox"
+							name="user_type" style="width: 142px;"
+							data-options="
+							valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=14',
+							loader: common.comboBoxLoader,
+							onBeforeLoad: function(param){
+								param.page = 0;param.rows = 100;
+							} " required="true" />
+						</td>
+					</tr>
+					<tr>
+						<th align="left">开始时间:</th>
+						<td><input class="Wdate" class="easyui-validatebox"
+							data-options="required:true" type="text" id="startTime"
+							name="start_time" style="width: 140px;" maxlength="10" size="20"
+							readonly="readonly"
+							onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})" /></td>
+					</tr>
+					<tr>
+						<th align="left">结束时间:</th>
+						<td><input class="Wdate" data-options="required:true" required="true" 
+							type="text" id="endTime" name="end_time" style="width: 140px;"
+							maxlength="10" size="20" readonly="readonly"
+							onfocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss',onpicked:function(){endTime.focus();},minDate:'#F{$dp.$D(\'startTime\')}'})" />
+						</td>
+					</tr>
+					<tr>
+						<th>排序:</th>
+						<td><input type="text" name="sort" class="easyui-validatebox"
+							value="0" style="width: 140px;" data-options="validType: ['num']"></td>
+					</tr>
+					<tr>
+						<th>备注:</th>
+						<td><textarea rows="2" name="remark" style="width: 138px;"></textarea>
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
+		<div id="l-map" style="display: none; width: 100%; height: 90%;"></div>
+		<div id="r-result" style="display: none">
+
+			<div id="add_id">
+				<a class="easyui-linkbutton" href="#" iconCls="icon-add"
+					plain="true" onclick="clearAll_add()">确定</a> <a
+					class="easyui-linkbutton" href="#" iconCls="icon-remove"
+					plain="true" onclick="close_map()">取消</a> <input
+					style="width: 140px;" type="text" id="siteName1" name="siteName" />
+				<a class="easyui-linkbutton" href="#" iconCls="icon-search"
+					plain="true" onclick="searchAddress(1)">查 询</a>
+			</div>
+
+			<div id="update_id">
+				<a class="easyui-linkbutton" href="#" iconCls="icon-add"
+					plain="true" onclick="clearAll()">确定</a> <a
+					class="easyui-linkbutton" href="#" iconCls="icon-remove"
+					plain="true" onclick="close_map()">取消</a> <input
+					style="width: 140px;" type="text" id="siteName2" name="siteName" />
+				<a class="easyui-linkbutton" href="#" iconCls="icon-search"
+					plain="true" onclick="searchAddress(2)">查 询</a> <a
+					class="easyui-linkbutton" href="#" iconCls="icon-add" plain="true"
+					onclick="polyline.enableEditing();polygon.enableEditing();"
+					id="update_id">开启线编辑功能</a> <a class="easyui-linkbutton" href="#"
+					iconCls="icon-remove" plain="true"
+					onclick="polyline.disableEditing();polygon.disableEditing();">关闭线编辑功能</a>
+			</div>
+		</div>
+		<div id="lineDlgBtn">
+			<a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a> <a
+				href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+		</div>
+	</div>
+
+	<!-- 添加站点 -->
+	<div id="addStat" class="easyui-dialog"
+		style="width: 100%; height: 100%;"
+		data-options="resizable:true,modal:true" closed="true"
+		buttons="#addStatDlgBtn">
+		<div style="background: #fafafa; padding: 15px;" align="center"
+			id="nomap">
+			<form id="addStatFm" method="post">
+
+				<input type="hidden" name="line_id" id="line_id" />
+
+				<table style="padding: 10px 0px;" border="0">
+					<tr>
+						<td align="center" colspan="9"><strong>线路名称：</strong> <Label
+							id="line_name_id" style="width: 140px"></Label></td>
+					</tr>
+					<tr>
+						<th>站点名称：</th>
+						<td><input class="easyui-validatebox"
+							data-options="required:true" style="width: 140px" type="text"
+							id="station_name_id" name="station_name" /></td>
+						<th>X坐标：</th>
+						<td><input type="text" name="x_point" id="x_point"
+							value="0.0"  /></td>
+						<th>Y坐标：</th>
+						<td><input type="text" name="y_point" id="y_point"
+							value="0.0"  /></td>
+						<th>距离下一站时间：</th>
+						<td><input class="easyui-validatebox"
+							data-options="required:true" validType="number" type="text"
+							style="width: 140px; height: 22px; border: solid 1px #CCCCCC;"
+							name="next_time" id="next_time_id" /></td>
+						<th>距离下一站里程：</th>
+						<td><input class="easyui-validatebox"
+							data-options="required:true" validType="number" type="text"
+							name="next_km" id="next_km_id" style="width: 140px" /></td>
+						<th>上一站：</th>
+						<td><input class="easyui-combobox" id="prev_id"
+							name="prev_id" style="width: 140px;"
+							data-options="valueField:'id',
+										 textField:'station_name',
+										 url:'./../lineStation/queryByLine_id',
+										 loader: common.comboBoxLoader,
+										 onBeforeLoad: function(param){
+				 								param.line_id = $('#line_id').val();
+				 							}
+										 " />
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
+		<div id="l-map-station" style="width: 100%; height: 90%;"></div>
+		<div id="addStatDlgBtn">
+			<a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a> <a
+				href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+		</div>
+	</div>
+
+	<!-- 添加班次 -->
+	<div id="addTime" class="easyui-dialog"
+		style="width: 600px; height: 480px;"
+		data-options="resizable:true,modal:true" closed="true"
+		buttons="#addTimeDlgBtn">
+		<div style="background: #fafafa; padding: 15px;" align="center">
+			<form id="addTimeFm" method="post">
+				<input type="hidden" name="line_id" id="line_id_id" /> <input
+					type="hidden" name="driver_id" id="driver_id" /> <input
+					type="hidden" name="car_id" id="car_id" />
+				<table style="padding: 10px 0px;" border="0">
+					<tr>
+						<th>线路名称:</th>
+						<td><input type="text" name="lineName" id="lineName"
+							style="width: 140px" readonly="readonly" /></td>
+					</tr>
+					<tr>
+						<th>指派司机:</th>
+						<td>
+							<div class="sfvalue">
+								<input class="easyui-validatebox" type="text"
+									style="width: 140px" onfocus="openDriver();" id="driver_name" />
+								<input type="button" value="复制30天内的司机和车辆"
+									onclick="copyDriver();">
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<th>指派车辆:</th>
+						<td>
+							<div class="sfvalue">
+								<input class="easyui-validatebox" type="text"
+									style="width: 140px" onfocus="openCar();" id="car_num" />
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<th>选择年月:</th>
+						<td><input class="Wdate" data-options="required:true"
+							type="text" id="yearMonth" name="yearMonth" style="width: 140px"
+							maxlength="10" size="20" readonly="readonly"
+							onfocus="WdatePicker({skin:'whyGreen',dateFmt:'yyyy-MM',minDate:'%y-%M',maxDate:'3008-12-20'})" />
+						</td>
+					</tr>
+					<tr>
+						<th>发车日期:</th>
+						<td align="right">
+							<table border="1" bordercolor="#DCDCDC" bordercolordark="#FFFFFF"
+								cellspacing="0" cellpadding="0">
+								<tr>
+									<td>01号<input type="checkbox" name="sendDate" value="01" /></td>
+									<td>02号<input type="checkbox" name="sendDate" value="02" /></td>
+									<td>03号<input type="checkbox" name="sendDate" value="03" /></td>
+									<td>04号<input type="checkbox" name="sendDate" value="04" /></td>
+									<td>05号<input type="checkbox" name="sendDate" value="05" /></td>
+									<td>06号<input type="checkbox" name="sendDate" value="06" /></td>
+									<td>07号<input type="checkbox" name="sendDate" value="07" /></td>
+								</tr>
+								<tr>
+									<td>08号<input type="checkbox" name="sendDate" value="08" /></td>
+									<td>09号<input type="checkbox" name="sendDate" value="09" /></td>
+									<td>10号<input type="checkbox" name="sendDate" value="10" /></td>
+									<td>11号<input type="checkbox" name="sendDate" value="11" /></td>
+									<td>12号<input type="checkbox" name="sendDate" value="12" /></td>
+									<td>13号<input type="checkbox" name="sendDate" value="13" /></td>
+									<td>14号<input type="checkbox" name="sendDate" value="14" /></td>
+								</tr>
+								<tr>
+									<td>15号<input type="checkbox" name="sendDate" value="15" /></td>
+									<td>16号<input type="checkbox" name="sendDate" value="16" /></td>
+									<td>17号<input type="checkbox" name="sendDate" value="17" /></td>
+									<td>18号<input type="checkbox" name="sendDate" value="18" /></td>
+									<td>19号<input type="checkbox" name="sendDate" value="19" /></td>
+									<td>20号<input type="checkbox" name="sendDate" value="20" /></td>
+									<td>21号<input type="checkbox" name="sendDate" value="21" /></td>
+								</tr>
+								<tr>
+									<td>22号<input type="checkbox" name="sendDate" value="22" /></td>
+									<td>23号<input type="checkbox" name="sendDate" value="23" /></td>
+									<td>24号<input type="checkbox" name="sendDate" value="24" /></td>
+									<td>25号<input type="checkbox" name="sendDate" value="25" /></td>
+									<td>26号<input type="checkbox" name="sendDate" value="26" /></td>
+									<td>27号<input type="checkbox" name="sendDate" value="27" /></td>
+									<td>28号<input type="checkbox" name="sendDate" value="28" /></td>
+								</tr>
+								<tr>
+									<td>29号<input type="checkbox" name="sendDate" value="29" /></td>
+									<td>30号<input type="checkbox" name="sendDate" value="30" /></td>
+									<td>31号<input type="checkbox" name="sendDate" value="31" /></td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<th>发车时间:</th>
+						<td><input class="Wdate" type="text" id="sendTime"
+							name="sendTime" style="width: 140px" maxlength="10" size="20"
+							readonly="readonly"
+							onfocus="WdatePicker({skin:'whyGreen',dateFmt:'HH:mm'})" /></td>
+					</tr>
+					<tr>
+						<th>预计到达终点时间:</th>
+						<td><input class="Wdate" type="text" id="doneTime"
+							name="doneTime" style="width: 140px" maxlength="10" size="20"
+							readonly="readonly"
+							onfocus="WdatePicker({skin:'whyGreen',dateFmt:'HH:mm'})" /></td>
+					</tr>
+				</table>
+			</form>
+		</div>
+		<div id="addTimeDlgBtn">
+			<a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a> <a
+				href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+		</div>
+	</div>
+
+
+	<!-- 选择司机 -->
+	<div id="selectDriver" class="easyui-dialog"
+		style="width: 600px; height: 480px;"
+		data-options="resizable:true,modal:true" closed="true"
+		buttons="#selectDriverDlgBtn">
+		<table id="selectDriverDg" class="easyui-datagrid"
+			data-options="url:'./../driver/query',rownumbers:true,toolbar:'#selectDriverDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false">
+			<thead>
+				<tr>
+					<th data-options="field:'id',width:80">ID</th>
+					<th data-options="field:'real_name',width:80">真实姓名</th>
+					<th data-options="field:'mobile',width:80">手机号</th>
+					<th data-options="field:'driver_age',width:80">驾龄</th>
+					<th data-options="field:'license_no',width:80">驾照号</th>
+					<th data-options="field:'license_type_name',width:80">驾照类型</th>
+					<th data-options="field:'driver_source_name',width:80">司机来源</th>
+					<th data-options="field:'remark',width:80">备注</th>
+				</tr>
+			</thead>
+		</table>
+
+		<div id="selectDriverDgTbar">
+			<table width="100%">
+				<tr>
+					<td align="left">&nbsp;&nbsp;手机号：&nbsp;&nbsp; <input
+						id="mobileParam" name="mobileParam" class="easyui-validatebox"
+						style="width: 150px;"> &nbsp;&nbsp;真实姓名：&nbsp;&nbsp; <input
+						id="real_nameParam" name="real_nameParam"
+						class="easyui-validatebox" style="width: 150px;"> <a
+						class="easyui-linkbutton" href="javascript:void(0);"
+						iconCls="icon-search" plain="true" onclick="selectDriver();">查
+							询</a>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div id="selectDriverDlgBtn">
+			<a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a> <a
+				href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+		</div>
+	</div>
+
+	<!-- 选择车辆 -->
+	<div id="selectCar" class="easyui-dialog"
+		style="width: 600px; height: 480px;"
+		data-options="resizable:true,modal:true" closed="true"
+		buttons="#selectCarDlgBtn">
+		<table id="selectCarDg" class="easyui-datagrid"
+			data-options="url:'./../car/query',rownumbers:true,toolbar:'#selectCarDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false">
+			<thead>
+				<tr>
+					<th data-options="field:'id',width:80">编号</th>
+					<th data-options="field:'car_num',width:80">车牌号</th>
+					<th data-options="field:'car_brand',width:80">车辆品牌</th>
+					<th data-options="field:'from_company_name',width:80">所属公司</th>
+					<th data-options="field:'remark',width:80">备注</th>
+				</tr>
+			</thead>
+		</table>
+		<div id="selectCarDgTbar">
+			<table width="100%">
+				<tr>
+					<td align="left">&nbsp;&nbsp;车牌号：&nbsp;&nbsp; <input
+						id="car_numParam" name="car_numParam" class="easyui-validatebox"
+						style="width: 150px;"> &nbsp;&nbsp;所属公司：&nbsp;&nbsp; <input
+						id="from_companyParam" class="easyui-combobox"
+						name="from_companyParam"
+						data-options="
+									valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=20',
+									loader: common.comboBoxLoader,
+									onBeforeLoad: function(param){
+										param.page = 0;param.rows = 100; 
+									} " />
+						<a class="easyui-linkbutton" href="javascript:void(0);"
+						iconCls="icon-search" plain="true" onclick="selectCar();">查 询</a>
+					</td>
+				</tr>
+			</table>
+		</div>
+		<div id="selectCarDlgBtn">
+			<a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a> <a
+				href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+		</div>
+	</div>
+
+	<div id="selectStation" class="easyui-dialog"
+		style="width: 300px; height: 480px;"
+		data-options="resizable:true,modal:true" closed="true">
+		<div id="selectStation_id" style="text-align: center;"></div>
+	</div>
+
+	<script type="text/javascript" src="/dist/js/subPages/addLine.js"></script>
+	<script type="text/javascript" src="/dist/js/subPages/addlineSation.js"></script>
+	<script type="text/javascript" src="/dist/js/subPages/addLineTime.js"></script>
+</body>
+</html>

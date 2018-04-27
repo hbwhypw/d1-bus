@@ -1,0 +1,47 @@
+package test;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+
+public class test {
+	public static void main(String[] args) {
+		
+		for (double i = 9990; i < 10000; i++) {
+			
+			for (double j = 9990; j <10000; j++) {
+				
+				double k = i/10;
+				
+				double m = j/10;
+				
+				String str= k + m + "";
+				
+				System.out.println(str);
+				
+				
+				BigDecimal bd = new BigDecimal(Double.parseDouble(str));
+				System.out.println(bd.setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue());
+				System.out.println("=================");
+				 
+				DecimalFormat df = new DecimalFormat("#.00"); 
+				 System.out.println(df.format(Double.parseDouble(str))); 
+				 
+				 System.out.println("=================");
+				 
+				 System.out.println(String.format("%.2f", Double.parseDouble(str)));
+				 System.out.println("=================");
+				
+				 NumberFormat nf = NumberFormat.getNumberInstance(); 
+				 nf.setMaximumFractionDigits(2); 
+				 System.out.println(nf.format(Double.parseDouble(str))); 
+				 System.out.println("----------------------------------");
+				
+			}
+			 System.out.println("+++++++++++++++++++++++++++++++++++++++++++++++");
+		}
+		
+		
+
+
+	}
+}

@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tmtc.dao.LineOrderDao" >
+  <resultMap id="BaseResultMap" type="com.tmtc.po.LineOrder" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="order_no" property="order_no" jdbcType="VARCHAR" />
+    <result column="user_id" property="user_id" jdbcType="BIGINT" />
+    <result column="city_id" property="city_id" jdbcType="INTEGER" />
+    <result column="line_id" property="line_id" jdbcType="BIGINT" />
+    <result column="time_line_id" property="time_line_id" jdbcType="BIGINT" />
+    <result column="station_id" property="station_id" jdbcType="BIGINT" />
+    <result column="order_time" property="order_time" jdbcType="TIMESTAMP" />
+    <result column="order_status" property="order_status" jdbcType="INTEGER" />
+    <result column="order_exp" property="order_exp" jdbcType="INTEGER" />
+    <result column="order_type" property="order_type" jdbcType="INTEGER" />
+    <result column="scan_time" property="scan_time" jdbcType="TIMESTAMP" />
+    <result column="is_check" property="is_check" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, order_no, user_id, city_id, line_id, time_line_id, station_id, order_time, order_status, 
+    order_exp, order_type, scan_time, is_check
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.tmtc.po.LineOrderRepository" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_line_order
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <if test="rowIndex!=null and pageSize!=null">
+      limit ${rowIndex},${pageSize}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_line_order
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from t_line_order
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.tmtc.po.LineOrderRepository" >
+    delete from t_line_order
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.tmtc.po.LineOrder" >
+    insert into t_line_order (id, order_no, user_id, 
+      city_id, line_id, time_line_id, 
+      station_id, order_time, order_status, 
+      order_exp, order_type, scan_time, 
+      is_check)
+    values (#{id,jdbcType=BIGINT}, #{order_no,jdbcType=VARCHAR}, #{user_id,jdbcType=BIGINT}, 
+      #{city_id,jdbcType=INTEGER}, #{line_id,jdbcType=BIGINT}, #{time_line_id,jdbcType=BIGINT}, 
+      #{station_id,jdbcType=BIGINT}, #{order_time,jdbcType=TIMESTAMP}, #{order_status,jdbcType=INTEGER}, 
+      #{order_exp,jdbcType=INTEGER}, #{order_type,jdbcType=INTEGER}, #{scan_time,jdbcType=TIMESTAMP}, 
+      #{is_check,jdbcType=INTEGER})
+  </insert>
+  <insert id="insertSelective" parameterType="com.tmtc.po.LineOrder" >
+    insert into t_line_order
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="order_no != null" >
+        order_no,
+      </if>
+      <if test="user_id != null" >
+        user_id,
+      </if>
+      <if test="city_id != null" >
+        city_id,
+      </if>
+      <if test="line_id != null" >
+        line_id,
+      </if>
+      <if test="time_line_id != null" >
+        time_line_id,
+      </if>
+      <if test="station_id != null" >
+        station_id,
+      </if>
+      <if test="order_time != null" >
+        order_time,
+      </if>
+      <if test="order_status != null" >
+        order_status,
+      </if>
+      <if test="order_exp != null" >
+        order_exp,
+      </if>
+      <if test="order_type != null" >
+        order_type,
+      </if>
+      <if test="scan_time != null" >
+        scan_time,
+      </if>
+      <if test="is_check != null" >
+        is_check,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="order_no != null" >
+        #{order_no,jdbcType=VARCHAR},
+      </if>
+      <if test="user_id != null" >
+        #{user_id,jdbcType=BIGINT},
+      </if>
+      <if test="city_id != null" >
+        #{city_id,jdbcType=INTEGER},
+      </if>
+      <if test="line_id != null" >
+        #{line_id,jdbcType=BIGINT},
+      </if>
+      <if test="time_line_id != null" >
+        #{time_line_id,jdbcType=BIGINT},
+      </if>
+      <if test="station_id != null" >
+        #{station_id,jdbcType=BIGINT},
+      </if>
+      <if test="order_time != null" >
+        #{order_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="order_status != null" >
+        #{order_status,jdbcType=INTEGER},
+      </if>
+      <if test="order_exp != null" >
+        #{order_exp,jdbcType=INTEGER},
+      </if>
+      <if test="order_type != null" >
+        #{order_type,jdbcType=INTEGER},
+      </if>
+      <if test="scan_time != null" >
+        #{scan_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="is_check != null" >
+        #{is_check,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.tmtc.po.LineOrderRepository" resultType="java.lang.Integer" >
+    select count(*) from t_line_order
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update t_line_order
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.order_no != null" >
+        order_no = #{record.order_no,jdbcType=VARCHAR},
+      </if>
+      <if test="record.user_id != null" >
+        user_id = #{record.user_id,jdbcType=BIGINT},
+      </if>
+      <if test="record.city_id != null" >
+        city_id = #{record.city_id,jdbcType=INTEGER},
+      </if>
+      <if test="record.line_id != null" >
+        line_id = #{record.line_id,jdbcType=BIGINT},
+      </if>
+      <if test="record.time_line_id != null" >
+        time_line_id = #{record.time_line_id,jdbcType=BIGINT},
+      </if>
+      <if test="record.station_id != null" >
+        station_id = #{record.station_id,jdbcType=BIGINT},
+      </if>
+      <if test="record.order_time != null" >
+        order_time = #{record.order_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.order_status != null" >
+        order_status = #{record.order_status,jdbcType=INTEGER},
+      </if>
+      <if test="record.order_exp != null" >
+        order_exp = #{record.order_exp,jdbcType=INTEGER},
+      </if>
+      <if test="record.order_type != null" >
+        order_type = #{record.order_type,jdbcType=INTEGER},
+      </if>
+      <if test="record.scan_time != null" >
+        scan_time = #{record.scan_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.is_check != null" >
+        is_check = #{record.is_check,jdbcType=INTEGER},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update t_line_order
+    set id = #{record.id,jdbcType=BIGINT},
+      order_no = #{record.order_no,jdbcType=VARCHAR},
+      user_id = #{record.user_id,jdbcType=BIGINT},
+      city_id = #{record.city_id,jdbcType=INTEGER},
+      line_id = #{record.line_id,jdbcType=BIGINT},
+      time_line_id = #{record.time_line_id,jdbcType=BIGINT},
+      station_id = #{record.station_id,jdbcType=BIGINT},
+      order_time = #{record.order_time,jdbcType=TIMESTAMP},
+      order_status = #{record.order_status,jdbcType=INTEGER},
+      order_exp = #{record.order_exp,jdbcType=INTEGER},
+      order_type = #{record.order_type,jdbcType=INTEGER},
+      scan_time = #{record.scan_time,jdbcType=TIMESTAMP},
+      is_check = #{record.is_check,jdbcType=INTEGER}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tmtc.po.LineOrder" >
+    update t_line_order
+    <set >
+      <if test="order_no != null" >
+        order_no = #{order_no,jdbcType=VARCHAR},
+      </if>
+      <if test="user_id != null" >
+        user_id = #{user_id,jdbcType=BIGINT},
+      </if>
+      <if test="city_id != null" >
+        city_id = #{city_id,jdbcType=INTEGER},
+      </if>
+      <if test="line_id != null" >
+        line_id = #{line_id,jdbcType=BIGINT},
+      </if>
+      <if test="time_line_id != null" >
+        time_line_id = #{time_line_id,jdbcType=BIGINT},
+      </if>
+      <if test="station_id != null" >
+        station_id = #{station_id,jdbcType=BIGINT},
+      </if>
+      <if test="order_time != null" >
+        order_time = #{order_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="order_status != null" >
+        order_status = #{order_status,jdbcType=INTEGER},
+      </if>
+      <if test="order_exp != null" >
+        order_exp = #{order_exp,jdbcType=INTEGER},
+      </if>
+      <if test="order_type != null" >
+        order_type = #{order_type,jdbcType=INTEGER},
+      </if>
+      <if test="scan_time != null" >
+        scan_time = #{scan_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="is_check != null" >
+        is_check = #{is_check,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tmtc.po.LineOrder" >
+    update t_line_order
+    set order_no = #{order_no,jdbcType=VARCHAR},
+      user_id = #{user_id,jdbcType=BIGINT},
+      city_id = #{city_id,jdbcType=INTEGER},
+      line_id = #{line_id,jdbcType=BIGINT},
+      time_line_id = #{time_line_id,jdbcType=BIGINT},
+      station_id = #{station_id,jdbcType=BIGINT},
+      order_time = #{order_time,jdbcType=TIMESTAMP},
+      order_status = #{order_status,jdbcType=INTEGER},
+      order_exp = #{order_exp,jdbcType=INTEGER},
+      order_type = #{order_type,jdbcType=INTEGER},
+      scan_time = #{scan_time,jdbcType=TIMESTAMP},
+      is_check = #{is_check,jdbcType=INTEGER}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <!-- 自定义 -->
+  <update id="updateByOrderTime" >
+  	<![CDATA[
+  		UPDATE t_line_order SET order_status = #{past} WHERE order_time + INTERVAL 15 MINUTE < NOW() AND order_status = #{noPay};
+  	]]>
+  </update>
+  <select id = "selectByOrderTime" resultMap="BaseResultMap" parameterType="integer" >
+  		SELECT 
+  		  id, order_no, user_id, 
+	      city_id, line_id, time_line_id, 
+	      station_id, order_time, order_status, 
+	      order_exp, order_type, scan_time, 
+	      is_check
+  		 FROM t_line_order WHERE order_time + INTERVAL 15 MINUTE &lt; NOW() AND order_status = #{noPay}
+  </select>
+</mapper>

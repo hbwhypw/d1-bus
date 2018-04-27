@@ -1,0 +1,58 @@
+package com.tmtc.vo;
+
+import com.tmtc.po.Company;
+
+/**
+ * Created:  hbwhypw
+ * Date: 2015/10/12 15:53
+ * Function:
+ */
+public class CompanyVo extends Company {
+    private String CityName;
+
+    private String logo_pic_url;
+
+    private String business_license_url;
+
+    public String getCityName() {
+        return CityName;
+    }
+
+    public void setCityName(String cityName) {
+        CityName = cityName;
+    }
+
+    public String getLogo_pic_url() {
+        return logo_pic_url;
+    }
+
+    public void setLogo_pic_url(String logo_pic_url) {
+        this.logo_pic_url = logo_pic_url;
+    }
+
+    public String getBusiness_license_url() {
+        return business_license_url;
+    }
+
+    public void setBusiness_license_url(String business_license_url) {
+        this.business_license_url = business_license_url;
+    }
+
+    public CompanyVo() {
+    }
+
+    public CompanyVo(Company c) {
+        super(c.getId(), c.getBusiness_license(), c.getName(), c.getCity_id(), c.getAddress(), c.getChairman_name(),
+                c.getChairman_phone(), c.getCompany_chairman(), c.getCompany_telphone(), c.getQq(), c.getEmail(),
+                c.getBusiness_fax(), c.getCompany_type(), c.getStart_time(), c.getEnd_time(), c.getLogo_pic(),
+                c.getWebsite(), c.getCreat_time(), c.getIs_check(), c.getIntro());
+    }
+
+    public CompanyVo(Company c, String CityName) {
+        super(c.getId(), c.getBusiness_license(), c.getName(), c.getCity_id(), c.getAddress(), c.getChairman_name(),
+                c.getChairman_phone(), c.getCompany_chairman(), c.getCompany_telphone(), c.getQq(), c.getEmail(),
+                c.getBusiness_fax(), c.getCompany_type(), c.getStart_time(), c.getEnd_time(), c.getLogo_pic(),
+                c.getWebsite(), c.getCreat_time(), c.getIs_check(), c.getIntro());
+        setCityName(CityName);
+    }
+}

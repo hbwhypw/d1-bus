@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tmtc.dao.LineTimeDao" >
+  <resultMap id="BaseResultMap" type="com.tmtc.po.LineTime" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="line_id" property="line_id" jdbcType="BIGINT" />
+    <result column="driver_id" property="driver_id" jdbcType="BIGINT" />
+    <result column="car_id" property="car_id" jdbcType="BIGINT" />
+    <result column="depart_time" property="depart_time" jdbcType="TIMESTAMP" />
+    <result column="depart_hour" property="depart_hour" jdbcType="TIMESTAMP" />
+    <result column="arrival_time" property="arrival_time" jdbcType="TIMESTAMP" />
+    <result column="driving_state" property="driving_state" jdbcType="INTEGER" />
+    <result column="line_station_sort" property="line_station_sort" jdbcType="INTEGER" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+    <result column="is_check" property="is_check" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, line_id, driver_id, car_id, depart_time, depart_hour, arrival_time, driving_state, 
+    line_station_sort, remark, create_time, is_check
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.tmtc.po.LineTimeRepository" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_line_time
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <if test="rowIndex!=null and pageSize!=null">
+      limit ${rowIndex},${pageSize}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_line_time
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from t_line_time
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.tmtc.po.LineTimeRepository" >
+    delete from t_line_time
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.tmtc.po.LineTime" >
+    insert into t_line_time (id, line_id, driver_id, 
+      car_id, depart_time, depart_hour, 
+      arrival_time, driving_state, line_station_sort, 
+      remark, create_time, is_check
+      )
+    values (#{id,jdbcType=BIGINT}, #{line_id,jdbcType=BIGINT}, #{driver_id,jdbcType=BIGINT}, 
+      #{car_id,jdbcType=BIGINT}, #{depart_time,jdbcType=TIMESTAMP}, #{depart_hour,jdbcType=TIMESTAMP}, 
+      #{arrival_time,jdbcType=TIMESTAMP}, #{driving_state,jdbcType=INTEGER}, #{line_station_sort,jdbcType=INTEGER}, 
+      #{remark,jdbcType=VARCHAR}, #{create_time,jdbcType=TIMESTAMP}, #{is_check,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.tmtc.po.LineTime" >
+    insert into t_line_time
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="line_id != null" >
+        line_id,
+      </if>
+      <if test="driver_id != null" >
+        driver_id,
+      </if>
+      <if test="car_id != null" >
+        car_id,
+      </if>
+      <if test="depart_time != null" >
+        depart_time,
+      </if>
+      <if test="depart_hour != null" >
+        depart_hour,
+      </if>
+      <if test="arrival_time != null" >
+        arrival_time,
+      </if>
+      <if test="driving_state != null" >
+        driving_state,
+      </if>
+      <if test="line_station_sort != null" >
+        line_station_sort,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="is_check != null" >
+        is_check,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="line_id != null" >
+        #{line_id,jdbcType=BIGINT},
+      </if>
+      <if test="driver_id != null" >
+        #{driver_id,jdbcType=BIGINT},
+      </if>
+      <if test="car_id != null" >
+        #{car_id,jdbcType=BIGINT},
+      </if>
+      <if test="depart_time != null" >
+        #{depart_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="depart_hour != null" >
+        #{depart_hour,jdbcType=TIMESTAMP},
+      </if>
+      <if test="arrival_time != null" >
+        #{arrival_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="driving_state != null" >
+        #{driving_state,jdbcType=INTEGER},
+      </if>
+      <if test="line_station_sort != null" >
+        #{line_station_sort,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="is_check != null" >
+        #{is_check,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.tmtc.po.LineTimeRepository" resultType="java.lang.Integer" >
+    select count(*) from t_line_time
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update t_line_time
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.line_id != null" >
+        line_id = #{record.line_id,jdbcType=BIGINT},
+      </if>
+      <if test="record.driver_id != null" >
+        driver_id = #{record.driver_id,jdbcType=BIGINT},
+      </if>
+      <if test="record.car_id != null" >
+        car_id = #{record.car_id,jdbcType=BIGINT},
+      </if>
+      <if test="record.depart_time != null" >
+        depart_time = #{record.depart_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.depart_hour != null" >
+        depart_hour = #{record.depart_hour,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.arrival_time != null" >
+        arrival_time = #{record.arrival_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.driving_state != null" >
+        driving_state = #{record.driving_state,jdbcType=INTEGER},
+      </if>
+      <if test="record.line_station_sort != null" >
+        line_station_sort = #{record.line_station_sort,jdbcType=INTEGER},
+      </if>
+      <if test="record.remark != null" >
+        remark = #{record.remark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.create_time != null" >
+        create_time = #{record.create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.is_check != null" >
+        is_check = #{record.is_check,jdbcType=INTEGER},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update t_line_time
+    set id = #{record.id,jdbcType=BIGINT},
+      line_id = #{record.line_id,jdbcType=BIGINT},
+      driver_id = #{record.driver_id,jdbcType=BIGINT},
+      car_id = #{record.car_id,jdbcType=BIGINT},
+      depart_time = #{record.depart_time,jdbcType=TIMESTAMP},
+      depart_hour = #{record.depart_hour,jdbcType=TIMESTAMP},
+      arrival_time = #{record.arrival_time,jdbcType=TIMESTAMP},
+      driving_state = #{record.driving_state,jdbcType=INTEGER},
+      line_station_sort = #{record.line_station_sort,jdbcType=INTEGER},
+      remark = #{record.remark,jdbcType=VARCHAR},
+      create_time = #{record.create_time,jdbcType=TIMESTAMP},
+      is_check = #{record.is_check,jdbcType=INTEGER}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tmtc.po.LineTime" >
+    update t_line_time
+    <set >
+      <if test="line_id != null" >
+        line_id = #{line_id,jdbcType=BIGINT},
+      </if>
+      <if test="driver_id != null" >
+        driver_id = #{driver_id,jdbcType=BIGINT},
+      </if>
+      <if test="car_id != null" >
+        car_id = #{car_id,jdbcType=BIGINT},
+      </if>
+      <if test="depart_time != null" >
+        depart_time = #{depart_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="depart_hour != null" >
+        depart_hour = #{depart_hour,jdbcType=TIMESTAMP},
+      </if>
+      <if test="arrival_time != null" >
+        arrival_time = #{arrival_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="driving_state != null" >
+        driving_state = #{driving_state,jdbcType=INTEGER},
+      </if>
+      <if test="line_station_sort != null" >
+        line_station_sort = #{line_station_sort,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="is_check != null" >
+        is_check = #{is_check,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tmtc.po.LineTime" >
+    update t_line_time
+    set line_id = #{line_id,jdbcType=BIGINT},
+      driver_id = #{driver_id,jdbcType=BIGINT},
+      car_id = #{car_id,jdbcType=BIGINT},
+      depart_time = #{depart_time,jdbcType=TIMESTAMP},
+      depart_hour = #{depart_hour,jdbcType=TIMESTAMP},
+      arrival_time = #{arrival_time,jdbcType=TIMESTAMP},
+      driving_state = #{driving_state,jdbcType=INTEGER},
+      line_station_sort = #{line_station_sort,jdbcType=INTEGER},
+      remark = #{remark,jdbcType=VARCHAR},
+      create_time = #{create_time,jdbcType=TIMESTAMP},
+      is_check = #{is_check,jdbcType=INTEGER}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

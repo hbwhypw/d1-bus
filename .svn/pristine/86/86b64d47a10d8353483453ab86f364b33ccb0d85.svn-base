@@ -1,0 +1,180 @@
+package com.tmtc.serviceImpl.appAPI;
+
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.dao.ExpScoreRecordDao;
+import com.tmtc.dao.LineDao;
+import com.tmtc.dao.LineOrderDao;
+import com.tmtc.dao.MoneyOrderDao;
+import com.tmtc.dao.ScanDao;
+import com.tmtc.dao.UserDao;
+import com.tmtc.dao.UserDetailDao;
+import com.tmtc.frame.ServiceRuntimeException;
+import com.tmtc.po.ExpScoreRecord;
+import com.tmtc.po.Line;
+import com.tmtc.po.LineOrder;
+import com.tmtc.po.LineOrderRepository;
+import com.tmtc.po.MoneyOrder;
+import com.tmtc.po.User;
+import com.tmtc.po.UserDetail;
+import com.tmtc.po.LineOrderRepository.Criteria;
+import com.tmtc.service.UserDetailService;
+import com.tmtc.service.appAPI.ValidTimeService;
+import com.tmtc.utils.DateUtil;
+import com.tmtc.utils.IdWorker;
+import com.tmtc.utils.OrderNumUtil;
+import com.tmtc.utils.VerificationUtil;
+
+@Service
+public class ValidTimeServiceImpl implements ValidTimeService {
+
+	@Autowired
+	UserDetailDao userDetailDao;
+
+	@Autowired
+	UserDao userDao;
+
+	@Autowired
+	LineDao lineDao;
+
+	@Autowired
+	ScanDao scanDao;
+
+	@Autowired
+	LineOrderDao lineOrderDao;
+
+	@Autowired
+	MoneyOrderDao moneyOrderDao;
+
+	@Autowired
+	ExpScoreRecordDao expScoreRecordDao;
+
+	@Autowired
+	UserDetailService userDetailService;
+
+	@Override
+	public int insertUpEmployeeNocheck(String company_id, String cn_ls_st, String line_id, String line_time_id,
+			Integer validDate) {
+		String[] split = cn_ls_st.split(",");
+		if (split.length % 3 != 0) {
+			return 4;
+		}
+		for (int i = 0; i < split.length; i += 3) {
+
+			String user_id = userDao.selectCompanyCardNum(company_id, split[i]);
+			if (0 == VerificationUtil.length(user_id)) {
+				String nextId = IdWorker.nextId();
+				Map<String, String> map = userDetailService.createQR_code(nextId);
+				User user = new User(nextId, ParameterConstant.BEIJING, company_id, null, null, null,
+						ParameterConstant.USER_TYPE_COMPANY, null, null, null, null, null, null);
+				if (userDao.insert(user) != 1) {
+					throw new ServiceRuntimeException("不验证用户刷卡添加用户异常！");
+				}
+				UserDetail userDetail = new UserDetail(ParameterConstant.USER_TYPE_COMPANY, nextId,
+						userDetailService.getLinkNum(), new Date(), null, null, null, null, map.get("qr_code"),
+						map.get("qr_code_secret"), null, null, null, null, null, null, null, split[i], 0, null, null,
+						DateUtil.AddDate(new Date(), validDate), ParameterConstant.IS_CHECK);
+				if (userDetailDao.insert(userDetail) != 1) {
+					throw new ServiceRuntimeException("不验证用户刷卡添加用户详细信息异常！");
+				}
+			}
+
+			int time = this.insertTime(company_id, split[i], ParameterConstant.USER_TYPE_COMPANY, line_id, line_time_id,
+					split[i + 1], DateUtil.getLongDate(split[i + 2]));
+			if (0 != time) {
+				throw new ServiceRuntimeException("上传刷卡信息异常（需要验证的卡）");
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public int insertUpEmployee(String company_id, String cn_ls_st, String line_id, String line_time_id) {
+
+		String[] split = cn_ls_st.split(",");
+		if (split.length % 3 != 0) {
+			return 4;
+		}
+		for (int i = 0; i < split.length; i += 3) {
+			int time = this.insertTime(company_id, split[i], ParameterConstant.USER_TYPE_COMPANY, line_id, line_time_id,
+					split[i + 1], DateUtil.getLongDate(split[i + 2]));
+			if (0 != time) {
+				throw new ServiceRuntimeException("上传刷卡信息异常（需要验证的卡）");
+			}
+		}
+		return 0;
+	}
+
+	@Override
+	public int insertTime(String company_id, String card_num, Integer user_type, String line_id, String line_time_id,
+			String line_station_id) {
+		Date date = DateUtil.getCurrentDate();
+		return this.insertTime(company_id, card_num, user_type, line_id, line_time_id, line_station_id, date);
+	}
+
+	public int insertTime(String company_id, String card_num, Integer user_type, String line_id, String line_time_id,
+			String line_station_id, Date date) {
+		String userId = userDao.selectCompanyCardNum(company_id, card_num);
+		if (0 == VerificationUtil.length(userId)) {
+			return 1;
+		}
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(userId);
+		if (!user_type.equals(userDetail.getUser_type())) {
+			return 2;
+		}
+		if (null == userDetail.getLast_order_time() || new Date().after(userDetail.getLast_order_time())) {
+			userDetail.setLast_order_time(date);
+			return 3;
+		}
+		
+		LineOrderRepository lineOrderRepository = new LineOrderRepository();
+		Criteria criteria = lineOrderRepository.createCriteria();
+		criteria.andUser_idEqualTo(userId);
+		criteria.andTime_line_idEqualTo(line_time_id);
+		List<LineOrder> list = lineOrderDao.selectByExample(lineOrderRepository);
+		if (0 != VerificationUtil.size(list)) {
+			return 5;
+		}
+		
+		Line line = lineDao.selectByPrimaryKey(line_id);
+
+		// 添加扫描记录
+		// Scan scan = new Scan(IdWorker.nextId(), userDetail.getId(),
+		// line_time_id, line_station_id, date,
+		// ParameterConstant.SCAN_TYPE_FINISH, ParameterConstant.IS_CHECK);
+		// if (scanDao.insert(scan) < 0) {
+		// throw new ServiceRuntimeException("扫描表添加异常");
+		// }
+
+		String orderByXL = OrderNumUtil.getOrderByXL();
+		LineOrder lineOrder = new LineOrder(IdWorker.nextId(), orderByXL, userId, line.getCity_id(), line_id,
+				line_time_id, line_station_id, date, ParameterConstant.ORDER_STATUS, ParameterConstant.ORDER_EXP,
+				ParameterConstant.LINE_ORDER_TYPE_PAY_CARD_NUM, date, ParameterConstant.IS_CHECK);
+		if (lineOrderDao.insert(lineOrder) != 1) {
+			throw new ServiceRuntimeException("线路订单添加异常");
+		}
+
+		MoneyOrder moneyOrder = new MoneyOrder(IdWorker.nextId(), userId, card_num, orderByXL, 0,
+				ParameterConstant.PAY_TYPE_BALANCE, ParameterConstant.ORDER_STATUS, date);
+		if (moneyOrderDao.insert(moneyOrder) != 1) {
+			throw new ServiceRuntimeException("消费记录添加异常");
+		}
+		ExpScoreRecord expScoreRecord = new ExpScoreRecord(IdWorker.nextId(), userId, ParameterConstant.EXP_CRAD,
+				ParameterConstant.ORDER_EXP, date, ParameterConstant.IS_CHECK);
+		if (expScoreRecordDao.insert(expScoreRecord) != 1) {
+			throw new ServiceRuntimeException("积分添加异常(记录)");
+		}
+		userDetail.setExp_score(userDetail.getExp_score() + ParameterConstant.ORDER_EXP);
+		if (userDetailDao.updateByPrimaryKeySelective(userDetail) != 1) {
+			throw new ServiceRuntimeException("积分添加异常(用户)");
+		}
+		return 0;
+	}
+
+}

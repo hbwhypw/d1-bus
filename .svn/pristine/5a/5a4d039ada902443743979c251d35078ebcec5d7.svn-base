@@ -1,0 +1,32 @@
+package com.tmtc.dao;
+
+import com.tmtc.po.User;
+import com.tmtc.po.UserRepository;
+import java.util.List;
+import org.apache.ibatis.annotations.Param;
+
+public interface UserDao {
+    int countByExample(UserRepository example);
+
+    int deleteByExample(UserRepository example);
+
+    int deleteByPrimaryKey(String id);
+
+    int insert(User record);
+
+    int insertSelective(User record);
+
+    List<User> selectByExample(UserRepository example);
+
+    User selectByPrimaryKey(String id);
+
+    int updateByExampleSelective(@Param("record") User record, @Param("example") UserRepository example);
+
+    int updateByExample(@Param("record") User record, @Param("example") UserRepository example);
+
+    int updateByPrimaryKeySelective(User record);
+
+    int updateByPrimaryKey(User record);
+    
+    List<String> selectEmployee(String company_id);
+}

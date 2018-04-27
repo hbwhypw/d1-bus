@@ -1,0 +1,56 @@
+package com.tmtc.controller.driver;
+
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.tmtc.constant.MessageVar;
+import com.tmtc.controller.appAPI.BaseController;
+import com.tmtc.service.appAPI.DriveAppService;
+@Controller
+@RequestMapping("/App/drive")
+public class DriveController extends BaseController{
+	
+	@Autowired
+	DriveAppService driveAppService;
+	
+	/**
+	 * 开始驾驶	/App/drive/start?
+	 * @param line_time_id	班次id
+	 * @return
+	 */
+	@RequestMapping("/start")
+	@ResponseBody
+	public Map<String, Object> start(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam String line_time_id){
+		String error = driveAppService.updateStart(line_time_id);
+		if(error == null){
+			return getMap(request, MessageVar.DRIVESTART);
+		}
+        Map<String, Object> map = getMap(request, error, STATUS_ERROR);
+		return map;
+	}
+	
+	/**
+	 * 结束驾驶	/App/drive/end?
+	 * @param line_time_id	班次id
+	 * @return
+	 */
+	@RequestMapping("/end")
+	@ResponseBody
+	public Map<String, Object> end(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam String line_time_id){
+        String error = driveAppService.updateEnd(line_time_id);
+        if(error == null){
+			return getMap(request, MessageVar.DRIVEEND);
+		}
+        return getMap(request, error, STATUS_ERROR);
+	}
+}

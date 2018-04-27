@@ -1,0 +1,6 @@
+package com.tmtc.service.appAPI;
+
+public interface ValidTimeService {
+
+	int time(String company_id, String card_num, Integer user_type,String line_id);
+}

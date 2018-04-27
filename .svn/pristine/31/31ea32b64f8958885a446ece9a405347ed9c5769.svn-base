@@ -1,0 +1,80 @@
+package com.tmtc.controller.appAPI;
+
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.tmtc.constant.MessageVar;
+import com.tmtc.service.CarLocationService;
+import com.tmtc.utils.VerificationUtil;
+
+/**
+ * 车辆
+ * 
+ * @author qiukai
+ *
+ */
+@Controller
+@RequestMapping("/App/CarLocation")
+public class CarLocationController extends BaseController {
+
+	@Autowired
+	CarLocationService carLocationService;
+
+	/**
+	 * 修改司机端的位置信息和自动到站 /App/CarLocation/update?
+	 * 
+	 * @param request
+	 * @param device_id
+	 *            设备号
+	 * @param x_point
+	 *            x坐标
+	 * @param y_point
+	 *            y坐标
+	 * @param lineTimeId
+	 *            班次id
+	 * @return
+	 */
+	@RequestMapping("/update")
+	@ResponseBody
+	public Map<String, Object> edit(HttpServletRequest request, @RequestParam String device_id,
+			@RequestParam Double x_point, @RequestParam Double y_point, @RequestParam String lineTimeId) {
+
+		int i = carLocationService.updateCarLocation(device_id, x_point, y_point, lineTimeId);
+
+		if (3 == i){
+			return getMap(request, MessageVar.ARRIVALTIME_STATION_NULL,STATUS_ERROR);
+		}
+		if (2 == i){
+			return getMap(request, MessageVar.DRIVER_ID_NULL, STATUS_ERROR);
+		}
+		if (1 == i){
+			return getMap(request, MessageVar.CARLOCTION_UPDATE_SUCCESS);
+		}
+		return getMap(request, MessageVar.CARLOCTION_UPDATE_ERROR, STATUS_ERROR);
+
+	}
+
+	/**
+	 * 删除司机端位置信息	 /App/CarLocation/delete?
+	 * 
+	 * @param id
+	 *            汽车ID
+	 * @return
+	 */
+	@RequestMapping("/delete")
+	@ResponseBody
+	public Map<String, Object> delete(HttpServletRequest request, @RequestParam(required = false) String id) {
+		if (0 < VerificationUtil.length(id)) {
+			carLocationService.delete(id);
+			return getMap(request, MessageVar.CARLOCATION_SUCCESS);
+		}
+		return getMap(request, MessageVar.CARLOCATION_ERROR);
+	}
+}

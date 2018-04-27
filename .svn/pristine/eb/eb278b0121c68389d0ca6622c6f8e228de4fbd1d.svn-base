@@ -1,0 +1,117 @@
+package com.tmtc.controller;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.tmtc.annotation.SystemControllerLog;
+import com.tmtc.constant.MessageVar;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.frame.JsonResult;
+import com.tmtc.frame.PageResult;
+import com.tmtc.po.AppResource;
+import com.tmtc.po.AppResourceRepository;
+import com.tmtc.service.AppResourceService;
+import com.tmtc.utils.VerificationUtil;
+
+@Controller
+@RequestMapping("/appResource")
+public class AppResourceController {
+	
+	@Autowired
+	AppResourceService appResourceService;
+	
+	@RequestMapping("/{edit}")
+	@ResponseBody
+    @SystemControllerLog("APP资源-编辑")
+	public JsonResult edit(HttpServletRequest request,HttpServletResponse response,
+			@Valid @ModelAttribute AppResource appResource,
+			@PathVariable String edit){
+		if (edit.equals("add")){
+			return new JsonResult(1,MessageVar.APPRESOURCE_ADD_SUCCESS,appResourceService.insert(appResource));
+		}else if(edit.equals("update")){
+			return new JsonResult(1,MessageVar.APPRESOURCE_UPDATE_SUCCESS,appResourceService.update(appResource));
+		}
+		return new JsonResult(0,MessageVar.APPRESOURCE_ERROR,null);
+	}
+	
+	@RequestMapping("/delete")
+	@ResponseBody
+    @SystemControllerLog("APP资源-删除")
+	public JsonResult delete(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam String ids){
+		String[] idArr = ids.split(",");
+		for(String id: idArr){
+			if(0 == appResourceService.delete(id)){
+				return new JsonResult(0, MessageVar.DELETE_ERROR, null);
+			}
+		}
+		return new JsonResult(1,MessageVar.APPRESOURCE_DELETE_SUCCESS,1);
+	}
+	
+	@RequestMapping("/forEver")
+	@ResponseBody
+    @SystemControllerLog("APP资源-永久删除")
+	public JsonResult forEver(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam String ids){
+		String[] idArr = ids.split(",");
+		for(String id: idArr){
+			if(0 == appResourceService.deleteForEver(id)){
+				return new JsonResult(0, MessageVar.DELETE_ERROR, null);
+			}
+		}
+		return new JsonResult(1,MessageVar.APPRESOURCE_DELETE_SUCCESS,1);
+	}
+	
+	@RequestMapping("/query")
+	@ResponseBody
+    @SystemControllerLog("APP资源-查询")
+	public PageResult query(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam(required = true) Integer page,
+			@RequestParam(required = true) Integer rows,
+			@RequestParam (required = false) String name,
+			@RequestParam (required = false) String url){
+		AppResourceRepository appResourceRepository = new AppResourceRepository();
+		AppResourceRepository.Criteria criteria = appResourceRepository.createCriteria();
+		appResourceRepository.setPageSize(rows);
+		appResourceRepository.setRowIndex((page-1)*rows);
+		if(0 != VerificationUtil.length(name)){
+			criteria.andNameLike("%"+name+"%");
+		}
+		if(0 != VerificationUtil.length(url)){
+			criteria.andUrlLike("%"+url+"%");
+		}
+		criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+		PageResult pageResult = appResourceService.selectByPage(appResourceRepository);
+		return pageResult;
+	}
+	
+	/**
+	 * 恢复使用
+	 * @param request
+	 * @param response
+	 * @param id	资源ID
+	 * @return
+	 */
+	@RequestMapping("/updateRecover")
+	@ResponseBody
+    @SystemControllerLog("APP资源-恢复使用")
+	public JsonResult updateRecover(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam String ids){
+		String[] idArr = ids.split(",");
+		for(String id: idArr){
+			if(0 == appResourceService.updateRecover(id)){
+				return new JsonResult(0, MessageVar.DELETE_ERROR, 0);
+			}
+		}
+		return new JsonResult(1,MessageVar.ISCHECK_SUCCESS,1);
+	}
+}

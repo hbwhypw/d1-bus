@@ -1,0 +1,194 @@
+package com.tmtc.controller.appAPI;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.po.AdPic;
+import com.tmtc.po.Product;
+import com.tmtc.po.ProductRepository;
+import com.tmtc.service.appAPI.AdPicAppService;
+import com.tmtc.service.appAPI.ProductAppService;
+import com.tmtc.utils.VerificationUtil;
+
+/**
+ * 商场产品
+ * 
+ * @author zxs
+ *
+ */
+@Controller
+@RequestMapping("/App/product")
+public class ProductAppController extends BaseController {
+
+	@Autowired
+	ProductAppService productAppService;
+	@Autowired
+	AdPicAppService adPicAppService;
+	
+	private String zaodiandao = "667176510356070400";
+
+	/**
+	 * 查询积分产品 /App/product/queryIntegral?
+	 * 
+	 * @param request
+	 * @param response
+	 * @param page
+	 *            第几页
+	 * @param rows
+	 *            一页几条数据
+	 * @return
+	 */
+	@RequestMapping("/queryIntegral")
+	@ResponseBody
+	public Map<String, Object> queryIntegral(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(required = true) Integer page, @RequestParam(required = true) Integer rows) {
+		ProductRepository productRepository = new ProductRepository();
+		productRepository.setPageSize(rows);
+		productRepository.setRowIndex((page - 1) * rows);
+		ProductRepository.Criteria criteria = productRepository.createCriteria();
+		criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+		criteria.andSell_typeEqualTo(ParameterConstant.SELL_TYPE_EXP);
+		List<Product> listProduct = productAppService.select(productRepository);
+		
+		List<Product> productList = new ArrayList<Product>();
+		for (Product product : listProduct) {
+			if (zaodiandao.equals(product.getPro_type())) {
+				product.setPro_name(product.getPro_name().substring(2));
+			}
+			productList.add(product);
+		}
+		return getMap(request, "", productList);
+	}
+
+	/**
+	 * 根据产品类型查询 /App/product/queryOnLine?
+	 * 
+	 * @param request
+	 * @param response
+	 * @param page
+	 *            第几页
+	 * @param rows
+	 *            一页几条数据
+	 * @param pro_type
+	 *            产品类型
+	 * @return
+	 */
+	@RequestMapping("/queryOnLine")
+	@ResponseBody
+	public Map<String, Object> queryOnLine(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(required = true) Integer page, @RequestParam(required = true) Integer rows,
+			@RequestParam(required = false) String pro_type) {
+		ProductRepository productRepository = new ProductRepository();
+		productRepository.setPageSize(rows);
+		productRepository.setRowIndex((page - 1) * rows);
+		ProductRepository.Criteria criteria = productRepository.createCriteria();
+		criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+		
+		// 早餐分类专有
+		if (zaodiandao.equals(pro_type)) {
+			criteria.andPro_nameLike("日一二三四五六".charAt(Calendar.getInstance().get(Calendar.DAY_OF_WEEK)-1)+"#%");
+		}
+		
+		if (0 != VerificationUtil.length(pro_type)) {
+			criteria.andPro_typeEqualTo(pro_type);
+		}
+		criteria.andSell_typeEqualTo(ParameterConstant.SELL_TYPE_SHOP);
+		List<Product> listProduct = productAppService.select(productRepository);
+		List<Product> productList = new ArrayList<Product>();
+		for (Product product : listProduct) {
+			if (zaodiandao.equals(pro_type)) {
+				product.setPro_name(product.getPro_name().substring(2));
+			}
+			productList.add(product);
+		}
+		return getMap(request, "", productList);
+	}
+	
+	/**
+	 * 在线商城首页banner /App/product/queryAdPic?
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/queryAdPic")
+	@ResponseBody
+	public Map<String, Object> queryAdPic(HttpServletRequest request, HttpServletResponse response) {
+		List<AdPic> list = adPicAppService.selectProductBanner();
+		return getMap(request, "", list);
+	}
+
+	/**
+	 * 在线商城首页长条广告 /App/product/queryProductAdPica?
+	 * 
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping("/queryProductAdPica")
+	@ResponseBody
+	public Map<String, Object> queryProductAdPica(HttpServletRequest request, HttpServletResponse response) {
+		List<AdPic> list = adPicAppService.selectProductAdPica(1, 1);
+		if (list.size() != 0) {
+			AdPic adPic = list.get(0);
+			return getMap(request, "", adPic);
+		}
+		return getMap(request, "", "");
+	}
+
+	/**
+	 * 在线商城首页方块广告 /App/product/queryProductAdPicb?
+	 * 
+	 * @param request
+	 * @param response
+	 * @param page
+	 *            第几页
+	 * @param rows
+	 *            一页几条数据
+	 * @return
+	 */
+	@RequestMapping("/queryProductAdPicb")
+	@ResponseBody
+	public Map<String, Object> queryProductAdPicb(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(required = true) Integer page, @RequestParam(required = true) Integer rows) {
+		List<AdPic> list = adPicAppService.selectProductAdPicb(page, rows);
+		return getMap(request, "", list);
+	}
+
+	/**
+	 * 在线商城产品详情 /App/product/queryProductDetail?
+	 * 
+	 * @param request
+	 * @param response
+	 * @param id
+	 *            产品的ID
+	 * @return
+	 */
+	@RequestMapping("/queryProductDetail")
+	@ResponseBody
+	public Map<String, Object> queryProductDetail(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(required = true) String id) {
+		Product product = productAppService.selectByPrimaryKey(id);
+		if (null != product) {
+			if (0 == VerificationUtil.length(product.getPro_picture())) {
+				product.setPro_picture("");
+			}
+		}
+		if (zaodiandao.equals(product.getPro_type())) {
+			product.setPro_name(product.getPro_name().substring(2));
+		}
+		return getMap(request, "", product);
+	}
+}

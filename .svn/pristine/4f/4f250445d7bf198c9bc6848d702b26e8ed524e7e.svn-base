@@ -1,0 +1,17 @@
+package com.tmtc.annotation.verity;
+
+import java.util.ArrayList;
+import java.util.List;
+import com.tmtc.utils.IdWorker;
+import com.tmtc.utils.VerificationUtil;
+
+public class VerifyUserBase {
+
+	static List<Integer> integerList = new ArrayList<Integer>();
+
+	static {
+		integerList.add(0);
+		integerList.add(1);
+		integerList.add(2);
+	}
+}

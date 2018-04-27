@@ -1,0 +1,672 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tmtc.dao.UserDetailDao" >
+  <resultMap id="BaseResultMap" type="com.tmtc.po.UserDetail" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="link_num" property="link_num" jdbcType="VARCHAR" />
+    <result column="register_time" property="register_time" jdbcType="TIMESTAMP" />
+    <result column="register_source" property="register_source" jdbcType="INTEGER" />
+    <result column="username" property="username" jdbcType="VARCHAR" />
+    <result column="nick_name" property="nick_name" jdbcType="VARCHAR" />
+    <result column="real_name" property="real_name" jdbcType="VARCHAR" />
+    <result column="qr_code" property="qr_code" jdbcType="VARCHAR" />
+    <result column="qr_code_secret" property="qr_code_secret" jdbcType="CHAR" />
+    <result column="sex" property="sex" jdbcType="INTEGER" />
+    <result column="id_code" property="id_code" jdbcType="VARCHAR" />
+    <result column="birthday" property="birthday" jdbcType="TIMESTAMP" />
+    <result column="user_type" property="user_type" jdbcType="INTEGER" />
+    <result column="portrait" property="portrait" jdbcType="VARCHAR" />
+    <result column="background" property="background" jdbcType="VARCHAR" />
+    <result column="email" property="email" jdbcType="VARCHAR" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
+    <result column="card_num" property="card_num" jdbcType="VARCHAR" />
+    <result column="balance" property="balance" jdbcType="INTEGER" />
+    <result column="exp_score" property="exp_score" jdbcType="INTEGER" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="invitation_code" property="invitation_code" jdbcType="VARCHAR" />
+    <result column="last_order_time" property="last_order_time" jdbcType="TIMESTAMP" />
+    <result column="is_check" property="is_check" jdbcType="INTEGER" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, link_num, register_time, register_source, username, nick_name, real_name, qr_code, 
+    qr_code_secret, sex, id_code, birthday, user_type, portrait, background, email, address, 
+    card_num, balance, exp_score, remark, invitation_code, last_order_time, is_check
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.tmtc.po.UserDetailRepository" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_user_detail
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <if test="rowIndex!=null and pageSize!=null">
+      limit ${rowIndex},${pageSize}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_user_detail
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from t_user_detail
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.tmtc.po.UserDetailRepository" >
+    delete from t_user_detail
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.tmtc.po.UserDetail" >
+    insert into t_user_detail (id, link_num, register_time, 
+      register_source, username, nick_name, 
+      real_name, qr_code, qr_code_secret, 
+      sex, id_code, birthday, 
+      user_type, portrait, background, 
+      email, address, card_num, 
+      balance, exp_score, remark, 
+      invitation_code, last_order_time, is_check
+      )
+    values (#{id,jdbcType=BIGINT}, #{link_num,jdbcType=VARCHAR}, #{register_time,jdbcType=TIMESTAMP}, 
+      #{register_source,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{nick_name,jdbcType=VARCHAR}, 
+      #{real_name,jdbcType=VARCHAR}, #{qr_code,jdbcType=VARCHAR}, #{qr_code_secret,jdbcType=CHAR}, 
+      #{sex,jdbcType=INTEGER}, #{id_code,jdbcType=VARCHAR}, #{birthday,jdbcType=TIMESTAMP}, 
+      #{user_type,jdbcType=INTEGER}, #{portrait,jdbcType=VARCHAR}, #{background,jdbcType=VARCHAR}, 
+      #{email,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, #{card_num,jdbcType=VARCHAR}, 
+      #{balance,jdbcType=INTEGER}, #{exp_score,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, 
+      #{invitation_code,jdbcType=VARCHAR}, #{last_order_time,jdbcType=TIMESTAMP}, #{is_check,jdbcType=INTEGER}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.tmtc.po.UserDetail" >
+    insert into t_user_detail
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="link_num != null" >
+        link_num,
+      </if>
+      <if test="register_time != null" >
+        register_time,
+      </if>
+      <if test="register_source != null" >
+        register_source,
+      </if>
+      <if test="username != null" >
+        username,
+      </if>
+      <if test="nick_name != null" >
+        nick_name,
+      </if>
+      <if test="real_name != null" >
+        real_name,
+      </if>
+      <if test="qr_code != null" >
+        qr_code,
+      </if>
+      <if test="qr_code_secret != null" >
+        qr_code_secret,
+      </if>
+      <if test="sex != null" >
+        sex,
+      </if>
+      <if test="id_code != null" >
+        id_code,
+      </if>
+      <if test="birthday != null" >
+        birthday,
+      </if>
+      <if test="user_type != null" >
+        user_type,
+      </if>
+      <if test="portrait != null" >
+        portrait,
+      </if>
+      <if test="background != null" >
+        background,
+      </if>
+      <if test="email != null" >
+        email,
+      </if>
+      <if test="address != null" >
+        address,
+      </if>
+      <if test="card_num != null" >
+        card_num,
+      </if>
+      <if test="balance != null" >
+        balance,
+      </if>
+      <if test="exp_score != null" >
+        exp_score,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="invitation_code != null" >
+        invitation_code,
+      </if>
+      <if test="last_order_time != null" >
+        last_order_time,
+      </if>
+      <if test="is_check != null" >
+        is_check,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="link_num != null" >
+        #{link_num,jdbcType=VARCHAR},
+      </if>
+      <if test="register_time != null" >
+        #{register_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="register_source != null" >
+        #{register_source,jdbcType=INTEGER},
+      </if>
+      <if test="username != null" >
+        #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="nick_name != null" >
+        #{nick_name,jdbcType=VARCHAR},
+      </if>
+      <if test="real_name != null" >
+        #{real_name,jdbcType=VARCHAR},
+      </if>
+      <if test="qr_code != null" >
+        #{qr_code,jdbcType=VARCHAR},
+      </if>
+      <if test="qr_code_secret != null" >
+        #{qr_code_secret,jdbcType=CHAR},
+      </if>
+      <if test="sex != null" >
+        #{sex,jdbcType=INTEGER},
+      </if>
+      <if test="id_code != null" >
+        #{id_code,jdbcType=VARCHAR},
+      </if>
+      <if test="birthday != null" >
+        #{birthday,jdbcType=TIMESTAMP},
+      </if>
+      <if test="user_type != null" >
+        #{user_type,jdbcType=INTEGER},
+      </if>
+      <if test="portrait != null" >
+        #{portrait,jdbcType=VARCHAR},
+      </if>
+      <if test="background != null" >
+        #{background,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="card_num != null" >
+        #{card_num,jdbcType=VARCHAR},
+      </if>
+      <if test="balance != null" >
+        #{balance,jdbcType=INTEGER},
+      </if>
+      <if test="exp_score != null" >
+        #{exp_score,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="invitation_code != null" >
+        #{invitation_code,jdbcType=VARCHAR},
+      </if>
+      <if test="last_order_time != null" >
+        #{last_order_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="is_check != null" >
+        #{is_check,jdbcType=INTEGER},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.tmtc.po.UserDetailRepository" resultType="java.lang.Integer" >
+    select count(*) from t_user_detail
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update t_user_detail
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.link_num != null" >
+        link_num = #{record.link_num,jdbcType=VARCHAR},
+      </if>
+      <if test="record.register_time != null" >
+        register_time = #{record.register_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.register_source != null" >
+        register_source = #{record.register_source,jdbcType=INTEGER},
+      </if>
+      <if test="record.username != null" >
+        username = #{record.username,jdbcType=VARCHAR},
+      </if>
+      <if test="record.nick_name != null" >
+        nick_name = #{record.nick_name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.real_name != null" >
+        real_name = #{record.real_name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.qr_code != null" >
+        qr_code = #{record.qr_code,jdbcType=VARCHAR},
+      </if>
+      <if test="record.qr_code_secret != null" >
+        qr_code_secret = #{record.qr_code_secret,jdbcType=CHAR},
+      </if>
+      <if test="record.sex != null" >
+        sex = #{record.sex,jdbcType=INTEGER},
+      </if>
+      <if test="record.id_code != null" >
+        id_code = #{record.id_code,jdbcType=VARCHAR},
+      </if>
+      <if test="record.birthday != null" >
+        birthday = #{record.birthday,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.user_type != null" >
+        user_type = #{record.user_type,jdbcType=INTEGER},
+      </if>
+      <if test="record.portrait != null" >
+        portrait = #{record.portrait,jdbcType=VARCHAR},
+      </if>
+      <if test="record.background != null" >
+        background = #{record.background,jdbcType=VARCHAR},
+      </if>
+      <if test="record.email != null" >
+        email = #{record.email,jdbcType=VARCHAR},
+      </if>
+      <if test="record.address != null" >
+        address = #{record.address,jdbcType=VARCHAR},
+      </if>
+      <if test="record.card_num != null" >
+        card_num = #{record.card_num,jdbcType=VARCHAR},
+      </if>
+      <if test="record.balance != null" >
+        balance = #{record.balance,jdbcType=INTEGER},
+      </if>
+      <if test="record.exp_score != null" >
+        exp_score = #{record.exp_score,jdbcType=INTEGER},
+      </if>
+      <if test="record.remark != null" >
+        remark = #{record.remark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.invitation_code != null" >
+        invitation_code = #{record.invitation_code,jdbcType=VARCHAR},
+      </if>
+      <if test="record.last_order_time != null" >
+        last_order_time = #{record.last_order_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.is_check != null" >
+        is_check = #{record.is_check,jdbcType=INTEGER},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update t_user_detail
+    set id = #{record.id,jdbcType=BIGINT},
+      link_num = #{record.link_num,jdbcType=VARCHAR},
+      register_time = #{record.register_time,jdbcType=TIMESTAMP},
+      register_source = #{record.register_source,jdbcType=INTEGER},
+      username = #{record.username,jdbcType=VARCHAR},
+      nick_name = #{record.nick_name,jdbcType=VARCHAR},
+      real_name = #{record.real_name,jdbcType=VARCHAR},
+      qr_code = #{record.qr_code,jdbcType=VARCHAR},
+      qr_code_secret = #{record.qr_code_secret,jdbcType=CHAR},
+      sex = #{record.sex,jdbcType=INTEGER},
+      id_code = #{record.id_code,jdbcType=VARCHAR},
+      birthday = #{record.birthday,jdbcType=TIMESTAMP},
+      user_type = #{record.user_type,jdbcType=INTEGER},
+      portrait = #{record.portrait,jdbcType=VARCHAR},
+      background = #{record.background,jdbcType=VARCHAR},
+      email = #{record.email,jdbcType=VARCHAR},
+      address = #{record.address,jdbcType=VARCHAR},
+      card_num = #{record.card_num,jdbcType=VARCHAR},
+      balance = #{record.balance,jdbcType=INTEGER},
+      exp_score = #{record.exp_score,jdbcType=INTEGER},
+      remark = #{record.remark,jdbcType=VARCHAR},
+      invitation_code = #{record.invitation_code,jdbcType=VARCHAR},
+      last_order_time = #{record.last_order_time,jdbcType=TIMESTAMP},
+      is_check = #{record.is_check,jdbcType=INTEGER}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tmtc.po.UserDetail" >
+    update t_user_detail
+    <set >
+      <if test="link_num != null" >
+        link_num = #{link_num,jdbcType=VARCHAR},
+      </if>
+      <if test="register_time != null" >
+        register_time = #{register_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="register_source != null" >
+        register_source = #{register_source,jdbcType=INTEGER},
+      </if>
+      <if test="username != null" >
+        username = #{username,jdbcType=VARCHAR},
+      </if>
+      <if test="nick_name != null" >
+        nick_name = #{nick_name,jdbcType=VARCHAR},
+      </if>
+      <if test="real_name != null" >
+        real_name = #{real_name,jdbcType=VARCHAR},
+      </if>
+      <if test="qr_code != null" >
+        qr_code = #{qr_code,jdbcType=VARCHAR},
+      </if>
+      <if test="qr_code_secret != null" >
+        qr_code_secret = #{qr_code_secret,jdbcType=CHAR},
+      </if>
+      <if test="sex != null" >
+        sex = #{sex,jdbcType=INTEGER},
+      </if>
+      <if test="id_code != null" >
+        id_code = #{id_code,jdbcType=VARCHAR},
+      </if>
+      <if test="birthday != null" >
+        birthday = #{birthday,jdbcType=TIMESTAMP},
+      </if>
+      <if test="user_type != null" >
+        user_type = #{user_type,jdbcType=INTEGER},
+      </if>
+      <if test="portrait != null" >
+        portrait = #{portrait,jdbcType=VARCHAR},
+      </if>
+      <if test="background != null" >
+        background = #{background,jdbcType=VARCHAR},
+      </if>
+      <if test="email != null" >
+        email = #{email,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="card_num != null" >
+        card_num = #{card_num,jdbcType=VARCHAR},
+      </if>
+      <if test="balance != null" >
+        balance = #{balance,jdbcType=INTEGER},
+      </if>
+      <if test="exp_score != null" >
+        exp_score = #{exp_score,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="invitation_code != null" >
+        invitation_code = #{invitation_code,jdbcType=VARCHAR},
+      </if>
+      <if test="last_order_time != null" >
+        last_order_time = #{last_order_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="is_check != null" >
+        is_check = #{is_check,jdbcType=INTEGER},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tmtc.po.UserDetail" >
+    update t_user_detail
+    set link_num = #{link_num,jdbcType=VARCHAR},
+      register_time = #{register_time,jdbcType=TIMESTAMP},
+      register_source = #{register_source,jdbcType=INTEGER},
+      username = #{username,jdbcType=VARCHAR},
+      nick_name = #{nick_name,jdbcType=VARCHAR},
+      real_name = #{real_name,jdbcType=VARCHAR},
+      qr_code = #{qr_code,jdbcType=VARCHAR},
+      qr_code_secret = #{qr_code_secret,jdbcType=CHAR},
+      sex = #{sex,jdbcType=INTEGER},
+      id_code = #{id_code,jdbcType=VARCHAR},
+      birthday = #{birthday,jdbcType=TIMESTAMP},
+      user_type = #{user_type,jdbcType=INTEGER},
+      portrait = #{portrait,jdbcType=VARCHAR},
+      background = #{background,jdbcType=VARCHAR},
+      email = #{email,jdbcType=VARCHAR},
+      address = #{address,jdbcType=VARCHAR},
+      card_num = #{card_num,jdbcType=VARCHAR},
+      balance = #{balance,jdbcType=INTEGER},
+      exp_score = #{exp_score,jdbcType=INTEGER},
+      remark = #{remark,jdbcType=VARCHAR},
+      invitation_code = #{invitation_code,jdbcType=VARCHAR},
+      last_order_time = #{last_order_time,jdbcType=TIMESTAMP},
+      is_check = #{is_check,jdbcType=INTEGER}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <!--自定义-->
+  <select id="selectUser" parameterType="map" resultType="com.tmtc.vo.UserVo">
+    SELECT
+      t1.id, t1.link_num, t1.register_time, t2.number,
+      (SELECT name FROM t_dictionary t3 WHERE t3.code = t2.city_id) AS city_name,
+      (SELECT name FROM t_company t4 WHERE t4.id = t2.company_id) AS company_name,
+      t2.city_id, t2.company_id,
+      t2.login_source, (SELECT name FROM t_dictionary t3 WHERE t3.code = t2.login_source) AS login_source_name,
+      t2.login_time,t2.login_cnt,t2.lock_time,t2.lock_cnt,
+      t1.register_source, (SELECT name FROM t_dictionary t3 WHERE t3.code = t1.register_source) AS register_source_name,
+      t1.username, t1.nick_name,
+      t1.real_name, t1.qr_code, t1.qr_code_secret,
+      t1.sex, (SELECT name FROM t_dictionary t3 WHERE t3.code = t1.sex) AS sex_name,
+      t1.id_code, t1.birthday,
+      t1.user_type, (SELECT name FROM t_dictionary t3 WHERE t3.code = t1.user_type) AS user_type_name,
+      t1.portrait, t1.background,
+      t1.email, address, t1.card_num, t1.balance,
+      t1.exp_score, t1.remark, t1.invitation_code,
+      t1.last_order_time, t1.is_check
+    FROM t_user_detail t1
+    JOIN t_user t2
+    ON t1.id = t2.id
+    WHERE 1 = 1
+    <if test="map.link_num != null" >
+      AND t1.link_num = #{map.link_num,jdbcType=VARCHAR}
+    </if>
+    <if test="map.register_time != null" >
+      AND t1.register_time = #{map.register_time,jdbcType=TIMESTAMP}
+    </if>
+    <if test="map.register_source != null" >
+      AND t1.register_source = #{map.register_source,jdbcType=INTEGER}
+    </if>
+    <if test="map.username != null" >
+      AND t1.username LIKE #{map.username,jdbcType=VARCHAR}
+    </if>
+    <if test="map.nick_name != null" >
+      AND t1.nick_name LIKE #{map.nick_name,jdbcType=VARCHAR}
+    </if>
+    <if test="map.real_name != null" >
+      AND t1.real_name LIKE #{map.real_name,jdbcType=VARCHAR}
+    </if>
+    <if test="map.sex != null" >
+      AND t1.sex = #{map.sex,jdbcType=INTEGER}
+    </if>
+    <if test="map.id_code != null" >
+      AND t1.id_code = #{map.id_code,jdbcType=VARCHAR}
+    </if>
+    <if test="map.birthday != null" >
+      AND t1.birthday = #{map.birthday,jdbcType=TIMESTAMP}
+    </if>
+    <if test="map.user_type != null" >
+      AND t1.user_type = #{map.user_type,jdbcType=INTEGER}
+    </if>
+    <if test="map.remaining_cnt != null" >
+      AND t1.remaining_cnt = #{map.remaining_cnt,jdbcType=DOUBLE}
+    </if>
+    <if test="map.exp_score != null" >
+      AND t1.exp_score = #{map.exp_score,jdbcType=INTEGER}
+    </if>
+    <if test="map.is_check != null" >
+      AND t1.is_check = #{map.is_check,jdbcType=INTEGER}
+    </if>
+    <if test="map.city_id != null" >
+      AND t2.city_id = #{map.city_id,jdbcType=INTEGER}
+    </if>
+    <if test="map.company_id != null" >
+      AND t2.company_id = #{map.company_id,jdbcType=INTEGER}
+    </if>
+    order by register_time desc
+    <if test="map.rowIndex != null and map.pageSize != null">
+      limit ${map.rowIndex}, ${map.pageSize}
+    </if>
+  </select>
+  <select id="countUser" parameterType="map" resultType="integer">
+    SELECT
+      COUNT(t1.id)
+    FROM t_user_detail t1
+      JOIN t_user t2 ON t1.id = t2.id
+    WHERE 1 = 1
+    <if test="map.link_num != null" >
+      AND t1.link_num = #{map.link_num,jdbcType=VARCHAR}
+    </if>
+    <if test="map.register_time != null" >
+      AND t1.register_time = #{map.register_time,jdbcType=TIMESTAMP}
+    </if>
+    <if test="map.register_source != null" >
+      AND t1.register_source = #{map.register_source,jdbcType=INTEGER}
+    </if>
+    <if test="map.username != null" >
+      AND t1.username LIKE #{map.username,jdbcType=VARCHAR}
+    </if>
+    <if test="map.nick_name != null" >
+      AND t1.nick_name LIKE #{map.nick_name,jdbcType=VARCHAR}
+    </if>
+    <if test="map.real_name != null" >
+      AND t1.real_name LIKE #{map.real_name,jdbcType=VARCHAR}
+    </if>
+    <if test="map.sex != null" >
+      AND t1.sex = #{map.sex,jdbcType=INTEGER}
+    </if>
+    <if test="map.id_code != null" >
+      AND t1.id_code = #{map.id_code,jdbcType=VARCHAR}
+    </if>
+    <if test="map.birthday != null" >
+      AND t1.birthday = #{map.birthday,jdbcType=TIMESTAMP}
+    </if>
+    <if test="map.user_type != null" >
+      AND t1.user_type = #{map.user_type,jdbcType=INTEGER}
+    </if>
+    <if test="map.remaining_cnt != null" >
+      AND t1.remaining_cnt = #{map.remaining_cnt,jdbcType=DOUBLE}
+    </if>
+    <if test="map.exp_score != null" >
+      AND t1.exp_score = #{map.exp_score,jdbcType=INTEGER}
+    </if>
+    <if test="map.is_check != null" >
+      AND t1.is_check = #{map.is_check,jdbcType=INTEGER}
+    </if>
+    <if test="map.city_id != null" >
+      AND t2.city_id = #{map.city_id,jdbcType=INTEGER}
+    </if>
+    <if test="map.company_id != null" >
+      AND t2.company_id = #{map.company_id,jdbcType=INTEGER}
+    </if>
+  </select>
+
+  <select id="selectUserById" parameterType="string" resultType="com.tmtc.vo.UserVo">
+    SELECT
+      t1.id, t1.link_num, t1.register_time, t2.number,
+      (SELECT name FROM t_dictionary t3 WHERE t3.code = t2.city_id) AS city_name,
+      (SELECT name FROM t_company t4 WHERE t4.id = t2.company_id) AS company_name,
+      t2.city_id, t2.company_id,
+      t2.login_source, (SELECT name FROM t_dictionary t3 WHERE t3.code = t2.login_source) AS login_source_name,
+      t2.login_time,t2.login_cnt,t2.lock_time,t2.lock_cnt,
+      t1.register_source, (SELECT name FROM t_dictionary t3 WHERE t3.code = t1.register_source) AS register_source_name,
+      t1.username, t1.nick_name,
+      t1.real_name, t1.qr_code, t1.qr_code_secret,
+      t1.sex, (SELECT name FROM t_dictionary t3 WHERE t3.code = t1.sex) AS sex_name,
+      t1.id_code, t1.birthday,
+      t1.user_type, (SELECT name FROM t_dictionary t3 WHERE t3.code = t1.user_type) AS user_type_name,
+      t1.portrait, t1.background,
+      t1.email, address, t1.card_num, t1.balance
+      t1.exp_score, t1.remark, t1.invitation_code,
+      t1.last_order_time, t1.is_check
+    FROM t_user_detail t1
+    JOIN t_user t2
+    ON t1.id = t2.id
+    WHERE 1 = 1
+    <if test="param != null" >
+      AND t1.id in
+      <foreach item="item" index="index" collection="param" open="(" separator="," close=")">
+        #{item}
+  	  </foreach>
+    </if>
+      AND t1.is_check = 1
+  </select>
+</mapper>

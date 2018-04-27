@@ -1,0 +1,45 @@
+package com.tmtc.serviceImpl.appAPI;
+
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.dao.LineDao;
+import com.tmtc.dao.UserDao;
+import com.tmtc.dao.UserDetailDao;
+import com.tmtc.po.UserDetail;
+import com.tmtc.service.appAPI.ValidTimeService;
+import com.tmtc.utils.VerificationUtil;
+
+@Service
+public class ValidTimeServiceImpl implements ValidTimeService {
+
+	@Autowired
+	UserDetailDao userDetailDao;
+
+	@Autowired
+	UserDao userDao;
+
+	@Autowired
+	LineDao lineDao;
+
+	@Override
+	public int time(String company_id, String card_num, Integer user_type, String line_id) {
+
+		String userId = userDao.selectCompanyCardNum(company_id, card_num);
+		if (0 == VerificationUtil.length(userId)) {
+			return 0;
+		}
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(userId);
+		if (!(userDetail.getUser_type().equals(user_type) && ParameterConstant.USER_TYPE_COMPANY == user_type)) {
+			return 1;
+		}
+		if (new Date().after(userDetail.getLast_order_time())) {
+			return 2;
+		}
+		return 3;
+	}
+
+}

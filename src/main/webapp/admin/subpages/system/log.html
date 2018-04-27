@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>log</title>
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/log.js"></script>
+<table id="logDg" class="easyui-datagrid" data-options="url:'./../log/query',rownumbers:true,toolbar:'#logDgTbar',
+		pageSize:30,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: false,selectOnCheck: false">
+    <thead>
+    <tr>
+        <th data-options="field:'id',width:80,checkbox:true">编号</th>
+        <th data-options="field:'description',width:40">描述</th>
+        <th data-options="field:'adminId',width:80,hidden:true">操作人</th>
+        <th data-options="field:'name',width:40">操作人</th>
+        <th data-options="field:'method',width:80">方法名</th>
+        <th data-options="field:'params',width:80">参数</th>
+        <th data-options="field:'type',width:40,formatter: log.typeFormatter">类型</th>
+        <th data-options="field:'exceptionCode',width:80">异常名称</th>
+        <th data-options="field:'exceptionDetail',width:80">异常详细</th>
+        <th data-options="field:'ip',width:40">请求ip</th>
+        <th data-options="field:'createDate',width:80">创建时间</th>
+    </tr>
+    </thead>
+</table>
+<div id="logDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+                &nbsp;&nbsp;描述：&nbsp;&nbsp;
+                <input id="descriptionParam" name="descriptionParam" class="easyui-validatebox" style="width: 150px;">
+                &nbsp;&nbsp;操作人：&nbsp;&nbsp;
+                <input id="nameParam" name="nameParam" class="easyui-validatebox" style="width: 150px;">
+                &nbsp;&nbsp;类型：&nbsp;&nbsp;
+                <select id="typeParam" name="typeParam" style="width: 150px;">
+                    <option value="0" selected="selected">控制层</option>
+                    <option value="1">服务层</option>
+                </select>
+                <a id="search" class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查 询</a>
+            </td>
+            <td align="right" width="280px">
+                <a id="del" class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">删除</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

@@ -1,0 +1,332 @@
+package com.tmtc.controller;
+
+import java.util.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import com.tmtc.annotation.SystemControllerLog;
+import com.tmtc.excelTools.ExcelUtils;
+import com.tmtc.excelTools.JsGridReportBase;
+import com.tmtc.excelTools.TableData;
+import com.tmtc.po.Admins;
+import com.tmtc.utils.*;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
+
+import com.tmtc.constant.MessageVar;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.constant.SystemVar;
+import com.tmtc.frame.JsonResult;
+import com.tmtc.frame.PageResult;
+import com.tmtc.frame.ServiceException;
+import com.tmtc.po.User;
+import com.tmtc.po.UserDetail;
+import com.tmtc.po.UserDetailRepository;
+import com.tmtc.service.UserDetailService;
+import com.tmtc.service.UserService;
+import com.tmtc.vo.UserDetailVo;
+import com.tmtc.vo.UserVo;
+
+@Controller
+@RequestMapping("/userDetail")
+public class UserDetailController extends BaseController {
+    @Autowired
+    UserDetailService userDetailService;
+    @Autowired
+    UserService userService;
+
+
+	/**
+	 * 我的二维码 url：/App/user/qrcode
+	 */
+	@RequestMapping("/qrcode")
+	@ResponseBody
+	public JsonResult getQr_code(HttpServletRequest request, HttpServletResponse response,String id) {
+		UserDetail userDetail = userDetailService.selectByPrimaryKey(id);
+		if (userDetail != null) {
+			return new JsonResult(1,"", SystemVar.SERVER_IMG_URL + SystemVar.USER_QR_CODE + userDetail.getQr_code());
+		}
+		return new JsonResult(-1, JsonResult.FAIL, null);
+	}
+	
+	/**
+	 * 重置二维码
+	 * @param request
+	 * @param response
+	 * @param user_id
+	 * @return
+	 */
+	@RequestMapping("/updateQrCode")
+	@ResponseBody
+	public JsonResult updateQrCode(HttpServletRequest request,HttpServletResponse response,
+		@RequestParam String user_id){
+		userDetailService.updateQrCode(user_id);
+		return new JsonResult();
+	}
+	
+	/**
+	 * 重置密码
+	 * @param request
+	 * @param response
+	 * @param user_id
+	 * @return
+	 */
+	@RequestMapping("/updatePassWord")
+	@ResponseBody
+	public JsonResult updatePassWord(HttpServletRequest request,HttpServletResponse response,
+		@RequestParam String user_id){
+		User user = userService.selectByPrimaryKey(user_id);
+		if(null != user){
+			userDetailService.updatePassWord(user);
+			return new JsonResult(userDetailService.updatePassWord(user),MessageVar.USER_RESETPASSWORD_SUCCESS,null);
+		}
+		return new JsonResult(0,MessageVar.USER_RESETPASSWORD_SUCCESS,null);
+	}
+	
+	/**
+	 * 删除用户信息
+	 */
+	@RequestMapping("/delete")
+	@ResponseBody
+    @SystemControllerLog("用户信息-删除")
+    public JsonResult delete(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam(required = true) String id){
+		UserDetail userDetail = new UserDetail();
+		userDetail.setId(id);
+		userDetailService.delete(id);
+		return new JsonResult();
+	}
+    /**
+     * 添加和修改用户信息
+     *
+     * @throws ServiceException
+     */
+    @RequestMapping("/{edit}")
+    @ResponseBody
+    @SystemControllerLog("用户信息-添加和修改")
+    public JsonResult edit(HttpServletRequest request, HttpServletResponse response,
+                           @PathVariable String edit,
+                           @Valid @ModelAttribute UserDetailVo userdetailVo,
+                           @RequestParam CommonsMultipartFile portraitUrl,
+                           @RequestParam CommonsMultipartFile backgroundUrl
+    ) throws ServiceException {
+        if (edit.equals("add")) {
+            UserDetailRepository userDetailRepository = new UserDetailRepository();
+            userDetailRepository.or().andUsernameEqualTo(userdetailVo.getUsername());
+            if (userDetailService.count(userDetailRepository) > 0) {
+                return new JsonResult(0, MessageVar.ADMINS_USERNAME_REPEAT, null);
+            }
+            String a = userdetailVo.getCard_num();
+            if(!userdetailVo.getCard_num().equals("0")){
+            	if(null != userDetailService.selectCard(userdetailVo.getCompany_id(), userdetailVo.getCard_num())){
+            		return new JsonResult(0,MessageVar.USER_CARDNUM_REPEAT,null);
+            	}
+            }
+            String id = IdWorker.nextId();
+            userdetailVo.setId(id);
+            userdetailVo.setIs_check(ParameterConstant.IS_CHECK);
+            userdetailVo.setRegister_time(new Date());
+            userdetailVo.setRegister_source(ParameterConstant.REGISTER_SOURCE_COMPANY);
+            userdetailVo.setExp_score(0);
+            userDetailService.insert(userdetailVo, portraitUrl, backgroundUrl, id);
+            return new JsonResult();
+        } else if (edit.equals("update")) {
+            UserDetailRepository userDetailRepository = new UserDetailRepository();
+            userDetailRepository.or()
+                    .andUsernameEqualTo(userdetailVo.getUsername())
+					.andIdNotEqualTo(userdetailVo.getId());
+            if (userDetailService.count(userDetailRepository) > 0) {
+                return new JsonResult(0, MessageVar.ADMINS_USERNAME_REPEAT, null);
+            }
+            userDetailService.update(userdetailVo, portraitUrl, backgroundUrl);
+            return new JsonResult();
+        }
+        return new JsonResult();
+    }
+
+	/**
+	 * 永久删除用户信息
+	 */
+	@RequestMapping("/forEver")
+	@ResponseBody
+    @SystemControllerLog("用户信息-永久删除")
+	public JsonResult forEver(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam(required = true) String id){
+		return new JsonResult(1,MessageVar.DELETE_SUCCESS,userDetailService.deleteForEver(id));
+	}
+	
+	/**
+	 * 查询用户信息
+	 */
+	@RequestMapping("/query")
+	@ResponseBody
+    @SystemControllerLog("用户信息-查询")
+	public PageResult query(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam(required = true) Integer page,
+			@RequestParam(required = true) Integer rows,
+			@RequestParam(required = false) String real_name,
+			@RequestParam(required = false) String username,
+			@RequestParam(required = false) String city,
+			@RequestParam(required = false) String sex,
+			@RequestParam(required = false) String company_id){
+        Map<String, String> map = new HashMap<>();
+        if (null != page && null != rows) {
+            map.put("rowIndex", String.valueOf((page - 1) * rows));
+            map.put("pageSize", String.valueOf(rows));
+        }
+        if (StringUtils.isNotEmpty(real_name)) {
+            map.put("real_name", "%" + real_name + "%");
+        }
+        if (StringUtils.isNotEmpty(username)) {
+            map.put("username", "%" + username + "%");
+        }
+        if (StringUtils.isNotEmpty(sex)) {
+            map.put("sex", sex);
+        }
+        if (StringUtils.isNotEmpty(city)) {
+            map.put("city_id", city);
+        }
+        if (StringUtils.isNotEmpty(company_id)) {
+            map.put("company_id", company_id);
+        }
+        List<UserVo> list = userDetailService.selectUser(map);
+        int count = userDetailService.countUser(map);
+        return new PageResult(count, list, 1);
+    }
+
+    /**
+     * 用户导出
+     * @param real_name
+     * @param username
+     * @param city
+     * @param sex
+     * @param company_id
+     */
+    @RequestMapping("/export")
+    @ResponseBody
+    @SystemControllerLog("用户信息-导出")
+    public void export(HttpServletRequest request, HttpServletResponse response,
+                       @RequestParam(required = false) String ids) {
+    	String[] idArr = ids.split(",");
+    	List<String> listId = new ArrayList<String>();
+    	for (int i = 0; i < idArr.length; i++) {
+			listId.add(idArr[i]);
+		}
+        List<UserVo> list = userDetailService.selectUserById(listId);
+        String[] hearders = new String[]{"登录名","工号(若有)", "真实姓名", "昵称", "生日", "性别", "邮箱", "地址", "注册时间", "公司"};
+        String[] fields = new String[]{"username", "number", "real_name", "nick_name", "birthday", "sex", "email", "address", "register_time","company_id"};
+        TableData td = ExcelUtils.createTableData(list, ExcelUtils.createTableHeader(hearders), fields);
+        JsGridReportBase report = null;
+        String title = "用户信息";
+        try {
+            report = new JsGridReportBase(request, response);
+            report.exportToExcel(title, "", td);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @RequestMapping("/import")
+    @ResponseBody
+    @SystemControllerLog("用户信息-导入")
+    public JsonResult importExcel(HttpServletRequest request, HttpServletResponse response,
+                            @RequestParam CommonsMultipartFile file) {
+        Admins admins = (Admins) request.getSession().getAttribute("admins");
+        String company_id = admins.getCompany_id();
+        Map<String, Object> map = new HashMap<>();
+        map.put("file", file);
+        map.put("company_id", company_id);
+        String error = userDetailService.insertExcel(map);
+        if (StringUtils.isEmpty(error)){
+            return new JsonResult();
+        } else {
+            return new JsonResult(2, error, null);
+        }
+    }
+
+    @RequestMapping("/selectByPhone")
+    @ResponseBody
+    @SystemControllerLog("用户信息-查询手机号")
+    public JsonResult selectByPhone(HttpServletRequest request, HttpServletResponse response,
+                                    @RequestParam(required = false) String phone) {
+        UserDetailRepository userDetailRepository = new UserDetailRepository();
+        UserDetailRepository.Criteria criteria = userDetailRepository.createCriteria();
+        if (0 != VerificationUtil.length(phone)) {
+            if (VerificationUtil.checkMobilePhone(phone)) {
+                criteria.andUsernameEqualTo(phone);
+                List<UserDetail> listUserDetail = userDetailService.select(userDetailRepository);
+                if (0 != VerificationUtil.size(listUserDetail)) {
+                    return new JsonResult();
+                } else {
+                    return new JsonResult(0, PropertiesUtil.getPropertyValue("message", "do.error"), null);
+                }
+            }
+        }
+        return new JsonResult(0, PropertiesUtil.getPropertyValue("message", "do.error"), null);
+    }
+
+    /**
+     * 查看图片
+     *
+     * @param request
+     * @param response
+     * @param id
+     * @return
+     */
+    @RequestMapping("/selectById")
+    @ResponseBody
+    @SystemControllerLog("用户信息-查看图片")
+    public JsonResult selectById(HttpServletRequest request, HttpServletResponse response,
+                                 @RequestParam String id) {
+        Map<String, List<String>> map = userDetailService.img(id);
+        return new JsonResult(1, "", map);
+    }
+
+    /**
+     * 恢复使用
+     *
+     * @param request
+     * @param response
+     * @param id
+     * @return
+     */
+    @RequestMapping("/updateRecover")
+    @ResponseBody
+    @SystemControllerLog("用户信息-恢复使用")
+    public JsonResult updateRecover(HttpServletRequest request, HttpServletResponse response,
+                                    @RequestParam String id) {
+        int a = userDetailService.updateRecover(id);
+        return new JsonResult(1, PropertiesUtil.getMessage("ischeck.success"), a);
+    }
+    
+    /**
+     * 激活
+     * @param request
+     * @param response
+     * @param id
+     * @return
+     */
+    @RequestMapping("/invoke")
+    @ResponseBody
+    @SystemControllerLog("用户信息-激活")
+    public JsonResult invoke(HttpServletRequest request, HttpServletResponse response,
+    		@RequestParam String id) {
+    	int num = userDetailService.updateInvoke(id);
+    	if(1 == num){
+    		return new JsonResult(1,MessageVar.INVOKE_SUCCESS,num);
+    	}
+    	if(2 == num){
+    		return new JsonResult(1,MessageVar.INVOKE_NO,num);
+    	}
+    	return new JsonResult(0,MessageVar.INVOKE_ERROR,num);
+    }
+}

@@ -1,0 +1,94 @@
+package com.tmtc.filter;
+
+import java.util.Enumeration;
+import java.util.TreeMap;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
+import com.tmtc.utils.secret.MD5;
+
+/**
+ * API验证签名
+ * 
+ * @author Administrator
+ *
+ */
+public class AppFilter extends HandlerInterceptorAdapter {
+	// 继承HandlerInterceptorAdapter类
+
+	private String reqSign = null;
+
+	private String timeKey = null;
+
+	private final static String KEY = "key";
+
+	/**
+	 * 接口密钥
+	 */
+	private final static String VALUE = "c6a757b4cce7556325419260ec248dd7";
+
+	/**
+	 * 接口超时时间
+	 */
+	private final static long TIME = 1L * 60L * 1000L;
+
+	/**
+	 * 对用户进行验证 return true通过，false不通过
+	 */
+	@Override
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+			throws Exception {
+
+		TreeMap<String, Object> _params = new TreeMap<String, Object>();
+		@SuppressWarnings("unchecked")
+		Enumeration<String> paraNames = request.getParameterNames();
+		while (paraNames.hasMoreElements()) {
+			String paraKey = (String) paraNames.nextElement();
+			String paraValue = request.getParameter(paraKey);
+			if (paraKey.equals("enc")) {
+				reqSign = paraValue;
+			} else {
+				if (paraKey.equals("timeKey")) {
+					timeKey = paraValue;
+				}
+				_params.put(paraKey.toLowerCase(), paraValue);
+			}
+		}
+
+		// 验证是否发送了签名
+		if (null == reqSign || null == timeKey) {
+			request.getRequestDispatcher("/App/error/enc").forward(request, response);
+			return false;
+		}
+
+		Long time = 0L;
+		try {
+			time = System.currentTimeMillis() - Long.valueOf(timeKey);
+		} catch (Exception e) {
+			request.getRequestDispatcher("/App/error/enc").forward(request, response);
+			return false;
+		}
+		if (TIME < time) {
+			request.getRequestDispatcher("/App/error/enc").forward(request, response);
+			return false;
+		}
+
+		// 生成签名
+		_params.put(KEY.toLowerCase(), VALUE);
+		StringBuffer strToVerfy = new StringBuffer();
+		for (Object param : _params.values()) {
+			strToVerfy.append(param);
+		}
+		String myenc = MD5.getMD5(strToVerfy.toString());
+
+		// 验证签名
+		if (myenc == null || !myenc.equals(reqSign)) {
+			request.getRequestDispatcher("/App/error/enc").forward(request, response);
+			return false;
+		}
+		return true;
+	}
+}

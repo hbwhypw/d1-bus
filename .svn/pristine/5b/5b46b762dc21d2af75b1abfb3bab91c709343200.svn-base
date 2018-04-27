@@ -1,0 +1,39 @@
+package com.tmtc.dao;
+
+import com.tmtc.po.Scan;
+import com.tmtc.po.ScanRepository;
+import com.tmtc.vo.UpCar;
+
+import java.util.List;
+import java.util.Map;
+
+import org.apache.ibatis.annotations.Param;
+
+public interface ScanDao {
+	int countByExample(ScanRepository example);
+
+	int deleteByExample(ScanRepository example);
+
+	int deleteByPrimaryKey(Long id);
+
+	int insert(Scan record);
+
+	int insertSelective(Scan record);
+
+	List<Scan> selectByExample(ScanRepository example);
+
+	Scan selectByPrimaryKey(Long id);
+
+	int updateByExampleSelective(@Param("record") Scan record, @Param("example") ScanRepository example);
+
+	int updateByExample(@Param("record") Scan record, @Param("example") ScanRepository example);
+
+	int updateByPrimaryKeySelective(Scan record);
+
+	int updateByPrimaryKey(Scan record);
+
+	/* 自定义 */
+	List<UpCar> select(Map map);
+	
+	Integer count(Map map);
+}

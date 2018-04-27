@@ -1,0 +1,68 @@
+package com.tmtc.controller.driver;
+
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.tmtc.constant.MessageVar;
+import com.tmtc.controller.appAPI.BaseController;
+import com.tmtc.service.appAPI.UpEmployeeService;
+import com.tmtc.utils.VerificationUtil;
+
+@Controller
+@RequestMapping("/App/UpEmloyee")
+public class UpEmployeeController extends BaseController {
+
+	@Autowired
+	UpEmployeeService upEmployeeService;
+
+	/**
+	 * /App/UpEmloyee/up
+	 * 
+	 * @param request
+	 * @param company_id
+	 *            公司id
+	 * @param card_nums
+	 *            串
+	 * @param line_time_id
+	 *            班次id
+	 * 
+	 * @return
+	 */
+	@ResponseBody
+	@RequestMapping("/up")
+	public Map<String, Object> add(HttpServletRequest request, String company_id, String card_nums,
+			String line_time_id) {
+
+		if (0 == VerificationUtil.length(card_nums)) {
+			return getMap(request, MessageVar.UP_ERROR, STATUS_ERROR);
+		}
+
+		String[] split = card_nums.split(",");
+		if (0 != (split.length % 3)) {
+			return getMap(request, MessageVar.UP_ERROR, STATUS_ERROR);
+		}
+		if (0 == VerificationUtil.length(company_id)) {
+			return getMap(request, MessageVar.UP_ERROR, STATUS_ERROR);
+		}
+		if (0 == VerificationUtil.length(line_time_id)) {
+			return getMap(request, MessageVar.UP_ERROR, STATUS_ERROR);
+		}
+		int i = upEmployeeService.upEmployee(split, company_id, line_time_id);
+		switch (i) {
+		case 0:
+			return getMap(request, MessageVar.UP_SUCCESS);
+		case 1:
+			return getMap(request, MessageVar.UP_ERROR, STATUS_ERROR);
+		case 2:
+			return getMap(request, MessageVar.UP_ERROR, STATUS_ERROR);
+		default:
+			return getMap(request, MessageVar.UP_ERROR, STATUS_ERROR);
+		}
+	}
+}

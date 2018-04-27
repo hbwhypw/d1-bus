@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>dictionary</title>
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/dictionary.js"></script>
+
+<table id="dictionaryDg" class="easyui-treegrid" data-options="url:'./../dictionary/query',rownumbers:true,toolbar:'#dictionaryDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false,idField: 'id',
+		treeField: 'name'">
+    <thead>
+    <tr>
+        <th data-options="field:'name',width:80">名称</th>
+        <th data-options="field:'code',width:80">代码值</th>
+        <th data-options="field:'is_sub',width:80,formatter: dictionary.is_subFormatter">是否子节点</th>
+        <th data-options="field:'sort',width:80,">排序</th>
+        <th data-options="field:'city_code',width:80">简码</th>
+        <th data-options="field:'is_available',width:80,formatter: dictionary.is_availableFormatter">是否可操作</th>
+        <th data-options="field:'is_check',width:80,formatter: dictionary.is_checkFormatter">是否有效</th>
+        <th data-options="field:'remark',width:80">备注</th>
+    </tr>
+    </thead>
+</table>
+<div id="dictionaryDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="right" width="400px">
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-add" plain="true">添加父节点</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-add" plain="true">添加子节点</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">删除</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">恢复使用</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">永久删除</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+<div id="dictionaryDlg" class="easyui-dialog" style="width:400px;height:300px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#dictionaryDlgBtn">
+    <form id="dictionaryFmRoot" class="fm" method="post" novalidate>
+        <div class="fitem">
+            <label> 名称： </label>
+            <input id="id" name="id" type="hidden">
+            <input id="name" name="name" class="easyui-validatebox" required="true"
+            	data-options="validType: ['maxLength[18]','specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 简码： </label>
+            <input id="city_code" name="city_code" class="easyui-validatebox"
+            	data-options="validType: ['specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 是否可操作： </label>
+            <select id="is_available" name="is_available" style="width: 173px;">
+                <option value="1" selected="selected">是</option>
+                <option value="0">否</option>
+            </select>
+        </div>
+        <div class="fitem">
+            <label> 备注： </label>
+            <input id="remark" name="remark" class="easyui-validatebox">
+        </div>
+    </form>
+    <div id="dictionaryDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+</div>
+
+<div id="dictionaryDlg2" class="easyui-dialog" style="width:400px;height:300px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#dictionaryDlgBtn2">
+    <form id="dictionaryFmSub" class="fm" method="post" novalidate>
+        <div class="fitem">
+            <label> 名称： </label>
+            <input id="id" name="id" type="hidden">
+            <input id="name" name="name" class="easyui-validatebox" required="true">
+        </div>
+        <div class="fitem">
+            <label> 父节点： </label>
+             <input id="codeParam" class="easyui-combobox" name="code" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/root',
+								editable:false,
+								loader: common.comboBoxLoader" required="true"/>
+        </div>
+        <div class="fitem">
+            <label> 简码： </label>
+            <input id="city_code" name="city_code" class="easyui-validatebox">
+        </div>
+        <div class="fitem">
+            <label> 是否可操作： </label>
+            <select id="is_available" name="is_available" style="width: 173px;">
+                <option value="1" selected="selected">是</option>
+                <option value="0">否</option>
+            </select>
+        </div>
+        <div class="fitem">
+            <label> 备注： </label>
+            <input id="remark" name="remark" class="easyui-validatebox">
+        </div>
+    </form>
+    <div id="dictionaryDlgBtn2">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+</div>
+</body>
+</html>

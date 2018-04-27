@@ -1,0 +1,37 @@
+package com.tmtc.dao;
+
+import com.tmtc.po.Admins;
+import com.tmtc.po.AdminsRepository;
+import java.util.List;
+import java.util.Map;
+
+import com.tmtc.vo.AdminVo;
+import org.apache.ibatis.annotations.Param;
+
+public interface AdminsDao {
+    int countByExample(AdminsRepository example);
+
+    int deleteByExample(AdminsRepository example);
+
+    int deleteByPrimaryKey(String id);
+
+    int insert(Admins record);
+
+    int insertSelective(Admins record);
+
+    List<Admins> selectByExample(AdminsRepository example);
+
+    Admins selectByPrimaryKey(String id);
+
+    int updateByExampleSelective(@Param("record") Admins record, @Param("example") AdminsRepository example);
+
+    int updateByExample(@Param("record") Admins record, @Param("example") AdminsRepository example);
+
+    int updateByPrimaryKeySelective(Admins record);
+
+    int updateByPrimaryKey(Admins record);
+
+    List<AdminVo> selectAdmins(@Param("map") Map map);
+
+    Integer countAdmins(@Param("map") Map map);
+}

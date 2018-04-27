@@ -1,0 +1,134 @@
+/**
+ * 定义线路对象
+ */
+var LineTime = function() {
+};
+
+LineTime.prototype._delete = function() {
+	var row = $('#lineTimeDg').datagrid('getChecked');
+	if (row) {
+		var ids = [];
+		if ($.isArray(row)) {
+			for (var i = 0; i < row.length; i++) {
+				ids.push(row[i].id);
+			} 
+		} else {
+			ids = ids.push(row.id);
+		}
+		$.messager.confirm('系统确认', '是否确定删除？', function (r) {
+            if (r) {
+                $.post('/lineTime/delete', {
+                    "ids": ids.toString()
+                }, function (data) {
+                    if (data.code === 1) {
+                        $.messager.show({
+                            title: '系统提示',
+                            msg: data.msg
+                        });
+                        $('#lineTimeDg').datagrid('reload');
+                    } else {
+                        $.messager.show({
+                            title: '系统错误',
+                            msg: data.msg
+                        });
+                    }
+                }, 'json');
+            }
+        });
+	} else {
+		$.messager.alert('警告', '请选择一项！', 'warning');
+	}
+}
+
+LineTime.prototype.update = function() {
+	_this = this;
+	var row = $('#lineTimeDg').datagrid('getChecked');
+	if (row) {
+		if (1 == row.length) {
+			$("#lineTimeDlg").dialog("open").dialog("setTitle","修改班次");
+			$('#lineTimeFm').form('load', row[0]);
+			_this.url = '/lineTime/update';
+		} else {
+			$.messager.alert('警告', '只能选择一项！', 'warning');
+		}
+	} else {
+		$.messager.alert('警告', '请选择一项！', 'warning');
+	}
+};
+
+LineTime.prototype.query = function() {
+	this.checkInput('lineTimeDg', 'line_nameParam');
+	$('#lineTimeDg').datagrid('queryReload');
+};
+
+LineTime.prototype.checkInput = function(Dg, paramName) {
+	var param = $('#' + paramName).val();
+	var requestParam = paramName.substring(0, paramName.indexOf("P"));
+	if (param != "") {
+		var queryParams = $('#' + Dg).datagrid('options').queryParams;
+		queryParams[requestParam] = param;
+	} else {
+		var queryParams = $('#' + Dg).datagrid('options').queryParams;
+		delete queryParams[requestParam];
+	}
+};
+
+LineTime.prototype.bind = function() {
+	var _this = this;
+
+	var lineTimeDyTbar = $("#lineTimeDgTbar table tbody tr td a");
+
+	// 查询按钮
+	lineTimeDyTbar.eq(0).click(function() {
+		_this.query();
+	});
+	$("#line_nameParam").keyup(function(event) {
+		if (event.keyCode == 13)
+			_this.query();
+	});
+	// 修改按钮
+	lineTimeDyTbar.eq(1).click(function() {
+		_this.update();
+	});
+
+	// 修改按钮
+	lineTimeDyTbar.eq(2).click(function() {
+		_this._delete();
+	});
+	
+	/* 线路dialog */
+	// 确定按钮
+	$("#lineTimeDlgBtn a").eq(0).click(function() {
+		$('#lineTimeFm').form('submit', {
+			url : _this.url,
+			onSubmit : function() {
+				return $(this).form('validate');
+			},
+			success : function(data) {
+				var data = eval('(' + data + ')');
+				if (data.code === 1) {
+					$('#lineTimeDlg').dialog('close');
+					$('#lineTimeDg').datagrid('reload');
+				}
+				$.messager.show({
+					title : '系统提示',
+					msg : data.msg
+				});
+			}
+		});
+	});
+	// 取消按钮
+	$("#lineTimeDlgBtn a").eq(1).click(function() {
+		$('#lineTimeDlg').dialog('close');
+	});
+};
+
+LineTime.prototype.init = function() {
+	this.url = "";
+	this.bind();
+};
+
+$(function() {
+	window.lineTime = new LineTime();
+	lineTime.init();
+});

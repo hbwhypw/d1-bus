@@ -1,0 +1,137 @@
+/**
+ * 生命upCar对象
+ */
+var upCar = function() {
+}
+upCar.prototype.init = function() {
+	this.url = "";
+	this.INPUT = 0;
+	this.bind();
+}
+
+upCar.prototype.bind = function() {
+	var _this = this;
+	var upCarDg = $("#UpCarDgTbar table tbody tr td a");
+	upCarDg.eq(0).click(function() {
+		_this.query();
+	});
+	$("#MoneyOrderVonameParam").keyup(function(event) {
+		if (event.keyCode == 13)
+			_this.query();
+	});
+
+	// 今天
+	upCarDg.eq(1).click(function() {
+		timeMaxMin($(this));
+		_this.query();
+	});
+	// 昨天
+	upCarDg.eq(2).click(function() {
+		timeMaxMin($(this));
+		_this.query();
+	});
+	// 本周
+	upCarDg.eq(3).click(function() {
+		timeMaxMin($(this));
+		_this.query();
+	});
+	// 本月
+	upCarDg.eq(4).click(function() {
+		timeMaxMin($(this));
+		_this.query();
+	});
+}
+
+upCar.prototype.query = function() {
+	this.checkInput('usernameParam', this.INPUT);
+	this.checkInput('real_nameParam', this.INPUT);
+	this.checkInput('nameParam', this.INPUT);
+	this.checkInput('station_nameParam', this.INPUT);
+	this.checkInput('begin_timeParam', this.INPUT);
+	this.checkInput('end_timeParam', this.INPUT);
+	$('#UpCarDg').datagrid('queryReload');
+}
+
+upCar.prototype.checkInput = function(paramName, formType) {
+	var param;
+	switch (formType) {
+	case 0:
+		param = $('#' + paramName).val();
+		break;
+	case 1:
+		param = $('#' + paramName + ' option:selected').val();
+		break;
+	case 2:
+		param = $('#' + paramName).combobox('getValue');
+		break;
+	default:
+		param = $('#' + paramName).val();
+	}
+	var requestParam = paramName.substring(0, paramName.indexOf("P"));
+	if (param != "") {
+		var queryParams = $('#UpCarDg').datagrid('options').queryParams;
+		queryParams[requestParam] = param;
+	} else {
+		var queryParams = $('#UpCarDg').datagrid('options').queryParams;
+		delete queryParams[requestParam];
+	}
+};
+
+function timeMaxMin(s) {
+
+	var now = new Date();
+	var name = $(s).attr('name');
+
+	var min = '';
+	var max = '';
+	switch (name) {
+	case 'today':
+		min = now.getFullYear() + '-' + fillZero(now.getMonth() + 1) + '-'
+				+ fillZero(now.getDate()) + " 00:00:00";
+		max = now.getFullYear() + '-' + fillZero(now.getMonth() + 1) + '-'
+				+ fillZero(now.getDate()) + " 23:59:59";
+		break;
+	case 'yesterday':
+		min = now.getFullYear() + '-' + fillZero(now.getMonth() + 1) + '-'
+				+ fillZero(now.getDate() - 1) + " 00:00:00";
+		max = now.getFullYear() + '-' + fillZero(now.getMonth() + 1) + '-'
+				+ fillZero(now.getDate() - 1) + " 23:59:59";
+		break;
+	case 'thisWeek':
+		nowDay = now.getDate();
+		nowDayOfWeek = now.getDay();
+		thisweek = nowDay - nowDayOfWeek;
+		min = now.getFullYear() + '-' + fillZero(now.getMonth() + 1) + '-'
+				+ fillZero(thisweek + 1) + " 00:00:00";
+		max = now.getFullYear() + '-' + fillZero(now.getMonth() + 1) + '-'
+				+ fillZero(thisweek + 7) + " 23:59:59";
+		break;
+	case 'thisMonth':
+		var hour = now.getHours();
+		var minute = now.getMinutes();
+		var second = now.getSeconds();
+		min = now.getFullYear() + '-' + fillZero(now.getMonth() + 1) + '-' + 01
+				+ " 00:00:00";
+		max = now.getFullYear() + '-' + fillZero(now.getMonth() + 1) + '-'
+				+ fillZero(now.getDate()) + " " + fillZero(hour) + ":"
+				+ fillZero(minute) + ":" + fillZero(second);
+		break;
+	default:
+		alert('error');
+	}
+	$('#begin_timeParam').val(min);// 必须用id才行
+	$('#end_timeParam').val(max);// 必须用id才行
+	$('#begin_timeParam').datetimebox('setValue', min);// 必须用id才行
+	$('#end_timeParam').datetimebox('setValue', max);// 必须用id才行
+};
+var fillZero = function(n) {
+	if (n < 10) {
+		return '0' + n;
+	} else {
+		return n;
+	}
+};
+$(function() {
+	window.upCar = new upCar();
+	upCar.init();
+});

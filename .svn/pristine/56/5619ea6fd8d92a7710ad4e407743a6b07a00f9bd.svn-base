@@ -1,0 +1,187 @@
+package com.tmtc.controller.appAPI;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+
+import com.tmtc.po.UserPush;
+import com.tmtc.po.VerificationCode;
+import com.tmtc.service.UserDetailService;
+import com.tmtc.service.UserPushService;
+import com.tmtc.utils.IdWorker;
+import com.tmtc.utils.VerificationUtil;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.tmtc.constant.MessageVar;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.po.UserDetail;
+import com.tmtc.po.UserDetailRepository;
+import com.tmtc.po.UserLogin;
+import com.tmtc.service.appAPI.LoginAPIService;
+import com.tmtc.service.appAPI.RegisterAPIService;
+import com.tmtc.utils.ConvertCity;
+import com.tmtc.utils.ConvertUtil;
+import com.tmtc.utils.IP;
+
+/**
+ * 登录接口
+ * 
+ * @author qiukai
+ *
+ */
+@Controller
+@RequestMapping("/App/login")
+public class LoginAppController extends BaseController {
+
+	@Autowired
+	LoginAPIService loginAPIService;
+	
+	@Autowired
+	UserPushService userPushService;
+
+	@Autowired
+	RegisterAPIService registerAPIService;
+	
+	@Autowired
+	UserDetailService userDetailService;
+	
+	/**
+	 * 个人端登录	/App/login/query1.3?
+	 * @param request
+	 * @param username	手机号
+	 * @param login_source	登录来源（登录来源编号，int类型）
+	 * @param cityName	城市名
+	 * @param channelId	通道id （String类型）
+	 * @param veriftyCode	验证码
+	 * @return
+	 */
+	@RequestMapping("/query1.3")
+	@ResponseBody
+	public Map<String, Object> query(HttpServletRequest request, @RequestParam String username,@RequestParam Integer login_source,
+			@RequestParam String cityName, @RequestParam String channelId,@RequestParam String veriftyCode) {
+		//验证手机号
+		if (!VerificationUtil.checkMobilePhone(username)) {
+			return getMap(request, MessageVar.PHONE_NUM_ERROR, STATUS_ERROR);
+		}
+		//验证验证码
+		VerificationCode verificationCode2 = registerAPIService.selectVerificationCode(username);
+		if (null == verificationCode2) {
+			return getMap(request, MessageVar.PHONE_ONT_VERIFICATION, STATUS_ERROR);
+		} else {
+			if (ParameterConstant.TIME < (System.currentTimeMillis() - verificationCode2.getCreate_time())) {
+				return getMap(request, MessageVar.VERIFICATION_CODE_OVER, STATUS_ERROR);
+			}
+		}
+		// 获取ip地址
+		String ip_address = IP.getIP(request);
+		//验证手机号是否存在
+		if (null == registerAPIService.selectPhone(username)) {
+			String id = registerAPIService.addUser(username, cityName,ip_address,login_source);
+			Map<String,Object> map = insert(id,channelId);
+			return getMap(MessageVar.LOGIN_SUCCESS,STATUS_SUCCESS, map.get("userDetail"), ((UserLogin) map.get("userLogin")).getLogin_token());
+		}
+		UserDetailRepository userDetailRepository = new UserDetailRepository();
+		UserDetailRepository.Criteria criteria = userDetailRepository.createCriteria();
+		criteria.andUsernameEqualTo(username);
+		List<UserDetail> list = userDetailService.select(userDetailRepository);
+		String id = list.get(0).getId();
+		Map<String,Object> map = insert(id,channelId);
+		return getMap(MessageVar.LOGIN_SUCCESS,STATUS_SUCCESS, map.get("userDetail"), ((UserLogin) map.get("userLogin")).getLogin_token());
+	}
+	
+	public Map<String, Object> insert(String id,String channelId){
+		UserLogin userLogin = loginAPIService.addUserLogin(id);
+		UserDetail userDetail = loginAPIService.selectUserDetail(id);
+		UserPush userPush = new UserPush();
+		userPush.setId(IdWorker.nextId());
+		userPush.setUser_id(id);
+		userPush.setChannel_id(channelId);
+		userPush.setCreate_time(new Date());
+		userPush.setDevice_type(ParameterConstant.REGISTER_SOURCE_ANDROID);
+		// 添加推送用户
+		userPushService.insertOrUpdate(userPush);
+		
+		Map<String, Object> map = new HashMap<String,Object>();
+		map.put("userLogin", userLogin);
+		map.put("userDetail", userDetail);
+		return map;
+	}
+	
+	/**
+	 * 企业登录 /App/login/query?
+	 * 
+	 * @param city_id
+	 *            城市id（int类型）
+	 * @param name
+	 *            登录名（手机号或者工号，string类型）
+	 * @param company_id
+	 *            公司id（String类型）
+	 * @param user_type
+	 *            用户类型（用户类型编号 ，int类型）
+	 * @param login_source
+	 *            登录来源（登录来源编号，int类型）
+	 * @param password
+	 *            登录密码（经过md5后的32位16进制数，string类型）
+	 * @param is_driver
+	 *            是否是司机，（是司机is_driver=1）不是司机可以不发送，或者发送0
+	 * @param channelId
+	 *            通道id （String类型）
+	 * @return
+	 */
+	@RequestMapping("/query")
+	@ResponseBody
+	public Map<String, Object> query(HttpServletRequest request, @RequestParam String name,String company_id,
+			@RequestParam String cityName, Integer user_type, Integer login_source, String password,
+			Integer is_driver,@RequestParam String channelId) {
+
+		Integer city_id = ConvertCity.gerCity_code(cityName);
+		// 获取ip地址
+		String ip_address = IP.getIP(request);
+
+		String login = loginAPIService.saveLogin(name, company_id, user_type, login_source, password, ip_address,
+				city_id, is_driver);
+		long sign = 0L;
+		try {
+			sign = Long.valueOf(login);
+		} catch (Exception e) {
+			String[] split = login.split(",");
+			sign = ConvertUtil.stringToLong(split[0]);
+		}
+		
+		// 用于司机端验证
+		if (sign == STATUS_SUCCESS) {
+			return getMap(request, MessageVar.LOGIN_USER_PWD_ERROR,STATUS_ERROR);
+		}
+
+		if (sign < ParameterConstant.LOCK_CNT) {
+			return getMap(request, MessageVar.LOGIN_WARN + (5 - sign) + "次",
+					(int) sign);
+		}
+		
+		// 锁定用户
+		if (sign == ParameterConstant.LOCK_CNT) {
+			return getMap(request, MessageVar.LOGIN_ERROR,(int) sign);
+		}
+		UserLogin userLogin = loginAPIService.addUserLogin(String.valueOf(sign));
+		UserDetail userDetail = loginAPIService.selectUserDetail(String.valueOf(sign));
+		UserPush userPush = new UserPush();
+		userPush.setId(IdWorker.nextId());
+		userPush.setUser_id(String.valueOf(sign));
+		userPush.setChannel_id(channelId);
+		userPush.setCreate_time(new Date());
+		userPush.setDevice_type(login_source);
+		// 添加推送用户
+		userPushService.insertOrUpdate(userPush);
+		if (null == userDetail) {
+			return getMap(MessageVar.LOGIN_SUCCESS,STATUS_SUCCESS, login, userLogin.getLogin_token());
+		}
+		return getMap(MessageVar.LOGIN_SUCCESS,STATUS_SUCCESS, userDetail, userLogin.getLogin_token());
+	}
+}

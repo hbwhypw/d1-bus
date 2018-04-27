@@ -1,0 +1,100 @@
+package com.tmtc.controller;
+
+import com.tmtc.annotation.SystemControllerLog;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.frame.JsonResult;
+import com.tmtc.frame.PageResult;
+import com.tmtc.po.Resource;
+import com.tmtc.po.ResourceRepository;
+import com.tmtc.service.ResourceService;
+import com.tmtc.utils.IdWorker;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+/**
+ * Created:  hbwhypw
+ * Date: 2015/9/23 9:41
+ * Function:
+ */
+@Controller
+@RequestMapping("/resource")
+public class ResourceController extends BaseController{
+    @Autowired
+    ResourceService resourceService;
+
+    @ResponseBody
+    @RequestMapping("/queryTree")
+    @SystemControllerLog("资源-查询资源树")
+    public PageResult queryTree(HttpServletRequest request, HttpServletResponse response,
+                            @RequestParam(required = false) Integer is_root,
+                            @RequestParam(required = false) String name) {
+        ResourceRepository resourceRepository = new ResourceRepository();
+        ResourceRepository.Criteria criteria = resourceRepository.createCriteria();
+        if (name != null){
+            criteria.andNameEqualTo(name);
+        }
+        if (is_root != null){
+            criteria.andIs_rootEqualTo(is_root);
+        }
+        criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+        return resourceService.selectByPage(resourceRepository);
+    }
+
+    @ResponseBody
+    @RequestMapping("/query")
+    @SystemControllerLog("资源-查询全部")
+    public JsonResult query(HttpServletRequest request, HttpServletResponse response) {
+        ResourceRepository resourceRepository = new ResourceRepository();
+        ResourceRepository.Criteria criteria = resourceRepository.createCriteria();
+        criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+        return new JsonResult(1, JsonResult.SUCCESS, resourceService.select(resourceRepository));
+    }
+
+    @ResponseBody
+    @RequestMapping("/queryRoot")
+    public JsonResult queryRoot(HttpServletRequest request, HttpServletResponse response,
+                            @RequestParam Integer is_root) {
+        ResourceRepository resourceRepository = new ResourceRepository();
+        resourceRepository.or().andIs_rootEqualTo(is_root).andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+        return new JsonResult(1,JsonResult.SUCCESS,resourceService.select(resourceRepository));
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/{edit}")
+    @SystemControllerLog("资源-编辑")
+    public JsonResult add(HttpServletRequest request, HttpServletResponse response,@PathVariable String edit,
+                          @Valid @ModelAttribute Resource resource, BindingResult bindingResult){
+        if (bindingResult.hasErrors()) {
+            handlerErrors(bindingResult);
+        }
+        if (edit.equals(ADD)){
+            resource.setId(IdWorker.nextId());
+            if(StringUtils.isEmpty(resource.getParent())) {
+                resource.setParent(null);
+            }
+            resourceService.insert(resource);
+        } else if (edit.equals(UPDATE)){
+            if(StringUtils.isEmpty(resource.getParent())) {
+                resource.setParent(null);
+            }
+            resourceService.update(resource);
+        }
+        return new JsonResult();
+    }
+
+    @ResponseBody
+    @RequestMapping(value = "/delete")
+    @SystemControllerLog("资源-删除")
+    public JsonResult delete(HttpServletRequest request, HttpServletResponse response,
+                             @RequestParam String id){
+        resourceService.delete(id);
+        return new JsonResult();
+    }
+}

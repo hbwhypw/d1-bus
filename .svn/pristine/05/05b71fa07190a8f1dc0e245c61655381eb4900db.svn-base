@@ -1,0 +1,80 @@
+package com.tmtc.serviceImpl.appAPI;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.dao.UserDao;
+import com.tmtc.dao.UserDetailDao;
+import com.tmtc.dao.VerificationCodeDao;
+import com.tmtc.po.User;
+import com.tmtc.po.UserDetail;
+import com.tmtc.po.UserRepository;
+import com.tmtc.po.UserRepository.Criteria;
+import com.tmtc.po.VerificationCode;
+import com.tmtc.po.VerificationCodeRepository;
+import com.tmtc.service.appAPI.RegisterAPIService;
+import com.tmtc.utils.VerificationUtil;
+
+@Service
+public class RegisterAPIServiceImpl implements RegisterAPIService {
+
+	@Autowired
+	VerificationCodeDao verificationCodeDao;
+
+	@Autowired
+	UserDetailDao userDetailDao;
+
+	@Autowired
+	UserDao userDao;
+
+	@Override
+	public boolean addVerificationCode(VerificationCode verificationCode) {
+		int insert = verificationCodeDao.insert(verificationCode);
+		return 0 < insert ? true : false;
+	}
+
+	@Override
+	public User selectPhone(String phone) {
+		UserRepository userRepository = new UserRepository();
+		Criteria criteria = userRepository.createCriteria();
+		criteria.andUsernameEqualTo(phone);
+		List<User> userlist = userDao.selectByExample(userRepository);
+		if (0 == VerificationUtil.size(userlist)) {
+			return null;
+		}
+		return userlist.get(0);
+	}
+
+	@Override
+	public VerificationCode selectVerificationCode(String phone) {
+		VerificationCodeRepository verificationCodeRepository = new VerificationCodeRepository();
+		VerificationCodeRepository.Criteria criteria = verificationCodeRepository.createCriteria();
+		criteria.andMobile_phoneEqualTo(phone);
+		verificationCodeRepository.setOrderByClause("create_time desc");
+		List<VerificationCode> list = verificationCodeDao.selectByExample(verificationCodeRepository);
+		if (0 == VerificationUtil.size(list)) {
+			return null;
+		}
+		return list.get(0);
+	}
+
+	@Override
+	public boolean addUserDetail(UserDetail userDetail) {
+		int insert = userDetailDao.insert(userDetail);
+		return 0 < insert ? true : false;
+	}
+
+	@Override
+	public boolean updateUser(User user) {
+		UserDetail userDetail = new UserDetail();
+		userDetail.setId(user.getId());
+		userDetail.setIs_check(ParameterConstant.IS_CHECK);
+		userDetailDao.updateByPrimaryKeySelective(userDetail);
+		int i = userDao.updateByPrimaryKeySelective(user);
+		return 0 < i ? true : false;
+	}
+
+}

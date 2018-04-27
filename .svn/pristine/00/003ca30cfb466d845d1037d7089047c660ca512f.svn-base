@@ -1,0 +1,44 @@
+body { font: 12px/20px "微软雅黑", "宋体", Arial, sans-serif, Verdana, Tahoma; padding: 0; margin: 0; background-color: #0088CC; }
+.container{ width: 422px; height: 580px; background-color: #0088CC; position:absolute; left:50%; top:50%; margin: -290px 0 0 -211px }
+.title{ width: 422px; height: 195px; left:50%; top:50%; background: url("../img/title.png") center center; }
+.white{ width: 422px; height: 100px; left:50%; top:100px; background-color: #0088CC; }
+.back{ width: 422px; height: 207px; background: url("../img/background.png") center; position:absolute; left:50%; top:50%; margin: -90px 0 0 -211px }
+
+.inputContainer{
+    width: 250px;height: 60px;
+    margin: 90px auto 0px;
+    color: #0092DC;
+    /*background-color: #00ee00;*/
+}
+.buttonContainer{
+    width: 70px;height:45px;
+    margin: 0 auto;
+}
+.inputText{
+    font: normal normal normal normal 13.3333330154419px/normal fantasy;
+    width: 170px;
+}
+.button{
+    background-image: url("../img/button.png");
+    width: 87px;height: 31px;
+    vertical-align: top;
+    text-align: center;
+}
+.button:hover{
+    background-image: url("../img/button.png");
+    width: 87px;height: 31px;
+    vertical-align: top;
+    text-align: center;
+}
+.button:active{
+    background-image: url("../img/button.png");
+    width: 87px;height: 31px;
+    vertical-align: top;
+    text-align: center;
+}
+.login{
+    float: left;
+}
+.register{
+    float: right;
+}

@@ -1,0 +1,12 @@
+package com.tmtc.filter;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+public class FilterUtil {
+
+	public boolean getFalse(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		request.getRequestDispatcher("/App/error/enc").forward(request, response);
+		return false;
+	}
+}

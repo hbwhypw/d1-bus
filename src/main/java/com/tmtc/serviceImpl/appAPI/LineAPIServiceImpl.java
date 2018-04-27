@@ -1,0 +1,303 @@
+package com.tmtc.serviceImpl.appAPI;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import com.tmtc.frame.ServiceRuntimeException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.dao.CarDao;
+import com.tmtc.dao.CompanyDao;
+import com.tmtc.dao.DriverDao;
+import com.tmtc.dao.LineDao;
+import com.tmtc.dao.LineOrderDao;
+import com.tmtc.dao.LineStationDao;
+import com.tmtc.dao.LineTimeDao;
+import com.tmtc.dao.UserDao;
+import com.tmtc.frame.BasePage;
+import com.tmtc.po.Car;
+import com.tmtc.po.Company;
+import com.tmtc.po.Driver;
+import com.tmtc.po.Line;
+import com.tmtc.po.LineOrder;
+import com.tmtc.po.LineOrderRepository;
+import com.tmtc.po.LineRepository;
+import com.tmtc.po.LineStation;
+import com.tmtc.po.LineStationRepository;
+import com.tmtc.po.LineTime;
+import com.tmtc.po.LineTimeRepository;
+import com.tmtc.po.LineTimeRepository.Criteria;
+import com.tmtc.po.User;
+import com.tmtc.po.UserDetail;
+import com.tmtc.service.appAPI.LineAPIService;
+import com.tmtc.utils.ConvertUtil;
+import com.tmtc.utils.DateUtil;
+import com.tmtc.utils.VerificationUtil;
+
+@Service
+public class LineAPIServiceImpl extends BasePage implements LineAPIService {
+
+	@Autowired
+	LineDao lineDao;
+
+	@Autowired
+	LineTimeDao lineTimeDao;
+
+	@Autowired
+	UserDao userDao;
+
+	@Autowired
+	LineStationDao lineStationDao;
+
+	@Autowired
+	CarDao carDao;
+
+	@Autowired
+	DriverDao driverDao;
+
+	@Autowired
+	LineOrderDao lineOrderDao;
+
+	@Autowired
+	CompanyDao companyDao;
+	
+	@Override
+	public List<LineOrder> findLineTime(Date beginDate, Date endDate, String user_id, Integer page, Integer rows) {
+
+		List<Integer> integerList = new ArrayList<Integer>();
+		integerList.add(ParameterConstant.ORDER_STATUS);
+		integerList.add(ParameterConstant.ORDER_STATUS_NOT);
+		LineOrderRepository lineOrderRepository = new LineOrderRepository();
+		lineOrderRepository.setOrderByClause("order_time desc ");
+		super.setPageParams(lineOrderRepository, page, rows);
+		com.tmtc.po.LineOrderRepository.Criteria criteria = lineOrderRepository.createCriteria();
+		criteria.andUser_idEqualTo(user_id);
+		criteria.andOrder_timeBetween(beginDate, endDate);
+		criteria.andOrder_statusIn(integerList);
+		criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+		List<LineOrder> lineOrderList = lineOrderDao.selectByExample(lineOrderRepository);
+		if (0 == VerificationUtil.size(lineOrderList)) {
+			return null;
+		}
+		for (LineOrder lo : lineOrderList) {
+			// 查询线路
+			Line line = lineDao.selectByPrimaryKey(lo.getLine_id());
+
+			if (null != line) {
+				// 查询开始站
+				LineStation startLineStation = lineStationDao.selectByPrimaryKey(line.getStart_id());
+				line.setStartLineStation(startLineStation);
+
+				// 查询结束站
+				LineStation endLineStation = lineStationDao.selectByPrimaryKey(line.getEnd_id());
+				line.setEndLineStation(endLineStation);
+				lo.setLine(line);
+			}
+		}
+
+		return lineOrderList;
+
+	}
+
+	@Override
+	public LineTime findLineTime(String lineTimeId) {
+
+		// 查询班次
+		LineTime lineTime = lineTimeDao.selectByPrimaryKey(lineTimeId);
+		if (null == lineTime) {
+			return null;
+		}
+		String lineId = lineTime.getLine_id();
+		String carId = lineTime.getCar_id();
+		String driverId = lineTime.getDriver_id();
+		if (null == lineId || null == carId || null == driverId) {
+			return null;
+		}
+
+		// 查询线路
+		Line line = lineDao.selectByPrimaryKey(lineId);
+
+		// 查询站点
+		LineStationRepository lineStationRepository = new LineStationRepository();
+		com.tmtc.po.LineStationRepository.Criteria create = lineStationRepository.createCriteria();
+		lineStationRepository.setOrderByClause("sort asc");
+		create.andLine_idEqualTo(lineId);
+		create.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+		List<LineStation> lineStationList = lineStationDao.selectByExample(lineStationRepository);
+		line.setLineStationList(lineStationList);
+
+		// 查询开始站
+		LineStation startLineStation = lineStationDao.selectByPrimaryKey(line.getStart_id());
+		line.setStartLineStation(startLineStation);
+
+		// 查询结束站
+		LineStation endLineStation = lineStationDao.selectByPrimaryKey(line.getEnd_id());
+		line.setEndLineStation(endLineStation);
+
+		lineTime.setLine(line);
+
+		// 查询车辆信息
+		Car car = carDao.selectByPrimaryKey(ConvertUtil.stringToLong(carId));
+		lineTime.setCar(car);
+
+		// 查询司机
+		Driver driver = driverDao.selectByPrimaryKey(driverId);
+		lineTime.setDriver(driver);
+		return lineTime;
+	}
+
+	@Override
+	public List<Line> findLine(String userId, Integer page, Integer rows, Date date) {
+
+		User user = userDao.selectByPrimaryKey(userId);
+
+		if (null == user) {
+			return null;
+		}
+
+		LineRepository lineRepository = new LineRepository();
+		LineRepository.Criteria criteria = lineRepository.createCriteria();
+		criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+		super.setPageParams(lineRepository, page, rows);
+		String company_id = user.getCompany_id();
+
+		// 个人端未完成
+		if (0 == VerificationUtil.length(company_id)) {
+			return null;
+		}
+
+		criteria.andCompany_idEqualTo(user.getCompany_id());
+		lineRepository.setOrderByClause("sort asc");
+		List<Line> lineList = lineDao.selectByExample(lineRepository);
+
+		List<Line> lineList1 = new ArrayList<Line>();
+		if (0 != VerificationUtil.size(lineList)) {
+
+			// 把日期往后增加一天.整数往后推,负数往前移动
+			Date date1 = DateUtil.getTomorrow(date);
+			for (Line l : lineList) {
+
+				LineStation startLineStation = lineStationDao.selectByPrimaryKey(l.getStart_id());
+				LineStation endLineStation = lineStationDao.selectByPrimaryKey(l.getEnd_id());
+				l.setStartLineStation(startLineStation);
+				l.setEndLineStation(endLineStation);
+
+				LineTimeRepository lineTimeRepository = new LineTimeRepository();
+				Criteria criteria1 = lineTimeRepository.createCriteria();
+				criteria1.andDepart_timeBetween(date, date1);
+				criteria1.andLine_idEqualTo(l.getId());
+				criteria1.andDriving_stateNotEqualTo(ParameterConstant.CAR_STATUS_END);
+				List<LineTime> lineTimeList = lineTimeDao.selectByExample(lineTimeRepository);
+				l.setLineTimeList(lineTimeList);
+				lineList1.add(l);
+			}
+		}
+
+		return lineList1;
+	}
+
+	public List<Line> detailList(List<Line> lineList){
+		List<Line> lineDetailList = new ArrayList<Line>();
+		if (0 != VerificationUtil.size(lineList)) {
+			for (Line l : lineList) {
+				LineStation startLineStation = lineStationDao.selectByPrimaryKey(l.getStart_id());
+				LineStation endLineStation = lineStationDao.selectByPrimaryKey(l.getEnd_id());
+				l.setStartLineStation(startLineStation);
+				l.setEndLineStation(endLineStation);
+				
+				LineStationRepository lineStationRepository = new LineStationRepository();
+				LineStationRepository.Criteria criteria = lineStationRepository.createCriteria();
+				criteria.andLine_idEqualTo(l.getId());
+				List<LineStation> list = lineStationDao.selectByExample(lineStationRepository);
+				l.setLineStationList(list);
+				lineDetailList.add(l);
+			}
+		}
+		return lineDetailList;
+	}
+	
+	@Override
+	public List<LineTime> findDriverLine(String userId, Integer page, Integer rows, Date date) {
+		Driver driver = driverDao.selectByPrimaryKey(userId);
+
+		if (null == driver) {
+			return null;
+		}
+
+		LineTimeRepository lineTimeRepository = new LineTimeRepository();
+		Criteria criteria1 = lineTimeRepository.createCriteria();
+		lineTimeRepository.setOrderByClause("depart_time asc");
+		criteria1.andDepart_timeGreaterThan(date);
+		criteria1.andDepart_timeBetween(date, DateUtil.AddDate(date,3));
+		criteria1.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+		criteria1.andDriver_idEqualTo(driver.getId());
+		criteria1.andDriving_stateNotEqualTo(ParameterConstant.CAR_STATUS_END);
+		this.setPageParams(lineTimeRepository, page, rows);
+		List<LineTime> lineTimeList = lineTimeDao.selectByExample(lineTimeRepository);
+
+		if (0 != VerificationUtil.size(lineTimeList)) {
+			for (LineTime lt : lineTimeList) {
+				Line line = lineDao.selectByPrimaryKey(lt.getLine_id());
+				if (line == null){
+					throw new ServiceRuntimeException("数据错误，线路不存在");
+				}
+				LineStation startLineStation = lineStationDao.selectByPrimaryKey(line.getStart_id());
+				LineStation endLineStation = lineStationDao.selectByPrimaryKey(line.getEnd_id());
+				line.setStartLineStation(startLineStation);
+				line.setEndLineStation(endLineStation);
+				lt.setLine(line);
+			}
+		}
+		return lineTimeList;
+	}
+
+	@Override
+	public String findLine(String car_id,String userId) {
+		
+		User user = userDao.selectByPrimaryKey(userId);
+		if(null == user){
+			return null;
+		}
+		
+		LineTimeRepository lineTimeRepository = new LineTimeRepository();
+		LineTimeRepository.Criteria criteria = lineTimeRepository.createCriteria();
+		criteria.andCar_idEqualTo(car_id);
+		criteria.andDriving_stateEqualTo(ParameterConstant.CAR_STATUS_IS);
+		List<LineTime> lineTimeList = lineTimeDao.selectByExample(lineTimeRepository);
+		if (0 == VerificationUtil.size(lineTimeList)) {
+			return null;
+		}
+		
+		LineTime lineTime = lineTimeList.get(0);
+		LineRepository lineRepository = new LineRepository();
+		LineRepository.Criteria criteria2 = lineRepository.createCriteria();
+		criteria2.andCompany_idEqualTo(user.getCompany_id());
+		criteria2.andIdEqualTo(lineTime.getLine_id());
+		List<Line> lineList = lineDao.selectByExample(lineRepository);
+		if(0 >= VerificationUtil.size(lineList)){
+			return null;
+		}
+		
+		return lineTime.getId();
+	}
+
+	@Override
+	public String driverPush(String linetime_id) {
+		LineTime lineTime = lineTimeDao.selectByPrimaryKey(linetime_id);
+		if (null == lineTime) {
+			return "没有该班次";
+		}
+		Line line = lineDao.selectByPrimaryKey(lineTime.getLine_id());
+		if (null == line) {
+			return "没有该线路";
+		}
+		Company company = companyDao.selectByPrimaryKey(line.getCompany_id());
+		if (null == company) {
+			return "该班次没有公司";
+		}
+//		List<UserDetail> userDetailList = 
+		return null;
+	}
+}

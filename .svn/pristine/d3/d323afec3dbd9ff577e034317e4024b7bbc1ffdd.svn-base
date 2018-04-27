@@ -1,0 +1,66 @@
+package com.tmtc.controller;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.tmtc.annotation.SystemControllerLog;
+import com.tmtc.frame.JsonResult;
+import com.tmtc.frame.PageResult;
+import com.tmtc.po.LineTime;
+import com.tmtc.service.LineTimeService;
+
+@Controller
+@RequestMapping("/lineTime")
+public class LineTimeController extends BaseController {
+
+	@Autowired
+	LineTimeService lineTimeService;
+
+	@ResponseBody
+	@RequestMapping(value = "/add")
+	@SystemControllerLog("班车的添加")
+	public JsonResult add(@Valid @ModelAttribute LineTime lineTime, BindingResult bindingResult,
+			@RequestParam String yearMonth, @RequestParam String[] sendDate, @RequestParam String sendTime,
+			@RequestParam String doneTime) {
+
+		lineTimeService.insertLineTime(lineTime, yearMonth, sendDate, sendTime, doneTime);
+		return new JsonResult();
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/update")
+	@SystemControllerLog("班次的修改")
+	public JsonResult update(@Valid @ModelAttribute LineTime lineTime) {
+		lineTimeService.update(lineTime);
+		return new JsonResult();
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/query")
+	public PageResult query(HttpServletRequest request, @RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer rows, @RequestParam(required = false) String line_name) {
+		return lineTimeService.query(line_name, page, rows);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/delete")
+	@SystemControllerLog("班次的永久删除")
+	public JsonResult delete(@RequestParam String ids) {
+		lineTimeService.delete(ids);
+		return new JsonResult();
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/selectDriverAndCar")
+	public JsonResult selectDriverAndCar(@RequestParam String line_id) {
+		return lineTimeService.selectDriverAndCar(line_id);
+	}
+}

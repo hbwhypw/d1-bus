@@ -1,0 +1,113 @@
+package com.tmtc.controller.appAPI;
+
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.tmtc.constant.MessageVar;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.po.LineOrder;
+import com.tmtc.po.UserDetail;
+import com.tmtc.service.UserDetailService;
+import com.tmtc.service.appAPI.LineOrderAppService;
+import com.tmtc.service.appAPI.ScanAppService;
+import com.tmtc.utils.ConvertCity;
+
+@Controller
+@RequestMapping("/App/scan")
+public class ScanAppController extends BaseController {
+
+	@Autowired
+	UserDetailService userDetailService;
+	@Autowired
+	ScanAppService scanAppService;
+	@Autowired
+	LineOrderAppService lineOrderAppService;
+
+	/**
+	 * * 点击上车 /App/scan/getOn?
+	 * 
+	 * @param request
+	 * @param response
+	 * @param city_id
+	 *            城市id(code值)
+	 * @param line_time_id
+	 *            班次id
+	 * @return
+	 */
+	@RequestMapping("/getOn")
+	@ResponseBody
+	public Map<String, Object> getOn(HttpServletRequest request, @RequestParam String cityName,
+			@RequestParam String line_time_id) {
+
+		Integer city_id = ConvertCity.gerCity_code(cityName);
+		String userId = getUserId(request);
+		UserDetail userDetail = userDetailService.selectByPrimaryKey(userId);
+
+		if (null == userDetail || ParameterConstant.IS_NOT_CHECK == userDetail.getIs_check()) {
+			return getMap(request, "", String.valueOf(ParameterConstant.IS_NOT_CHECK));
+		}
+
+		Integer userType = userDetail.getUser_type();
+		if (ParameterConstant.USER_TYPE_COMPANY == userType) {
+			return getMap(request, MessageVar.SCANGETON, String.valueOf(ParameterConstant.SCAN_STATUS_SCAN));
+		}
+		
+		if (ParameterConstant.USER_TYPE_COMPANY_NORMAL != userType) {
+			
+		}
+		
+		if (ParameterConstant.USER_TYPE_COMPANY_NORMAL == userType) {
+			
+			int status = lineOrderAppService.select(userId, line_time_id);
+
+			// 没有订单或订单状态为已完成，则生成订单
+			if (0 == status || ParameterConstant.ORDER_STATUS == status) {
+				LineOrder lineOrder = lineOrderAppService.add(userId, city_id, line_time_id);
+				return getMap(request, MessageVar.SCANNOPAY, lineOrder);
+			}
+
+			// 订单状态为未完成状态，则直接跳到扫码页面
+			if (ParameterConstant.ORDER_STATUS_NOT == status) {
+				return getMap(request, MessageVar.SCANGETON, String.valueOf(ParameterConstant.SCAN_STATUS_SCAN));
+			}
+
+			// 其余状态均将其改为未支付，然后跳到支付页面
+			if (ParameterConstant.ORDER_STATUS_ADMIN_CANCEL == status
+					|| ParameterConstant.ORDER_STATUS_USER_CANCEL == status
+					|| ParameterConstant.ORDER_STATUS_NOT_PAY == status
+					|| ParameterConstant.ORDER_STATUS_DATED == status) {
+				LineOrder lineOrder = lineOrderAppService.update(userId, line_time_id);
+				return getMap(request, MessageVar.SCANNOPAY, lineOrder);
+			}
+		}
+		return getMap(request, "", String.valueOf(ParameterConstant.IS_NOT_CHECK));
+	}
+
+	/**
+	 * 下车 /App/scan/getOff?
+	 * 
+	 * @param request
+	 * @param response
+	 * @param station_id
+	 *            站点id
+	 * @param time_line_id
+	 *            班次id
+	 * @return
+	 */
+	@RequestMapping("/getOff")
+	@ResponseBody
+	public Map<String, Object> getOff(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam String station_id, @RequestParam String time_line_id) {
+		String userId = getUserId(request);
+		return getMap(request, MessageVar.GETOFF,
+				String.valueOf(scanAppService.insert(userId, station_id, time_line_id)));
+	}
+}

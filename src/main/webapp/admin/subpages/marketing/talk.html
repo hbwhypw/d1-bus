@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>talkVo</title>
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/talk.js"></script>
+<table id="talkVoDg" class="easyui-datagrid" data-options="url:'./../talk/query',rownumbers:true,toolbar:'#talkVoDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true">
+    <thead>
+    <tr>
+    	
+        <th data-options="field:'id',width:80">编号</th>
+     
+        <th data-options="field:'type',width:80">类型</th>
+        <th data-options="field:'company_name',width:80">公司名称</th>
+        <th data-options="field:'room_id',width:80">房间ID</th>
+        <th data-options="field:'room_name',width:80">房间名</th>
+        <th data-options="field:'romm_des',width:80">描述</th>
+        <th data-options="field:'room_num',width:80">房间人数</th>
+        <th data-options="field:'remark',width:80">备注</th>
+        <th data-options="field:'create_time',width:80">创建时间</th>
+    </tr>
+    </thead>
+</table>
+<div id="talkVoDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+                &nbsp;&nbsp;类型：&nbsp;&nbsp;
+                <input id="typeParam" name="type" class="easyui-validatebox" style="width: 150px;">
+                &nbsp;&nbsp;房间ID：&nbsp;&nbsp;
+                <input id="room_idParam" name="room_id" class="easyui-validatebox" style="width: 150px;">
+                &nbsp;&nbsp;房间名：&nbsp;&nbsp;
+                <input id="room_nameParam" name="room_name" class="easyui-validatebox" style="width: 150px;">
+                &nbsp;&nbsp;公司名称：&nbsp;&nbsp;
+	            <input id="company_idParam" class="easyui-combobox" name="company_id" data-options="
+									valueField:'id',textField:'name',url:'./../company/query',
+									loader: common.comboBoxLoaderPage,
+									onBeforeLoad: function(param){
+										param.page = 1;param.rows = 100; 
+									} "/>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查 询</a>
+            </td>
+            <td align="right" width="450px">
+            	<a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-add" plain="true">添加</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+<div id="talkVoDlg" class="easyui-dialog" style="width:480px;height:300px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#talkVoDlgBtn">
+    <form id="talkVoFm" class="fm" method="post" novalidate enctype="multipart/form-data">
+        <div class="fitem">
+            <label> 类型： </label>
+            <input id="id" name="id" type="hidden">
+            <input id="type" name="type" class="easyui-validatebox" required="true"
+            	data-options="validType: ['specialChar']">
+        </div>
+        <div class="fitem">
+  
+            <label> 公司名称： </label>
+            <input id="company_idParam" class="easyui-combobox" name="company_id" data-options="
+								valueField:'id',textField:'name',url:'./../company/query',
+								loader: common.comboBoxLoaderPage,
+								onBeforeLoad: function(param){
+									param.page = 1;param.rows = 100; 
+								} "/>
+        </div>
+        <div class="fitem">
+            <label> 房间名： </label>
+            <input id="room_name" name="room_name" class="easyui-validatebox" required="true"
+            	data-options="validType: ['specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 描述： </label>
+            <input id="romm_des" name="romm_des" class="easyui-validatebox" required="true"
+            	data-options="validType: ['specialChar']">
+        </div>
+<!--         <div class="fitem"> -->
+<!--             <label> 房间人数： </label> -->
+<!--             <input id="room_num" name="room_num" class="easyui-validatebox" required="true" -->
+<!--             	data-options="validType: ['num']"> -->
+<!--         </div> -->
+        <div class="fitem">
+            <label> 备注： </label>
+            <input id="remark" name="remark" class="easyui-validatebox">
+        </div>
+    </form>
+    <div id="talkVoDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+</div>
+<div id="talkVoUpdateDlg" class="easyui-dialog" style="width:480px;height:300px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#talkVoUpdateDlgBtn">
+    <form id="talkVoUpdateFm" class="fm" method="post" novalidate enctype="multipart/form-data">
+        <div class="fitem">
+            <label> 房间名： </label>
+            <input id="id" name="id" type="hidden">
+            <input id="room_name" name="room_name" class="easyui-validatebox" required="true"
+            	data-options="validType: ['specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 描述： </label>
+            <input id="romm_des" name="romm_des" class="easyui-validatebox" required="true"
+            	data-options="validType: ['specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 备注： </label>
+            <input id="remark" name="remark" class="easyui-validatebox">
+        </div>
+    </form>
+    <div id="talkVoUpdateDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+</div>
+</body>
+</html>

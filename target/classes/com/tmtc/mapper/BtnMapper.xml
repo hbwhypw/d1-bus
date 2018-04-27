@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tmtc.dao.BtnDao" >
+  <resultMap id="BaseResultMap" type="com.tmtc.po.Btn" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="btn_id" property="btn_id" jdbcType="VARCHAR" />
+    <result column="btn_name" property="btn_name" jdbcType="VARCHAR" />
+    <result column="group_id" property="group_id" jdbcType="VARCHAR" />
+    <result column="group_name" property="group_name" jdbcType="VARCHAR" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, btn_id, btn_name, group_id, group_name, remark
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.tmtc.po.BtnRepository" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_btn
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_btn
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from t_btn
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.tmtc.po.BtnRepository" >
+    delete from t_btn
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.tmtc.po.Btn" >
+    insert into t_btn (id, btn_id, btn_name, 
+      group_id, group_name, remark
+      )
+    values (#{id,jdbcType=BIGINT}, #{btn_id,jdbcType=VARCHAR}, #{btn_name,jdbcType=VARCHAR}, 
+      #{group_id,jdbcType=VARCHAR}, #{group_name,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.tmtc.po.Btn" >
+    insert into t_btn
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="btn_id != null" >
+        btn_id,
+      </if>
+      <if test="btn_name != null" >
+        btn_name,
+      </if>
+      <if test="group_id != null" >
+        group_id,
+      </if>
+      <if test="group_name != null" >
+        group_name,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="btn_id != null" >
+        #{btn_id,jdbcType=VARCHAR},
+      </if>
+      <if test="btn_name != null" >
+        #{btn_name,jdbcType=VARCHAR},
+      </if>
+      <if test="group_id != null" >
+        #{group_id,jdbcType=VARCHAR},
+      </if>
+      <if test="group_name != null" >
+        #{group_name,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.tmtc.po.BtnRepository" resultType="java.lang.Integer" >
+    select count(*) from t_btn
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update t_btn
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.btn_id != null" >
+        btn_id = #{record.btn_id,jdbcType=VARCHAR},
+      </if>
+      <if test="record.btn_name != null" >
+        btn_name = #{record.btn_name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.group_id != null" >
+        group_id = #{record.group_id,jdbcType=VARCHAR},
+      </if>
+      <if test="record.group_name != null" >
+        group_name = #{record.group_name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.remark != null" >
+        remark = #{record.remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update t_btn
+    set id = #{record.id,jdbcType=BIGINT},
+      btn_id = #{record.btn_id,jdbcType=VARCHAR},
+      btn_name = #{record.btn_name,jdbcType=VARCHAR},
+      group_id = #{record.group_id,jdbcType=VARCHAR},
+      group_name = #{record.group_name,jdbcType=VARCHAR},
+      remark = #{record.remark,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tmtc.po.Btn" >
+    update t_btn
+    <set >
+      <if test="btn_id != null" >
+        btn_id = #{btn_id,jdbcType=VARCHAR},
+      </if>
+      <if test="btn_name != null" >
+        btn_name = #{btn_name,jdbcType=VARCHAR},
+      </if>
+      <if test="group_id != null" >
+        group_id = #{group_id,jdbcType=VARCHAR},
+      </if>
+      <if test="group_name != null" >
+        group_name = #{group_name,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tmtc.po.Btn" >
+    update t_btn
+    set btn_id = #{btn_id,jdbcType=VARCHAR},
+      btn_name = #{btn_name,jdbcType=VARCHAR},
+      group_id = #{group_id,jdbcType=VARCHAR},
+      group_name = #{group_name,jdbcType=VARCHAR},
+      remark = #{remark,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+
+  <!-- 自定义 -->
+  <select id="selectGroupId" resultType="com.tmtc.po.Btn">
+    SELECT
+     id, btn_id, btn_name, group_id, group_name, remark
+    FROM t_btn
+    GROUP BY group_id
+  </select>
+</mapper>

@@ -1,0 +1,75 @@
+package com.tmtc.po;
+
+import java.util.Date;
+
+public class ScanTemp {
+    private Long id;
+
+    private Long user_id;
+
+    private String linetime_id;
+
+    private Long station_id;
+
+    private Date create_time;
+
+    private Integer status;
+
+    private Integer is_check;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Long getUser_id() {
+        return user_id;
+    }
+
+    public void setUser_id(Long user_id) {
+        this.user_id = user_id;
+    }
+
+    public String getLinetime_id() {
+        return linetime_id;
+    }
+
+    public void setLinetime_id(String linetime_id) {
+        this.linetime_id = linetime_id;
+    }
+
+    public Long getStation_id() {
+        return station_id;
+    }
+
+    public void setStation_id(Long station_id) {
+        this.station_id = station_id;
+    }
+
+    public Date getCreate_time() {
+        return create_time;
+    }
+
+    public void setCreate_time(Date create_time) {
+        this.create_time = create_time;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Integer getIs_check() {
+        return is_check;
+    }
+
+    public void setIs_check(Integer is_check) {
+        this.is_check = is_check;
+    }
+}

@@ -1,0 +1,310 @@
+package com.tmtc.controller;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
+
+import com.tmtc.annotation.SystemControllerLog;
+import com.tmtc.constant.MessageVar;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.excelTools.ExcelUtils;
+import com.tmtc.excelTools.JsGridReportBase;
+import com.tmtc.excelTools.TableData;
+import com.tmtc.frame.JsonResult;
+import com.tmtc.frame.PageResult;
+import com.tmtc.frame.ServiceException;
+import com.tmtc.po.Car;
+import com.tmtc.po.CarRepository;
+import com.tmtc.service.CarService;
+import com.tmtc.utils.IdWorker;
+import com.tmtc.utils.VerificationUtil;
+import com.tmtc.vo.CarVo;
+
+/**
+ * 车辆管理的控制器
+ * @author zxs
+ * 
+ */
+@Controller
+@RequestMapping("/car")
+public class CarController {
+	
+	@Autowired
+	CarService carService;
+	/**
+	 * 添加和删除车辆
+	 * @throws ServiceException 
+	 */
+	@RequestMapping("/{edit}")
+	@ResponseBody
+    @SystemControllerLog("车辆-编辑")
+	public JsonResult add(HttpServletRequest request,HttpServletResponse response,
+			@Valid @ModelAttribute Car car,
+			@RequestParam CommonsMultipartFile[] car_picUrl,
+			@RequestParam CommonsMultipartFile[] car_registration_picUrl,
+			@RequestParam CommonsMultipartFile[] appearance_picUrl,
+			@RequestParam CommonsMultipartFile[] trim_picUrl,
+			@PathVariable String edit) throws ServiceException{
+		if (edit.equals("add")){
+			car.setId(IdWorker.nextId());
+			car.setCreate_time(new Date());
+			car.setIs_check(ParameterConstant.IS_CHECK);
+			carService.insert(car,car_picUrl,car_registration_picUrl,appearance_picUrl,trim_picUrl,request);
+			return new JsonResult();
+		}else if (edit.equals("update")){
+			carService.update(car,car_picUrl,car_registration_picUrl,appearance_picUrl,trim_picUrl,request);
+			return new JsonResult();
+		}
+		return new JsonResult(0,MessageVar.DO_ERROR,null);
+	}
+	/**
+	 * 车辆删除
+	 */
+	@RequestMapping("/delete")
+	@ResponseBody
+    @SystemControllerLog("车辆-删除")
+	public JsonResult delete(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam(required = true) String ids){
+		String[] idArr = ids.split(",");
+		for(String id: idArr){
+			Car car = new Car();
+			car.setId(id);
+			car.setIs_check(ParameterConstant.IS_NOT_CHECK);
+			carService.delete(car);
+			if(0 == carService.delete(car)){
+				return new JsonResult(0, MessageVar.DELETE_ERROR, 0);
+			}
+		}
+		return new JsonResult(0, MessageVar.DELETE_SUCCESS, 0);
+	}
+	/**
+	 * 车辆永久删除
+	 */
+	@RequestMapping("/forEver")
+	@ResponseBody
+    @SystemControllerLog("车辆-永久删除")
+	public JsonResult forEver(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam(required = true) String ids){
+		String[] idArr = ids.split(",");
+		for(String id: idArr){
+			if(0 == carService.deleteForEver(id)){
+				return new JsonResult(0, MessageVar.DELETE_ERROR, 0);
+			}
+		}
+		return new JsonResult(1,MessageVar.DELETE_SUCCESS,1);
+	}
+	/**
+	 * 查看所有车辆信息
+	 */
+	@RequestMapping("/query")
+	@ResponseBody
+    @SystemControllerLog("车辆-查询")
+	public PageResult query(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam(required = true) Integer page,
+			@RequestParam(required = true) Integer rows,
+			@RequestParam(required = false) String car_num,
+			@RequestParam(required = false) Integer from_company,
+			@RequestParam(required = false) Integer car_status){
+		if(null!=page && null!=rows){
+			CarRepository carRepository = new CarRepository();
+			CarRepository.Criteria criteria = carRepository.createCriteria();
+			carRepository.setPageSize(rows);
+			carRepository.setRowIndex((page-1)*rows);
+			if(null != car_num && "" != car_num){
+				criteria.andCar_numLike("%"+car_num+"%");
+			}
+			if(null != from_company){
+				criteria.andFrom_companyEqualTo(from_company);
+			}
+			if(null != car_status){
+				criteria.andCar_statusEqualTo(car_status);
+			}
+			criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+			PageResult pageResult = carService.selectByPage(carRepository);
+			return pageResult;
+		}
+		return new PageResult(0,null,0);
+	}
+	/**
+	 * 查看是否有此车牌
+	 */
+	@RequestMapping("/selectByCar_num")
+	@ResponseBody
+	public JsonResult selectByCar_num(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam(required = false) String car_num){
+		CarRepository carRepository = new CarRepository();
+		CarRepository.Criteria criteria = carRepository.createCriteria();
+		if(0 != VerificationUtil.length(car_num)){
+			criteria.andCar_numEqualTo(car_num);
+			criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+			List<Car> listCar= carService.select(carRepository);
+			if(0 != VerificationUtil.size(listCar)){
+				return new JsonResult();
+			}else{
+				return new JsonResult(0,MessageVar.DO_ERROR,null);
+			}
+		}
+		return new JsonResult(0,MessageVar.DO_ERROR,null);
+	}
+	/**
+	 * 查询是否有此设备号
+	 * @param request
+	 * @param response
+	 * @param imei
+	 * @return
+	 */
+	@RequestMapping("/selectByImei")
+	@ResponseBody
+	public JsonResult selectByImei(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam(required = false) String imei){
+		CarRepository carRepository = new CarRepository();
+		CarRepository.Criteria criteria = carRepository.createCriteria();
+		if(0 != VerificationUtil.length(imei)){
+			criteria.andImeiEqualTo(imei);
+			criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+			List<Car> listCar= carService.select(carRepository);
+			if(0 != VerificationUtil.size(listCar)){
+				return new JsonResult();
+			}else{
+				return new JsonResult(0,MessageVar.DO_ERROR,null);
+			}
+		}
+		return new JsonResult(0,MessageVar.DO_ERROR,null);
+	}
+	
+	@RequestMapping("/selectByPhone")
+	@ResponseBody
+	public JsonResult selectByPhone(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam(required = false) String phone){
+		CarRepository carRepository = new CarRepository();
+		CarRepository.Criteria criteria = carRepository.createCriteria();
+		if(0 != VerificationUtil.length(phone)){
+			if(VerificationUtil.checkMobilePhone(phone)){
+				criteria.andPhoneEqualTo(phone);
+				criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+				List<Car> listCar= carService.select(carRepository);
+				if(0 != VerificationUtil.size(listCar)){
+					return new JsonResult();
+				}else{
+					return new JsonResult(0,MessageVar.DO_ERROR,null);
+				}
+			}
+		}
+		return new JsonResult(0,MessageVar.DO_ERROR,null);
+	}
+	
+	/**
+	 * 查看图片
+	 * @param request
+	 * @param response
+	 * @param id	车辆ID
+	 * @return
+	 */
+	@RequestMapping("/selectById")
+	@ResponseBody
+	public JsonResult selectById(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam String id){
+		return new JsonResult(1,"",carService.img(id));
+	}
+	
+	/**
+	 * 恢复使用
+	 * @param request
+	 * @param response
+	 * @param id	车辆ID
+	 * @return
+	 */
+	@RequestMapping("/updateRecover")
+	@ResponseBody
+    @SystemControllerLog("车辆-恢复使用")
+	public JsonResult updateRecover(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam String ids){
+		String[] idArr = ids.split(",");
+		for(String id: idArr){
+			if(0 == carService.updateRecover(id)){
+				return new JsonResult(0, MessageVar.ISCHECK_ERROR, 0);
+			}
+		}
+		return new JsonResult(1,MessageVar.ISCHECK_SUCCESS,1);
+	}
+	
+	/**
+     * 车辆导出
+     */
+    /*@RequestMapping("/export")
+    @ResponseBody
+    @SystemControllerLog("车辆导出")
+    public void export(HttpServletRequest request, HttpServletResponse response,
+                       @RequestParam(required = false) String car_num,
+                       @RequestParam(required = false) Integer from_company,
+                       @RequestParam(required = false) Integer car_status) {
+    	CarRepository carRepository = new CarRepository();
+		CarRepository.Criteria criteria = carRepository.createCriteria();
+		if(null != car_num && "" != car_num){
+			criteria.andCar_numLike("%"+car_num+"%");
+		}
+		if(null != from_company){
+			criteria.andFrom_companyEqualTo(from_company);
+		}
+		if(null != car_status){
+			criteria.andCar_statusEqualTo(car_status);
+		}
+		criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+		List<CarVo> list = carService.selectDetail(carRepository);
+        String[] hearders = new String[]{"车牌号","乘客座位数", "车辆型号","车辆品牌","设备型号","手机号", "所属公司", "设备IMEI号","购车时间","年检日期"};
+        String[] fields = new String[]{"car_num", "seat", "car_type_name", "car_brand", "device", "phone", "from_company_name", "imei","buy_date","inspection_date"};
+        TableData td = ExcelUtils.createTableData(list, ExcelUtils.createTableHeader(hearders), fields);
+        JsGridReportBase report = null;
+        String title = "车辆信息";
+        try {
+            report = new JsGridReportBase(request, response);
+            report.exportToExcel(title, "", td);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }*/
+	
+    /**
+     * 车辆导出
+     */
+    @RequestMapping("/export")
+    @ResponseBody
+    @SystemControllerLog("车辆导出")
+    public void export(HttpServletRequest request, HttpServletResponse response,
+    		@RequestParam(required = false) String ids) {
+    	String[] idArr = ids.split(",");
+    	List<String> listId = new ArrayList<String>();
+    	for (int i = 0; i < idArr.length; i++) {
+			listId.add(idArr[i]);
+		}
+    	CarRepository carRepository = new CarRepository();
+    	CarRepository.Criteria criteria = carRepository.createCriteria();
+    	criteria.andIdIn(listId);
+    	criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+    	List<CarVo> list = carService.selectDetail(carRepository);
+    	String[] hearders = new String[]{"车牌号","乘客座位数", "车辆型号","车辆品牌","设备型号","手机号", "所属公司", "设备IMEI号","购车时间","年检日期"};
+    	String[] fields = new String[]{"car_num", "seat", "car_type_name", "car_brand", "device", "phone", "from_company_name", "imei","buy_date","inspection_date"};
+    	TableData td = ExcelUtils.createTableData(list, ExcelUtils.createTableHeader(hearders), fields);
+    	JsGridReportBase report = null;
+    	String title = "车辆信息";
+    	try {
+    		report = new JsGridReportBase(request, response);
+    		report.exportToExcel(title, "", td);
+    	} catch (Exception e) {
+    		e.printStackTrace();
+    	}
+    }
+}

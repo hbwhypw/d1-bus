@@ -1,0 +1,157 @@
+{
+	menus:[
+	{
+		menuName:'系统基础设置',
+		menuUrl:'',
+		subList:[
+			{
+                menuName:'积分管理',
+                menuUrl:'subpages/exp.html',
+                subList: null
+            },{
+                menuName:'券码管理',
+                menuUrl:'subpages/card.html',
+                subList: null
+            },{
+                menuName:'用户管理',
+                menuUrl:'subpages/userDetail.jsp',
+                subList: null
+            },{
+                menuName:'日志管理',
+                menuUrl:'subpages/log.html',
+                subList: null
+            },{
+                menuName:'管理员管理',
+                menuUrl:'subpages/admins.jsp',
+                subList: null
+            },{
+                menuName:'资源管理',
+                menuUrl:'subpages/resource.html',
+                subList: null
+            },{
+                menuName:'角色管理',
+                menuUrl:'subpages/role.html',
+                subList: null
+            },{
+                menuName:'公司管理',
+                menuUrl:'subpages/company.html',
+                subList: null
+            },{
+                menuName:'车辆管理',
+                menuUrl:'subpages/car.html',
+                subList: null
+            },{
+                menuName:'字典管理',
+                menuUrl:'subpages/dictionary.html',
+                subList: null
+            },{
+                menuName:'广告管理',
+                menuUrl:'subpages/adPic.html',
+                subList: null
+            },{
+                menuName:'司机管理',
+                menuUrl:'subpages/driver.html',
+                subList: null
+            },{
+                menuName:'线路管理',
+                menuUrl: 'subpages/line.html',
+                subList: null
+            },{
+                menuName:'站点管理',
+                menuUrl: 'subpages/lineStation.html',
+                subList: null
+            },{
+                menuName:'班次管理',
+                menuUrl: 'subpages/lineTime.html',
+                subList: null
+            },{
+                menuName:'消息反馈管理',
+                menuUrl: 'subpages/feedback.html',
+                subList: null
+            },{
+                menuName:'app资源管理',
+                menuUrl: 'subpages/appResource.html',
+                subList: null
+            },{
+                menuName:'线路申请',
+                menuUrl: 'subpages/lineApply.html',
+                subList: null
+            },{
+                menuName:'App访问统计',
+                menuUrl: 'subpages/appLog.html',
+                subList: null
+            },{
+                menuName:'消息管理',
+                menuUrl: 'subpages/message.html',
+                subList: null
+            },{
+                menuName:'劵码消费记录',
+                menuUrl: 'subpages/cardRecord.html',
+                subList: null
+            },{
+                menuName:'商品类型管理',
+                menuUrl: 'subpages/productType.html',
+                subList: null
+            },{
+                menuName:'商品管理',
+                menuUrl: 'subpages/product.html',
+                subList: null
+            },{
+                menuName:'线路订单管理',
+                menuUrl: 'subpages/lineOrder.html',
+                subList: null
+            },{
+                menuName:'商城订单管理',
+                menuUrl: 'subpages/shopOrder.html',
+                subList: null
+            },{
+                menuName:'积分订单管理',
+                menuUrl: 'subpages/expOrder.html',
+                subList: null
+            }
+		]
+	},{
+        menuName:'线路管理',
+        menuUrl:'',
+        subList:[{
+                  menuName:'用户管理',
+                  menuUrl:'subpages/user.html',
+                  subList: null
+                  
+              },{
+                menuName:'添加站点',
+                menuUrl: 'subpages/line/addStat.html',
+                subList: null
+            }
+        ]
+    },{
+        menuName:'商城管理',
+        menuUrl:'',
+        subList:[
+          {
+                menuName:'用户管理',
+                menuUrl:'subpages/userDetail.html',
+                subList: null
+            },{
+                menuName:'商品管理',
+                menuUrl: 'subpages/product.html',
+                subList: null
+            }
+        ]
+    },{
+        menuName:'统计管理',
+        menuUrl:'',
+        subList:[
+          {
+                menuName:'用户管理',
+                menuUrl:'subpages/user.html',
+                subList: null
+            },{
+                menuName:'司机统计',
+                menuUrl: 'info/driverInfo.html',
+                subList: null
+            }
+        ]
+    }
+	]
+}

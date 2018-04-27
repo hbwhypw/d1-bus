@@ -1,0 +1,109 @@
+package com.tmtc.serviceImpl;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.dao.MoneyOrderDao;
+import com.tmtc.dao.UserDetailDao;
+import com.tmtc.frame.BasePage;
+import com.tmtc.frame.PageResult;
+import com.tmtc.frame.ServiceException;
+import com.tmtc.po.MoneyOrder;
+import com.tmtc.po.MoneyOrderRepository;
+import com.tmtc.po.MoneyOrderRepository.Criteria;
+import com.tmtc.po.UserDetail;
+import com.tmtc.service.ReChargeService;
+
+@Service
+public class ReChargeServiceImpl extends BasePage implements ReChargeService {
+
+	@Autowired
+	MoneyOrderDao moneyOrderDao;
+
+	@Autowired
+	UserDetailDao userDetailDao;
+
+	@Override
+	public int count(MoneyOrderRepository example) {
+		return moneyOrderDao.countByExample(example);
+	}
+
+	@Override
+	public int delete(String id) {
+		return 0;
+	}
+
+	@Override
+	public int delete(MoneyOrderRepository example) {
+		return 0;
+	}
+
+	@Override
+	public int insert(MoneyOrder record) {
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(record.getUserId());
+		if (null == userDetail
+				|| !String.valueOf(userDetail.getCard_num().toString()).equals(record.getCard_no())) {
+			return 0;
+		}
+		return moneyOrderDao.insert(record);
+	}
+
+	@Override
+	public List<MoneyOrder> select(MoneyOrderRepository example) {
+		List<MoneyOrder> list = moneyOrderDao.selectByExample(example);
+		return list;
+	}
+
+	@Override
+	public MoneyOrder selectByPrimaryKey(String id) {
+		return moneyOrderDao.selectByPrimaryKey(id);
+	}
+
+	@Override
+	public int update(MoneyOrder record) {
+		return moneyOrderDao.updateByPrimaryKeySelective(record);
+	}
+
+	@Override
+	public int update(MoneyOrder record, MoneyOrderRepository example) {
+		return 0;
+	}
+
+	@Override
+	public PageResult selectByPage(MoneyOrderRepository example) {
+		return null;
+	}
+
+	@Override
+	public boolean updatereCharger(MoneyOrder moneyOrder) throws ServiceException {
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(moneyOrder.getUserId());
+		if (null == userDetail) {
+			throw new ServiceException("数据库异常！用户不存在!用户id为：" + moneyOrder.getUserId());
+		}
+		userDetail.setBalance(userDetail.getBalance() + moneyOrder.getMoney());
+		int i = userDetailDao.updateByPrimaryKeySelective(userDetail);
+		if (0 >= i) {
+			throw new ServiceException("数据库异常！用户修改失败" + userDetail.toString());
+		}
+		int update = this.update(moneyOrder);
+		if (0 >= update) {
+			throw new ServiceException("数据库异常！订单修改失败" + moneyOrder.toString());
+		}
+		return true;
+	}
+
+	@Override
+	public List<MoneyOrder> findMoneyOrder(String userId, Integer page,Integer rows) {
+		MoneyOrderRepository moneyOrderRepository = new MoneyOrderRepository();
+		Criteria criteria = moneyOrderRepository.createCriteria();
+		criteria.andUserIdEqualTo(userId);
+		criteria.andOrder_statusEqualTo(ParameterConstant.CZ_ORDER_STATUS_FINISH);
+		super.setPageParams(moneyOrderRepository, page, rows);
+		List<MoneyOrder> list = moneyOrderDao.selectByExample(moneyOrderRepository);
+		return list;
+	}
+
+}

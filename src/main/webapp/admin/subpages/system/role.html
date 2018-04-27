@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>role</title>
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/role.js"></script>
+<table id="roleDg" class="easyui-datagrid" data-options="url:'./../role/query',rownumbers:true,toolbar:'#roleDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true">
+    <thead>
+    <tr>
+        <th data-options="field:'id',width:80">编号</th>
+        <th data-options="field:'name',width:80">名称</th>
+        <!--<th data-options="field:'role_type',width:80">类别</th>-->
+        <th data-options="field:'resource',width:80">资源</th>
+        <th data-options="field:'btn',width:80">按钮</th>
+        <th data-options="field:'sort',width:40">排序</th>
+        <th data-options="field:'note',width:80">备注</th>
+        <th data-options="field:'is_check',width:20,formatter: common.is_checkFormatter">是否有效</th>
+    </tr>
+    </thead>
+</table>
+<div id="roleDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+                &nbsp;&nbsp;名称：&nbsp;&nbsp;
+                <input id="nameParam" name="name" class="easyui-validatebox" style="width: 150px;">
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查 询</a>
+            </td>
+            <td align="right" width="320px">
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-add" plain="true">添加</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">删除</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+<div id="roleDlg" class="easyui-dialog" style="width:400px;height:450px;"
+     data-options="resizable:true,modal:true" closed="true" buttons="#roleDlgBtn">
+    <div id="tt" class="easyui-tabs" style="width:auto;height:auto;">
+        <div title="角色信息" style="height:100%;padding:20px;">
+            <form id="roleFm" class="fm" method="post" novalidate>
+                <div class="fitem">
+                    <label> 名称： </label>
+                    <input id="id" name="id" type="hidden">
+                    <input id="name" name="name" class="easyui-validatebox" required="true"data-options="validType: ['maxLength[18]','specialChar']">
+                    <input id="resource" name="resource" type="hidden">
+                    <input id="btn" name="btn" type="hidden">
+                </div>
+                <div class="fitem">
+                    <label> 备注： </label>
+                    <input id="note" name="note" class="easyui-validatebox" required="true"
+                    	data-options="validType: ['specialChar']">
+                </div>
+                <!--<div class="fitem">-->
+                    <!--<label> 类别： </label>-->
+                    <!--<input id="role_type" name="role_type" class="easyui-validatebox"-->
+                    	<!--data-options="validType: ['maxLength[18]','specialChar']">-->
+                <!--</div>-->
+                <div class="fitem">
+                    <label> 排序： </label>
+                    <input id="sort" name="sort" class="easyui-validatebox"
+                    	data-options="validType: ['num']">
+                </div>
+                <div class="fitem">
+                    <label> 是否有效： </label>
+                    <select id="is_check" name="is_check" style="width: 173px;">
+                        <option value="1">√</option>
+                        <option value="0">X</option>
+                    </select>
+                </div>
+            </form>
+            <label style="color: red">注意：当前用户权限，必须退出重新登录后才能生效</label>
+        </div>
+        <div title="角色权限资源" style="padding:20px;">
+            <ul id="roleResourceTree" class="easyui-tree" data-options="checkbox: true,
+            loadFilter: function(data){
+                if (data.code == 1 && data.data){
+                    return data.data;
+                } else {
+                    alert('资源树请求出错');
+                }
+            }"></ul>
+        </div>
+        <div id="btnPermission" title="按钮权限资源" style="padding:20px;font-size: 16px">
+            加载中……
+            <!--
+            <div id="btnPermission" title="" style="padding: 20px; font-size: 16px; width: 344px; height: auto;" class="panel-body panel-body-noheader panel-body-noborder">
+                <fieldset id="649050629980954624">
+                    <legend>用户按钮权限：</legend>
+                    <input id="add" type="checkbox" name="add"><label for="add">添加</label>
+                    <input id="update" type="checkbox" name="update"><label for="update">修改</label>
+                    <input id="delete" type="checkbox" name="delete"><label for="delete">删除</label>
+                    <input id="import" type="checkbox" name="import"><label for="import">导入</label>
+                    <input id="export" type="checkbox" name="export"><label for="export">导出</label>
+                </fieldset>
+                <fieldset id="662451936074801152">
+                    <legend>商城订单权限：</legend>
+                    <input id="add" type="checkbox" name="add"><label for="add">添加</label>
+                    <input id="update" type="checkbox" name="update"><label for="update">修改</label>
+                </fieldset>
+            </div>
+            -->
+        </div>
+    </div>
+    <div id="roleDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+</div>
+</body>
+</html>

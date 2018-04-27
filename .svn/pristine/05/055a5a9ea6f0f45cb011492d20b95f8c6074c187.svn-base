@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>cardRecordVo</title>
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/cardRecord.js"></script>
+<table id="cardRecordVoDg" class="easyui-datagrid" data-options="url:'./../cardRecord/query',rownumbers:true,toolbar:'#cardRecordVoDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false,rowStyler: cardRecord.rowStyler">
+    <thead>
+    <tr>
+        <th data-options="field:'id',width:80,checkbox:true">编号</th>
+        <th data-options="field:'userName',width:80">用户名</th>
+        <th data-options="field:'cardName',width:80">劵码名称</th>
+        <th data-options="field:'isUseName',width:80">是否使用</th>
+        <th data-options="field:'opt_time',width:80">操作时间</th>
+        <th data-options="field:'isCheckName',width:80">是否有效</th>
+    </tr>
+    </thead>
+</table>
+<div id="cardRecordVoDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+                &nbsp;&nbsp;用户名：&nbsp;&nbsp;
+                <input id="userNameParam" name="userName" class="easyui-validatebox" style="width: 150px;">
+                &nbsp;&nbsp;劵码名称：&nbsp;&nbsp;
+                <input id="cardNameParam" name="cardName" class="easyui-validatebox" style="width: 150px;">
+	        	&nbsp;&nbsp;起始时间：&nbsp;&nbsp;
+               	<input id="startParam" name="startParam" class="Wdate" type="text" style="width: 172px" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"/>
+               	&nbsp;&nbsp;终止时间：&nbsp;&nbsp;
+               	<input id="endParam" name="endParam" class="Wdate" type="text" style="width: 172px" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"/>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查 询</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" plain="true" name="today">今天</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" plain="true" name="yesterday">昨天</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" plain="true" name="thisWeek">本周</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" plain="true" name="thisMonth">本月</a>
+            </td>
+            <td align="right" width="450px">
+            	<a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">永久删除</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+package com.tmtc.service;
+
+import com.tmtc.po.MoneyOrder;
+import com.tmtc.po.MoneyOrderRepository;
+
+public interface ReChargeService extends IService<MoneyOrder, MoneyOrderRepository>,PageService<MoneyOrderRepository>{
+
+}

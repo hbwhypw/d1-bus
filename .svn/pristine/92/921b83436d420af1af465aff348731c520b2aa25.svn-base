@@ -1,0 +1,453 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tmtc.dao.LineStationDao">
+	<resultMap id="BaseResultMap" type="com.tmtc.po.LineStation">
+		<id column="id" property="id" jdbcType="BIGINT" />
+		<result column="line_id" property="line_id" jdbcType="BIGINT" />
+		<result column="station_name" property="station_name" jdbcType="VARCHAR" />
+		<result column="next_time" property="next_time" jdbcType="INTEGER" />
+		<result column="next_km" property="next_km" jdbcType="DOUBLE" />
+		<result column="prev_id" property="prev_id" jdbcType="BIGINT" />
+		<result column="next_id" property="next_id" jdbcType="BIGINT" />
+		<result column="x_point" property="x_point" jdbcType="DOUBLE" />
+		<result column="y_point" property="y_point" jdbcType="DOUBLE" />
+		<result column="qrcode" property="qrcode" jdbcType="VARCHAR" />
+		<result column="sort" property="sort" jdbcType="INTEGER" />
+		<result column="willnum" property="willnum" jdbcType="INTEGER" />
+		<result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+		<result column="is_check" property="is_check" jdbcType="INTEGER" />
+	</resultMap>
+	<resultMap id="LineResultMap" type="com.tmtc.po.Line" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="line_name" property="line_name" jdbcType="VARCHAR" />
+    <result column="start_id" property="start_id" jdbcType="BIGINT" />
+    <result column="end_id" property="end_id" jdbcType="BIGINT" />
+    <result column="km" property="km" jdbcType="DOUBLE" />
+    <result column="on_time_rate" property="on_time_rate" jdbcType="DOUBLE" />
+    <result column="city_id" property="city_id" jdbcType="INTEGER" />
+    <result column="company_id" property="company_id" jdbcType="BIGINT" />
+    <result column="line_category" property="line_category" jdbcType="INTEGER" />
+    <result column="line_type" property="line_type" jdbcType="INTEGER" />
+    <result column="user_type" property="user_type" jdbcType="INTEGER" />
+    <result column="start_time" property="start_time" jdbcType="TIMESTAMP" />
+    <result column="end_time" property="end_time" jdbcType="TIMESTAMP" />
+    <result column="sort" property="sort" jdbcType="INTEGER" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+    <result column="is_check" property="is_check" jdbcType="INTEGER" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.tmtc.po.Line" extends="LineResultMap" >
+    <result column="line_path" property="line_path" jdbcType="LONGVARCHAR" />
+  </resultMap>
+	<sql id="Example_Where_Clause">
+		<where>
+			<foreach collection="oredCriteria" item="criteria" separator="or">
+				<if test="criteria.valid">
+					<trim prefix="(" suffix=")" prefixOverrides="and">
+						<foreach collection="criteria.criteria" item="criterion">
+							<choose>
+								<when test="criterion.noValue">
+									and ${criterion.condition}
+								</when>
+								<when test="criterion.singleValue">
+									and ${criterion.condition} #{criterion.value}
+								</when>
+								<when test="criterion.betweenValue">
+									and ${criterion.condition} #{criterion.value} and
+									#{criterion.secondValue}
+								</when>
+								<when test="criterion.listValue">
+									and ${criterion.condition}
+									<foreach collection="criterion.value" item="listItem"
+										open="(" close=")" separator=",">
+										#{listItem}
+									</foreach>
+								</when>
+							</choose>
+						</foreach>
+					</trim>
+				</if>
+			</foreach>
+		</where>
+	</sql>
+	<sql id="Update_By_Example_Where_Clause">
+		<where>
+			<foreach collection="example.oredCriteria" item="criteria"
+				separator="or">
+				<if test="criteria.valid">
+					<trim prefix="(" suffix=")" prefixOverrides="and">
+						<foreach collection="criteria.criteria" item="criterion">
+							<choose>
+								<when test="criterion.noValue">
+									and ${criterion.condition}
+								</when>
+								<when test="criterion.singleValue">
+									and ${criterion.condition} #{criterion.value}
+								</when>
+								<when test="criterion.betweenValue">
+									and ${criterion.condition} #{criterion.value} and
+									#{criterion.secondValue}
+								</when>
+								<when test="criterion.listValue">
+									and ${criterion.condition}
+									<foreach collection="criterion.value" item="listItem"
+										open="(" close=")" separator=",">
+										#{listItem}
+									</foreach>
+								</when>
+							</choose>
+						</foreach>
+					</trim>
+				</if>
+			</foreach>
+		</where>
+	</sql>
+	<sql id="Base_Column_List">
+		id, line_id, station_name, next_time, next_km, prev_id, next_id, x_point,
+		y_point,
+		qrcode, sort, willnum, create_time, is_check
+	</sql>
+	<select id="selectByExample" resultMap="BaseResultMap"
+		parameterType="com.tmtc.po.LineStationRepository">
+		select
+		<if test="distinct">
+			distinct
+		</if>
+		<include refid="Base_Column_List" />
+		from t_line_station
+		<if test="_parameter != null">
+			<include refid="Example_Where_Clause" />
+		</if>
+		<if test="orderByClause != null">
+			order by ${orderByClause}
+		</if>
+		 <if test="rowIndex!=null and pageSize!=null">
+      limit ${rowIndex},${pageSize}
+    </if>
+	</select>
+	<select id="selectByPrimaryKey" resultMap="BaseResultMap"
+		parameterType="java.lang.Long">
+		select
+		<include refid="Base_Column_List" />
+		from t_line_station
+		where id = #{id,jdbcType=BIGINT}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+		delete from t_line_station
+		where id = #{id,jdbcType=BIGINT}
+	</delete>
+	<delete id="deleteByExample" parameterType="com.tmtc.po.LineStationRepository">
+		delete from t_line_station
+		<if test="_parameter != null">
+			<include refid="Example_Where_Clause" />
+		</if>
+	</delete>
+	<insert id="insert" parameterType="com.tmtc.po.LineStation">
+		insert into t_line_station (id, line_id, station_name,
+		next_time, next_km, prev_id,
+		next_id, x_point, y_point,
+		qrcode, sort, willnum,
+		create_time, is_check)
+		values (#{id,jdbcType=BIGINT}, #{line_id,jdbcType=BIGINT},
+		#{station_name,jdbcType=VARCHAR},
+		#{next_time,jdbcType=INTEGER}, #{next_km,jdbcType=DOUBLE}, #{prev_id,jdbcType=BIGINT},
+		#{next_id,jdbcType=BIGINT}, #{x_point,jdbcType=DOUBLE},
+		#{y_point,jdbcType=DOUBLE},
+		#{qrcode,jdbcType=VARCHAR}, #{sort,jdbcType=INTEGER}, #{willnum,jdbcType=INTEGER},
+		#{create_time,jdbcType=TIMESTAMP}, #{is_check,jdbcType=INTEGER})
+	</insert>
+	<insert id="insertSelective" parameterType="com.tmtc.po.LineStation">
+		insert into t_line_station
+		<trim prefix="(" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				id,
+			</if>
+			<if test="line_id != null">
+				line_id,
+			</if>
+			<if test="station_name != null">
+				station_name,
+			</if>
+			<if test="next_time != null">
+				next_time,
+			</if>
+			<if test="next_km != null">
+				next_km,
+			</if>
+			<if test="prev_id != null">
+				prev_id,
+			</if>
+			<if test="next_id != null">
+				next_id,
+			</if>
+			<if test="x_point != null">
+				x_point,
+			</if>
+			<if test="y_point != null">
+				y_point,
+			</if>
+			<if test="qrcode != null">
+				qrcode,
+			</if>
+			<if test="sort != null">
+				sort,
+			</if>
+			<if test="willnum != null">
+				willnum,
+			</if>
+			<if test="create_time != null">
+				create_time,
+			</if>
+			<if test="is_check != null">
+				is_check,
+			</if>
+		</trim>
+		<trim prefix="values (" suffix=")" suffixOverrides=",">
+			<if test="id != null">
+				#{id,jdbcType=BIGINT},
+			</if>
+			<if test="line_id != null">
+				#{line_id,jdbcType=BIGINT},
+			</if>
+			<if test="station_name != null">
+				#{station_name,jdbcType=VARCHAR},
+			</if>
+			<if test="next_time != null">
+				#{next_time,jdbcType=INTEGER},
+			</if>
+			<if test="next_km != null">
+				#{next_km,jdbcType=DOUBLE},
+			</if>
+			<if test="prev_id != null">
+				#{prev_id,jdbcType=BIGINT},
+			</if>
+			<if test="next_id != null">
+				#{next_id,jdbcType=BIGINT},
+			</if>
+			<if test="x_point != null">
+				#{x_point,jdbcType=DOUBLE},
+			</if>
+			<if test="y_point != null">
+				#{y_point,jdbcType=DOUBLE},
+			</if>
+			<if test="qrcode != null">
+				#{qrcode,jdbcType=VARCHAR},
+			</if>
+			<if test="sort != null">
+				#{sort,jdbcType=INTEGER},
+			</if>
+			<if test="willnum != null">
+				#{willnum,jdbcType=INTEGER},
+			</if>
+			<if test="create_time != null">
+				#{create_time,jdbcType=TIMESTAMP},
+			</if>
+			<if test="is_check != null">
+				#{is_check,jdbcType=INTEGER},
+			</if>
+		</trim>
+	</insert>
+	<select id="countByExample" parameterType="com.tmtc.po.LineStationRepository"
+		resultType="java.lang.Integer">
+		select count(*) from t_line_station
+		<if test="_parameter != null">
+			<include refid="Example_Where_Clause" />
+		</if>
+	</select>
+	<update id="updateByExampleSelective" parameterType="map">
+		update t_line_station
+		<set>
+			<if test="record.id != null">
+				id = #{record.id,jdbcType=BIGINT},
+			</if>
+			<if test="record.line_id != null">
+				line_id = #{record.line_id,jdbcType=BIGINT},
+			</if>
+			<if test="record.station_name != null">
+				station_name = #{record.station_name,jdbcType=VARCHAR},
+			</if>
+			<if test="record.next_time != null">
+				next_time = #{record.next_time,jdbcType=INTEGER},
+			</if>
+			<if test="record.next_km != null">
+				next_km = #{record.next_km,jdbcType=DOUBLE},
+			</if>
+			<if test="record.prev_id != null">
+				prev_id = #{record.prev_id,jdbcType=BIGINT},
+			</if>
+			<if test="record.next_id != null">
+				next_id = #{record.next_id,jdbcType=BIGINT},
+			</if>
+			<if test="record.x_point != null">
+				x_point = #{record.x_point,jdbcType=DOUBLE},
+			</if>
+			<if test="record.y_point != null">
+				y_point = #{record.y_point,jdbcType=DOUBLE},
+			</if>
+			<if test="record.qrcode != null">
+				qrcode = #{record.qrcode,jdbcType=VARCHAR},
+			</if>
+			<if test="record.sort != null">
+				sort = #{record.sort,jdbcType=INTEGER},
+			</if>
+			<if test="record.willnum != null">
+				willnum = #{record.willnum,jdbcType=INTEGER},
+			</if>
+			<if test="record.create_time != null">
+				create_time = #{record.create_time,jdbcType=TIMESTAMP},
+			</if>
+			<if test="record.is_check != null">
+				is_check = #{record.is_check,jdbcType=INTEGER},
+			</if>
+		</set>
+		<if test="_parameter != null">
+			<include refid="Update_By_Example_Where_Clause" />
+		</if>
+	</update>
+	<update id="updateByExample" parameterType="map">
+		update t_line_station
+		set id = #{record.id,jdbcType=BIGINT},
+		line_id = #{record.line_id,jdbcType=BIGINT},
+		station_name = #{record.station_name,jdbcType=VARCHAR},
+		next_time = #{record.next_time,jdbcType=INTEGER},
+		next_km = #{record.next_km,jdbcType=DOUBLE},
+		prev_id = #{record.prev_id,jdbcType=BIGINT},
+		next_id = #{record.next_id,jdbcType=BIGINT},
+		x_point = #{record.x_point,jdbcType=DOUBLE},
+		y_point = #{record.y_point,jdbcType=DOUBLE},
+		qrcode = #{record.qrcode,jdbcType=VARCHAR},
+		sort = #{record.sort,jdbcType=INTEGER},
+		willnum = #{record.willnum,jdbcType=INTEGER},
+		create_time = #{record.create_time,jdbcType=TIMESTAMP},
+		is_check = #{record.is_check,jdbcType=INTEGER}
+		<if test="_parameter != null">
+			<include refid="Update_By_Example_Where_Clause" />
+		</if>
+	</update>
+	<update id="updateByPrimaryKeySelective" parameterType="com.tmtc.po.LineStation">
+		update t_line_station
+		<set>
+			<if test="line_id != null">
+				line_id = #{line_id,jdbcType=BIGINT},
+			</if>
+			<if test="station_name != null">
+				station_name = #{station_name,jdbcType=VARCHAR},
+			</if>
+			<if test="next_time != null">
+				next_time = #{next_time,jdbcType=INTEGER},
+			</if>
+			<if test="next_km != null">
+				next_km = #{next_km,jdbcType=DOUBLE},
+			</if>
+			<if test="prev_id != null">
+				prev_id = #{prev_id,jdbcType=BIGINT},
+			</if>
+			<if test="next_id != null">
+				next_id = #{next_id,jdbcType=BIGINT},
+			</if>
+			<if test="x_point != null">
+				x_point = #{x_point,jdbcType=DOUBLE},
+			</if>
+			<if test="y_point != null">
+				y_point = #{y_point,jdbcType=DOUBLE},
+			</if>
+			<if test="qrcode != null">
+				qrcode = #{qrcode,jdbcType=VARCHAR},
+			</if>
+			<if test="sort != null">
+				sort = #{sort,jdbcType=INTEGER},
+			</if>
+			<if test="willnum != null">
+				willnum = #{willnum,jdbcType=INTEGER},
+			</if>
+			<if test="create_time != null">
+				create_time = #{create_time,jdbcType=TIMESTAMP},
+			</if>
+			<if test="is_check != null">
+				is_check = #{is_check,jdbcType=INTEGER},
+			</if>
+		</set>
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+	<update id="updateByPrimaryKey" parameterType="com.tmtc.po.LineStation">
+		update t_line_station
+		set line_id = #{line_id,jdbcType=BIGINT},
+		station_name = #{station_name,jdbcType=VARCHAR},
+		next_time = #{next_time,jdbcType=INTEGER},
+		next_km = #{next_km,jdbcType=DOUBLE},
+		prev_id = #{prev_id,jdbcType=BIGINT},
+		next_id = #{next_id,jdbcType=BIGINT},
+		x_point = #{x_point,jdbcType=DOUBLE},
+		y_point = #{y_point,jdbcType=DOUBLE},
+		qrcode = #{qrcode,jdbcType=VARCHAR},
+		sort = #{sort,jdbcType=INTEGER},
+		willnum = #{willnum,jdbcType=INTEGER},
+		create_time = #{create_time,jdbcType=TIMESTAMP},
+		is_check = #{is_check,jdbcType=INTEGER}
+		where id = #{id,jdbcType=BIGINT}
+	</update>
+
+	<update id="updateBySort">
+		update t_line_station
+		set sort = sort + 1
+		where
+		line_id = #{line_id} 
+		and
+		sort > #{sort}
+	</update>
+	
+	<update id="updateBySortReduction">
+		update t_line_station
+		set sort = sort - 1
+		where
+		line_id = #{line_id} 
+		and
+		sort > #{sort}
+	</update>
+	
+	<!-- 自定义 -->
+	<select id="search" resultMap="ResultMapWithBLOBs">
+		<![CDATA[
+		select * from t_line where id in(
+				SELECT
+						line_id
+					FROM
+						(
+							SELECT
+								* FROM t_line_station
+							WHERE
+								line_id IN (
+									SELECT
+										line_id
+									FROM
+										t_line_station
+									WHERE
+										(
+											x_point >= ${xStart_min}
+											AND x_point <= ${xStart_max}
+										)
+									AND (
+										y_point >= ${yStart_min}
+										AND y_point <= ${yStart_max}
+									)
+								)
+						) t
+					WHERE
+						(
+							t.x_point >= ${xEnd_min}
+							AND t.x_point <= ${xEnd_max}
+						)
+					AND (
+						t.y_point >= ${yEnd_min}
+						AND t.y_point <= ${yEnd_max}
+					)
+				)
+		]]>
+	</select>
+	
+	<select id="location" resultMap="BaseResultMap">
+		<![CDATA[
+			SELECT * FROM t_line_station WHERE (x_point >= ${x_min} AND x_point <= ${x_max}) AND (y_point >= ${y_min} AND y_point <= ${y_max}) AND line_id = #{line_id} AND is_check = 1
+		]]>
+	</select>
+</mapper>

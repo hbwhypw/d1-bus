@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>lineStation</title>
+</head>
+<body>
+	<script type="text/javascript" src="/dist/js/subPages/lineStation.js"></script>
+
+	<!-- 数据表格 -->
+	<table id="lineStationDg" class="easyui-datagrid"
+		data-options="url:'./../lineStation/query',rownumbers:true,toolbar:'#lineStationDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false">
+		<thead>
+			<tr>
+				<th data-options="field:'line_id',width:80,hidden: true">线路id</th>
+				<th data-options="field:'prev_id',width:80,hidden: true">上一站id</th>
+				<th data-options="field:'next_id',width:80,hidden: true">下一站id</th>
+				<th data-options="field:'line_path',width:80,hidden: true">下一站id</th>
+
+				<th data-options="width:80, checkbox: true">全选/反选</th>
+				<th data-options="field:'id',width:80">编号</th>
+				<th data-options="field:'station_name',width:80">站点名称</th>
+				<th data-options="field:'line_name',width:80">所属线路</th>
+				<th data-options="field:'next_time',width:80">到下一站的时间</th>
+				<th data-options="field:'next_km',width:80">到下一站的公里数</th>
+				<th data-options="field:'prev_name',width:80">上一站</th>
+				<th data-options="field:'next_name',width:80">下一站</th>
+				<th data-options="field:'x_point',width:80">x坐标</th>
+				<th data-options="field:'y_point',width:80">y坐标</th>
+				<th data-options="field:'sort',width:80">顺序</th>
+				<th data-options="field:'create_time',width:80">创建时间</th>
+				<th
+					data-options="field:'is_check',width:80,formatter: common.is_checkFormatter">是否有效</th>
+			</tr>
+		</thead>
+	</table>
+
+	<!-- 按钮 -->
+	<div id="lineStationDgTbar">
+		<table width="100%">
+			<tr>
+				<td align="left">
+					&nbsp;&nbsp;线路名：&nbsp;&nbsp;
+					<input id="line_nameParam" name="line_nameParam" class="easyui-validatebox" style="width: 150px;">
+					&nbsp;&nbsp;站点名：&nbsp;&nbsp;
+					<input id="station_nameParam" name="station_nameParam" class="easyui-validatebox" style="width: 150px;">
+					<a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查询</a>
+				</td>
+				<td align="right" width="320px">
+				<a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改</a>
+					<a class="easyui-linkbutton" href="javascript:void(0);"
+					iconCls="icon-remove" plain="true">删除</a>
+					<!-- <a class="easyui-linkbutton" href="javascript:void(0);"
+					iconCls="icon-remove" plain="true">永久删除</a> --></td>
+				<td align="right" width="10px">&nbsp;</td>
+			</tr>
+		</table>
+	</div>
+
+	<!-- 修改站点 -->
+	<div id="lineStationDlg" class="easyui-dialog"
+		style="width: 100%; height: 100%;"
+		data-options="resizable:true,modal:true" closed="true"
+		buttons="#lineStationDlgBtn">
+		<div style="background: #fafafa; padding: 15px;" align="center"
+			id="nomap">
+			<form id="lineStationFm" method="post">
+
+				<input type="hidden" name="line_id" id="line_id" />
+				
+				<input type="hidden" name="id" id="id" />
+
+				<table style="padding: 10px 0px;" border="0">
+					<tr>
+						<td align="center" colspan="9"><strong>线路名称：</strong> <Label
+							id="line_name_id" style="width: 140px"></Label></td>
+					</tr>
+					<tr>
+						<th>站点名称：</th>
+						<td><input class="easyui-validatebox"
+							data-options="required:true" style="width: 140px" type="text"
+							id="station_name_id" name="station_name" /></td>
+						<th>X坐标：</th>
+						<td><input type="text" name="x_point" id="x_point"
+							value="0.0"  /></td>
+						<th>Y坐标：</th>
+						<td><input type="text" name="y_point" id="y_point"
+							value="0.0"  /></td>
+						<th>距离下一站时间：</th>
+						<td><input class="easyui-validatebox"
+							data-options="required:true" validType="number" type="text"
+							style="width: 140px; height: 22px; border: solid 1px #CCCCCC;"
+							name="next_time" id="next_time_id" /></td>
+						<th>距离下一站里程：</th>
+						<td><input class="easyui-validatebox"
+							data-options="required:true" validType="number" type="text"
+							name="next_km" id="next_km_id" style="width: 140px" /></td>
+						<th>上一站：</th>
+						<td><input class="easyui-combobox" id="prev_id" name="prev_id" style="width: 140px;"
+							data-options="valueField:'id',
+										 textField:'station_name',
+										 url:'./../lineStation/queryByLine_id',
+										 loader: common.comboBoxLoader,
+										 onBeforeLoad: function(param){
+				 								param.line_id = $('#line_id').val();
+				 							}
+										 " />
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
+		<div id="l-map-station" style="width: 100%; height: 90%;"></div>
+		<div id="lineStationDlgBtn">
+			<a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a> <a
+				href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+		</div>
+	</div>
+</body>
+</html>

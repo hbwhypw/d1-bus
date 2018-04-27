@@ -1,0 +1,55 @@
+package com.tmtc.serviceImpl.appAPI;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.tmtc.dao.LineDao;
+import com.tmtc.dao.UserDao;
+import com.tmtc.dao.UserDetailDao;
+import com.tmtc.frame.ServiceException;
+import com.tmtc.po.Line;
+import com.tmtc.po.UserDetail;
+import com.tmtc.service.appAPI.CollectMoneyService;
+import com.tmtc.utils.VerificationUtil;
+
+@Service
+public class CollerctMoneyServiceImpl implements CollectMoneyService {
+
+	@Autowired
+	UserDetailDao userDetailDao;
+
+	@Autowired
+	UserDao userDao;
+
+	@Autowired
+	LineDao lineDao;
+
+	@Override
+	public synchronized int check(String company_id, String card_num, String line_id) throws ServiceException {
+
+		String userId = userDao.selectCompanyCardNum(company_id, card_num);
+		if (0 == VerificationUtil.length(userId)) {
+			return 0;
+		}
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(userId);
+		Integer balance = userDetail.getBalance();
+		if (null == balance) {
+			userDetail.setBalance(0);
+			userDetailDao.updateByPrimaryKeySelective(userDetail);
+			return 1;
+		}
+		Line line = lineDao.selectByPrimaryKey(line_id);
+		if (null == line) {
+			throw new ServiceException("数据库，数据异常");
+		}
+		Integer price = line.getPrice();
+		
+		if (balance < price) {
+			return 1;
+		}
+		userDetail.setBalance(balance - price);
+		userDetailDao.updateByPrimaryKeySelective(userDetail);
+		return 2;
+	}
+
+}

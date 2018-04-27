@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tmtc.dao.CarDao" >
+  <resultMap id="BaseResultMap" type="com.tmtc.po.Car" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="car_num" property="car_num" jdbcType="VARCHAR" />
+    <result column="seat" property="seat" jdbcType="INTEGER" />
+    <result column="total_seat" property="total_seat" jdbcType="INTEGER" />
+    <result column="car_type" property="car_type" jdbcType="INTEGER" />
+    <result column="car_brand" property="car_brand" jdbcType="VARCHAR" />
+    <result column="device" property="device" jdbcType="VARCHAR" />
+    <result column="phone" property="phone" jdbcType="VARCHAR" />
+    <result column="buy_date" property="buy_date" jdbcType="TIMESTAMP" />
+    <result column="from_company" property="from_company" jdbcType="INTEGER" />
+    <result column="imei" property="imei" jdbcType="VARCHAR" />
+    <result column="car_pic" property="car_pic" jdbcType="VARCHAR" />
+    <result column="car_registration_pic" property="car_registration_pic" jdbcType="VARCHAR" />
+    <result column="appearance_pic" property="appearance_pic" jdbcType="VARCHAR" />
+    <result column="trim_pic" property="trim_pic" jdbcType="VARCHAR" />
+    <result column="insure_end_date" property="insure_end_date" jdbcType="TIMESTAMP" />
+    <result column="car_status" property="car_status" jdbcType="INTEGER" />
+    <result column="inspection_date" property="inspection_date" jdbcType="TIMESTAMP" />
+    <result column="is_check" property="is_check" jdbcType="INTEGER" />
+    <result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, car_num, seat, total_seat, car_type, car_brand, device, phone, buy_date, from_company, 
+    imei, car_pic, car_registration_pic, appearance_pic, trim_pic, insure_end_date, car_status, 
+    inspection_date, is_check, create_time, remark
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.tmtc.po.CarRepository" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_car
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <if test="rowIndex!=null and pageSize!=null">
+      limit ${rowIndex},${pageSize}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_car
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from t_car
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.tmtc.po.CarRepository" >
+    delete from t_car
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.tmtc.po.Car" >
+    insert into t_car (id, car_num, seat, 
+      total_seat, car_type, car_brand, 
+      device, phone, buy_date, 
+      from_company, imei, car_pic, 
+      car_registration_pic, appearance_pic, trim_pic, 
+      insure_end_date, car_status, inspection_date, 
+      is_check, create_time, remark
+      )
+    values (#{id,jdbcType=BIGINT}, #{car_num,jdbcType=VARCHAR}, #{seat,jdbcType=INTEGER}, 
+      #{total_seat,jdbcType=INTEGER}, #{car_type,jdbcType=INTEGER}, #{car_brand,jdbcType=VARCHAR}, 
+      #{device,jdbcType=VARCHAR}, #{phone,jdbcType=VARCHAR}, #{buy_date,jdbcType=TIMESTAMP}, 
+      #{from_company,jdbcType=INTEGER}, #{imei,jdbcType=VARCHAR}, #{car_pic,jdbcType=VARCHAR}, 
+      #{car_registration_pic,jdbcType=VARCHAR}, #{appearance_pic,jdbcType=VARCHAR}, #{trim_pic,jdbcType=VARCHAR}, 
+      #{insure_end_date,jdbcType=TIMESTAMP}, #{car_status,jdbcType=INTEGER}, #{inspection_date,jdbcType=TIMESTAMP}, 
+      #{is_check,jdbcType=INTEGER}, #{create_time,jdbcType=TIMESTAMP}, #{remark,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.tmtc.po.Car" >
+    insert into t_car
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="car_num != null" >
+        car_num,
+      </if>
+      <if test="seat != null" >
+        seat,
+      </if>
+      <if test="total_seat != null" >
+        total_seat,
+      </if>
+      <if test="car_type != null" >
+        car_type,
+      </if>
+      <if test="car_brand != null" >
+        car_brand,
+      </if>
+      <if test="device != null" >
+        device,
+      </if>
+      <if test="phone != null" >
+        phone,
+      </if>
+      <if test="buy_date != null" >
+        buy_date,
+      </if>
+      <if test="from_company != null" >
+        from_company,
+      </if>
+      <if test="imei != null" >
+        imei,
+      </if>
+      <if test="car_pic != null" >
+        car_pic,
+      </if>
+      <if test="car_registration_pic != null" >
+        car_registration_pic,
+      </if>
+      <if test="appearance_pic != null" >
+        appearance_pic,
+      </if>
+      <if test="trim_pic != null" >
+        trim_pic,
+      </if>
+      <if test="insure_end_date != null" >
+        insure_end_date,
+      </if>
+      <if test="car_status != null" >
+        car_status,
+      </if>
+      <if test="inspection_date != null" >
+        inspection_date,
+      </if>
+      <if test="is_check != null" >
+        is_check,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="car_num != null" >
+        #{car_num,jdbcType=VARCHAR},
+      </if>
+      <if test="seat != null" >
+        #{seat,jdbcType=INTEGER},
+      </if>
+      <if test="total_seat != null" >
+        #{total_seat,jdbcType=INTEGER},
+      </if>
+      <if test="car_type != null" >
+        #{car_type,jdbcType=INTEGER},
+      </if>
+      <if test="car_brand != null" >
+        #{car_brand,jdbcType=VARCHAR},
+      </if>
+      <if test="device != null" >
+        #{device,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="buy_date != null" >
+        #{buy_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="from_company != null" >
+        #{from_company,jdbcType=INTEGER},
+      </if>
+      <if test="imei != null" >
+        #{imei,jdbcType=VARCHAR},
+      </if>
+      <if test="car_pic != null" >
+        #{car_pic,jdbcType=VARCHAR},
+      </if>
+      <if test="car_registration_pic != null" >
+        #{car_registration_pic,jdbcType=VARCHAR},
+      </if>
+      <if test="appearance_pic != null" >
+        #{appearance_pic,jdbcType=VARCHAR},
+      </if>
+      <if test="trim_pic != null" >
+        #{trim_pic,jdbcType=VARCHAR},
+      </if>
+      <if test="insure_end_date != null" >
+        #{insure_end_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="car_status != null" >
+        #{car_status,jdbcType=INTEGER},
+      </if>
+      <if test="inspection_date != null" >
+        #{inspection_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="is_check != null" >
+        #{is_check,jdbcType=INTEGER},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.tmtc.po.CarRepository" resultType="java.lang.Integer" >
+    select count(*) from t_car
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update t_car
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.car_num != null" >
+        car_num = #{record.car_num,jdbcType=VARCHAR},
+      </if>
+      <if test="record.seat != null" >
+        seat = #{record.seat,jdbcType=INTEGER},
+      </if>
+      <if test="record.total_seat != null" >
+        total_seat = #{record.total_seat,jdbcType=INTEGER},
+      </if>
+      <if test="record.car_type != null" >
+        car_type = #{record.car_type,jdbcType=INTEGER},
+      </if>
+      <if test="record.car_brand != null" >
+        car_brand = #{record.car_brand,jdbcType=VARCHAR},
+      </if>
+      <if test="record.device != null" >
+        device = #{record.device,jdbcType=VARCHAR},
+      </if>
+      <if test="record.phone != null" >
+        phone = #{record.phone,jdbcType=VARCHAR},
+      </if>
+      <if test="record.buy_date != null" >
+        buy_date = #{record.buy_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.from_company != null" >
+        from_company = #{record.from_company,jdbcType=INTEGER},
+      </if>
+      <if test="record.imei != null" >
+        imei = #{record.imei,jdbcType=VARCHAR},
+      </if>
+      <if test="record.car_pic != null" >
+        car_pic = #{record.car_pic,jdbcType=VARCHAR},
+      </if>
+      <if test="record.car_registration_pic != null" >
+        car_registration_pic = #{record.car_registration_pic,jdbcType=VARCHAR},
+      </if>
+      <if test="record.appearance_pic != null" >
+        appearance_pic = #{record.appearance_pic,jdbcType=VARCHAR},
+      </if>
+      <if test="record.trim_pic != null" >
+        trim_pic = #{record.trim_pic,jdbcType=VARCHAR},
+      </if>
+      <if test="record.insure_end_date != null" >
+        insure_end_date = #{record.insure_end_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.car_status != null" >
+        car_status = #{record.car_status,jdbcType=INTEGER},
+      </if>
+      <if test="record.inspection_date != null" >
+        inspection_date = #{record.inspection_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.is_check != null" >
+        is_check = #{record.is_check,jdbcType=INTEGER},
+      </if>
+      <if test="record.create_time != null" >
+        create_time = #{record.create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.remark != null" >
+        remark = #{record.remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update t_car
+    set id = #{record.id,jdbcType=BIGINT},
+      car_num = #{record.car_num,jdbcType=VARCHAR},
+      seat = #{record.seat,jdbcType=INTEGER},
+      total_seat = #{record.total_seat,jdbcType=INTEGER},
+      car_type = #{record.car_type,jdbcType=INTEGER},
+      car_brand = #{record.car_brand,jdbcType=VARCHAR},
+      device = #{record.device,jdbcType=VARCHAR},
+      phone = #{record.phone,jdbcType=VARCHAR},
+      buy_date = #{record.buy_date,jdbcType=TIMESTAMP},
+      from_company = #{record.from_company,jdbcType=INTEGER},
+      imei = #{record.imei,jdbcType=VARCHAR},
+      car_pic = #{record.car_pic,jdbcType=VARCHAR},
+      car_registration_pic = #{record.car_registration_pic,jdbcType=VARCHAR},
+      appearance_pic = #{record.appearance_pic,jdbcType=VARCHAR},
+      trim_pic = #{record.trim_pic,jdbcType=VARCHAR},
+      insure_end_date = #{record.insure_end_date,jdbcType=TIMESTAMP},
+      car_status = #{record.car_status,jdbcType=INTEGER},
+      inspection_date = #{record.inspection_date,jdbcType=TIMESTAMP},
+      is_check = #{record.is_check,jdbcType=INTEGER},
+      create_time = #{record.create_time,jdbcType=TIMESTAMP},
+      remark = #{record.remark,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tmtc.po.Car" >
+    update t_car
+    <set >
+      <if test="car_num != null" >
+        car_num = #{car_num,jdbcType=VARCHAR},
+      </if>
+      <if test="seat != null" >
+        seat = #{seat,jdbcType=INTEGER},
+      </if>
+      <if test="total_seat != null" >
+        total_seat = #{total_seat,jdbcType=INTEGER},
+      </if>
+      <if test="car_type != null" >
+        car_type = #{car_type,jdbcType=INTEGER},
+      </if>
+      <if test="car_brand != null" >
+        car_brand = #{car_brand,jdbcType=VARCHAR},
+      </if>
+      <if test="device != null" >
+        device = #{device,jdbcType=VARCHAR},
+      </if>
+      <if test="phone != null" >
+        phone = #{phone,jdbcType=VARCHAR},
+      </if>
+      <if test="buy_date != null" >
+        buy_date = #{buy_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="from_company != null" >
+        from_company = #{from_company,jdbcType=INTEGER},
+      </if>
+      <if test="imei != null" >
+        imei = #{imei,jdbcType=VARCHAR},
+      </if>
+      <if test="car_pic != null" >
+        car_pic = #{car_pic,jdbcType=VARCHAR},
+      </if>
+      <if test="car_registration_pic != null" >
+        car_registration_pic = #{car_registration_pic,jdbcType=VARCHAR},
+      </if>
+      <if test="appearance_pic != null" >
+        appearance_pic = #{appearance_pic,jdbcType=VARCHAR},
+      </if>
+      <if test="trim_pic != null" >
+        trim_pic = #{trim_pic,jdbcType=VARCHAR},
+      </if>
+      <if test="insure_end_date != null" >
+        insure_end_date = #{insure_end_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="car_status != null" >
+        car_status = #{car_status,jdbcType=INTEGER},
+      </if>
+      <if test="inspection_date != null" >
+        inspection_date = #{inspection_date,jdbcType=TIMESTAMP},
+      </if>
+      <if test="is_check != null" >
+        is_check = #{is_check,jdbcType=INTEGER},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tmtc.po.Car" >
+    update t_car
+    set car_num = #{car_num,jdbcType=VARCHAR},
+      seat = #{seat,jdbcType=INTEGER},
+      total_seat = #{total_seat,jdbcType=INTEGER},
+      car_type = #{car_type,jdbcType=INTEGER},
+      car_brand = #{car_brand,jdbcType=VARCHAR},
+      device = #{device,jdbcType=VARCHAR},
+      phone = #{phone,jdbcType=VARCHAR},
+      buy_date = #{buy_date,jdbcType=TIMESTAMP},
+      from_company = #{from_company,jdbcType=INTEGER},
+      imei = #{imei,jdbcType=VARCHAR},
+      car_pic = #{car_pic,jdbcType=VARCHAR},
+      car_registration_pic = #{car_registration_pic,jdbcType=VARCHAR},
+      appearance_pic = #{appearance_pic,jdbcType=VARCHAR},
+      trim_pic = #{trim_pic,jdbcType=VARCHAR},
+      insure_end_date = #{insure_end_date,jdbcType=TIMESTAMP},
+      car_status = #{car_status,jdbcType=INTEGER},
+      inspection_date = #{inspection_date,jdbcType=TIMESTAMP},
+      is_check = #{is_check,jdbcType=INTEGER},
+      create_time = #{create_time,jdbcType=TIMESTAMP},
+      remark = #{remark,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+</mapper>

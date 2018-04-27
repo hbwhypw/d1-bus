@@ -1,0 +1,101 @@
+<%@ page language="java" contentType="text/html; charset=utf-8" pageEncoding="utf-8"%>
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>admins</title>
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/admins.js"></script>
+<table id="adminsDg" class="easyui-datagrid" data-options="url:'./../admins/query',rownumbers:true,toolbar:'#adminsDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false">
+    <thead>
+    <tr>
+        <th data-options="field:'id',width:80,hidden: true">编号</th>
+        <th data-options="field:'username',width:80">用户名</th>
+        <th data-options="field:'nick_name',width:80">昵称</th>
+        <th data-options="field:'roleName',width:80">角色</th>
+        <th data-options="field:'role_id',width:80,hidden:true">角色</th>
+        <th data-options="field:'companyName',width:80">公司</th>
+        <th data-options="field:'company_id',width:80,hidden:true">公司</th>
+        <!--<th data-options="field:'cityName',width:80">城市</th>-->
+        <!--<th data-options="field:'city_id',width:80,hidden:true">城市</th>-->
+        <th data-options="field:'login_date',width:80">最后登录时间</th>
+        <th data-options="field:'login_cunt',width:80">登录次数</th>
+        <!--<th data-options="field:'lock_time',width:80">锁定时间</th>-->
+        <th data-options="field:'create_time',width:80">创建时间</th>
+        <th data-options="field:'is_check',width:20,formatter: common.is_checkFormatter">是否有效</th>
+    </tr>
+    </thead>
+</table>
+<div id="adminsDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+                &nbsp;&nbsp;用户名：&nbsp;&nbsp;
+                <input id="usernameParam" name="username" class="easyui-validatebox" style="width: 150px;">
+                &nbsp;&nbsp;昵称：&nbsp;&nbsp;
+                <input id="nick_nameParam" name="nick_name" class="easyui-validatebox" style="width: 150px;">
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查 询</a>
+            </td>
+            <td align="right" width="280px">
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-add" plain="true">添加</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">删除</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">重置密码</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+<div id="adminsDlg" class="easyui-dialog" style="width:400px;height:450px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#adminsDlgBtn">
+    <div class="ftitle">
+        管理员信息
+    </div>
+    <form id="adminsFm" class="fm" method="post" novalidate>
+        <div class="fitem">
+            <label> 用户名： </label>
+            <input id="id" name="id" type="hidden">
+            <input id="username" name="username" class="easyui-validatebox" required="true"
+                   data-options="validType: ['username']">
+        </div>
+        <div class="fitem">
+            <label> 昵称： </label>
+            <input id="nick_name" name="nick_name" class="easyui-validatebox" required="true"
+                   data-options="validType: ['maxLength[18]','specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 角色： </label>
+            <input id="role_id" name="role_id" class="easyui-combobox" required="true" data-options="
+                valueField:'id',textField:'name',url:'./../role/query',required: true,
+                editable:false, loader: common.comboBoxLoaderPage,
+                onBeforeLoad: function(param){
+                    param.page = 1;param.rows = 100;
+                } "/>
+        </div>
+        <div class="fitem">
+            <label> 公司： </label>
+            <input id="company_id" name="company_id" class="easyui-combobox" required="true" data-options="
+                valueField:'id',textField:'name',url:'./../company/query',
+                editable:false, loader: common.comboBoxLoaderPage,
+                onBeforeLoad: function(param){
+                    param.page = 1;param.rows = 100;
+                } "/>
+        </div>
+        <div class="fitem">
+            <label> 是否有效： </label>
+            <select id="is_check" name="is_check" style="width: 170px;">
+                <option value="1">是</option>
+                <option value="0">否</option>
+            </select>
+        </div>
+    </form>
+    <div id="adminsDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+</div>
+</body>
+</html>

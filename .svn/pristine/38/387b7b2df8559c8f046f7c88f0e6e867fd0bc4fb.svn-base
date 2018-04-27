@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>btn</title>
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/btn.js"></script>
+<table id="btnDg" class="easyui-datagrid" data-options="url:'./../btn/query',rownumbers:true,toolbar:'#btnDgTbar',
+    striped:true,fit:true,fitColumns: true,singleSelect: true">
+    <thead>
+    <tr>
+        <th data-options="field:'id',width:80">编号</th>
+        <th data-options="field:'btn_id',width:80">按钮id</th>
+        <th data-options="field:'btn_name',width:80">按钮名称</th>
+        <th data-options="field:'group_id',width:40">所属资源</th>
+        <th data-options="field:'group_name',width:80">资源权限名称</th>
+        <th data-options="field:'remark',width:80">备注</th>
+    </tr>
+    </thead>
+</table>
+<div id="btnDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+                &nbsp;&nbsp;名称：&nbsp;&nbsp;
+                <input id="nameParam" name="nameParam" class="easyui-validatebox" style="width: 150px;">
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查 询</a>
+            </td>
+            <td align="right" width="320px">
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-add" plain="true">添加</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">删除</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+<div id="btnDlg" class="easyui-dialog" style="width:400px;height:450px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#btnDlgBtn">
+    <div class="ftitle">
+        按钮信息
+    </div>
+    <form id="btnFm" class="fm" method="post" novalidate>
+        <div class="fitem">
+            <label> 按钮id： </label>
+            <input id="id" name="id" type="hidden">
+            <input id="btn_id" name="btn_id" class="easyui-validatebox" required="true"
+                   data-options="validType: ['maxLength[18]','specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 按钮名称： </label>
+            <input id="btn_name" name="btn_name" class="easyui-validatebox" required="true"
+                   data-options="validType: ['maxLength[18]','specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 所属资源： </label>
+            <input id="group_id" name="group_id" class="easyui-combobox" required="true" data-options="
+                valueField:'id',textField:'name',url:'./../resource/query',required: true,
+                editable:false, loader: common.comboBoxLoader"/>
+        </div>
+        <div class="fitem">
+            <label> 分组名称： </label>
+            <input id="group_name" name="group_name" class="easyui-validatebox" required="true"
+                   data-options="validType: ['maxLength[18]','specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 备注： </label>
+            <input id="remark" name="remark" class="easyui-validatebox"
+                   data-options="validType: ['maxLength[18]','specialChar']">
+        </div>
+    </form>
+    <div id="btnDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+</div>
+</body>
+</html>

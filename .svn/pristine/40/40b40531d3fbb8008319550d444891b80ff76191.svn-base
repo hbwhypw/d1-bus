@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>lineOrderVo</title>
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/lineOrder.js"></script>
+<table id="lineOrderVoDg" class="easyui-datagrid" data-options="url:'./../lineOrder/query',rownumbers:true,toolbar:'#lineOrderVoDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false,rowStyler: lineOrderVo.rowStyler">
+    <thead>
+    <tr>
+        <th data-options="field:'id',width:80,checkbox:true">编号</th>
+        <th data-options="field:'city_name',width:80">城市名</th>
+        <th data-options="field:'line_name',width:80">线路名称</th>
+        <th data-options="field:'depart_time',width:80">发车时间</th>
+        <th data-options="field:'station_name',width:80">站点名称</th>
+        <th data-options="field:'order_time',width:80">下单时间</th>
+        <th data-options="field:'order_status_name',width:80">订单状态</th>
+        <th data-options="field:'scan_time',width:80">扫描时间</th>
+        <th data-options="field:'is_check',width:80,formatter: lineOrderVo.is_checkFormatter">是否有效</th>
+    </tr>
+    </thead>
+</table>
+<div id="lineOrderVoDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+                &nbsp;&nbsp;城市名称：&nbsp;&nbsp;
+                <input id="city_idParam" class="easyui-combobox" name="city_id" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=10',
+								loader: common.comboBoxLoader"/>
+	        	&nbsp;&nbsp;线路名称：&nbsp;&nbsp;
+               	<input id="line_nameParam" name="line_name" class="easyui-validatebox" style="width: 150px;"/>
+               	&nbsp;&nbsp;站点名称：&nbsp;&nbsp;
+               	<input id="station_nameParam" name="station_name" class="easyui-validatebox" style="width: 150px;"/>
+               	&nbsp;&nbsp;订单状态：&nbsp;&nbsp;
+               	<input id="order_statusParam" class="easyui-combobox" name="order_status" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=28',
+								loader: common.comboBoxLoader"/>
+            </td>
+            <td align="right" width="350px">
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改消息状态</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">删除</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">恢复使用</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">永久删除</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+        <tr>
+        	<td>
+                &nbsp;&nbsp;起始时间：&nbsp;&nbsp;
+               	<input id="startParam" name="startParam" class="Wdate" type="text" style="width: 172px" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"/>
+               	&nbsp;&nbsp;终止时间：&nbsp;&nbsp;
+               	<input id="endParam" name="endParam" class="Wdate" type="text" style="width: 172px" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"/>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查 询</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" plain="true" name="today">今天</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" plain="true" name="yesterday">昨天</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" plain="true" name="thisWeek">本周</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" plain="true" name="thisMonth">本月</a>
+            </td>
+        </tr>
+    </table>
+</div>
+<div id="lineOrderVoDlg" class="easyui-dialog" style="width:400px;height:250px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#lineOrderVoDlgBtn">
+    <form id="lineOrderVoFm" class="fm" method="post" novalidate enctype="multipart/form-data">
+        <div class="fitem">
+            <label> 订单状态： </label>
+            <input id="id" name="id" type="hidden">
+            <input id="order_status" class="easyui-combobox" name="order_status" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=28',
+								editable:false,
+								loader: common.comboBoxLoader " required="true"/>
+        </div>
+    </form>
+    <div id="lineOrderVoDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,143 @@
+package com.tmtc.serviceImpl.appAPI;
+
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.dao.ExpScoreRecordDao;
+import com.tmtc.dao.LineDao;
+import com.tmtc.dao.LineOrderDao;
+import com.tmtc.dao.MoneyOrderDao;
+import com.tmtc.dao.ScanDao;
+import com.tmtc.dao.UserDao;
+import com.tmtc.dao.UserDetailDao;
+import com.tmtc.frame.ServiceRuntimeException;
+import com.tmtc.po.ExpScoreRecord;
+import com.tmtc.po.Line;
+import com.tmtc.po.LineOrder;
+import com.tmtc.po.LineOrderRepository;
+import com.tmtc.po.LineOrderRepository.Criteria;
+import com.tmtc.po.MoneyOrder;
+import com.tmtc.po.UserDetail;
+import com.tmtc.service.appAPI.CollectMoneyService;
+import com.tmtc.utils.DateUtil;
+import com.tmtc.utils.IdWorker;
+import com.tmtc.utils.OrderNumUtil;
+import com.tmtc.utils.VerificationUtil;
+
+@Service
+public class CollerctMoneyServiceImpl implements CollectMoneyService {
+
+	@Autowired
+	UserDetailDao userDetailDao;
+
+	@Autowired
+	UserDao userDao;
+
+	@Autowired
+	LineDao lineDao;
+
+	@Autowired
+	ScanDao scanDao;
+
+	@Autowired
+	LineOrderDao lineOrderDao;
+
+	@Autowired
+	MoneyOrderDao moneyOrderDao;
+
+	@Autowired
+	ExpScoreRecordDao expScoreRecordDao;
+
+	@Override
+	public synchronized int insertCheck(String company_id, String card_num, String line_id, String line_time_id,
+			String line_station_id) throws ServiceRuntimeException {
+
+		String userId = userDao.selectCompanyCardNum(company_id, card_num);
+		if (0 == VerificationUtil.length(userId)) {
+			return 0; // 无效卡
+		}
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(userId);
+		if (null == userDetail) {
+			throw new ServiceRuntimeException("用户id，数据异常");
+		}
+
+		if (ParameterConstant.USER_TYPE_COMPANY_NORMAL != userDetail.getUser_type()) {
+			return 3; // 不是免费用户
+		}
+
+		LineOrderRepository lineOrderRepository = new LineOrderRepository();
+		Criteria criteria = lineOrderRepository.createCriteria();
+		criteria.andUser_idEqualTo(userId);
+		criteria.andTime_line_idEqualTo(line_time_id);
+		List<LineOrder> list = lineOrderDao.selectByExample(lineOrderRepository);
+		if (0 != VerificationUtil.size(list)) {
+			return 5;
+		}
+		
+		
+		Integer balance = userDetail.getBalance();
+		if (null == balance) {
+			userDetail.setBalance(0);
+			userDetailDao.updateByPrimaryKeySelective(userDetail);
+			return 1; // 余额不足
+		}
+		
+		Line line = lineDao.selectByPrimaryKey(line_id);
+		if (null == line) {
+			throw new ServiceRuntimeException("线路id，数据异常");
+		}
+		
+		Integer price = line.getPrice();
+		if (balance < price) {
+			return 1; // 余额不足
+		}
+
+		if (!company_id.equals(line.getCompany_id())) {
+			throw new ServiceRuntimeException("公司id，数据异常；");
+		}
+		Date date = DateUtil.getCurrentDate();
+		// 添加扫描记录
+//		Scan scan = new Scan(IdWorker.nextId(), userDetail.getId(), line_time_id, line_station_id, date,
+//				ParameterConstant.SCAN_TYPE_FINISH, ParameterConstant.IS_CHECK);
+//		if (scanDao.insert(scan) < 0) {
+//			throw new ServiceRuntimeException("扫描表添加异常");
+//		}
+
+		
+		
+		String orderByXL = OrderNumUtil.getOrderByXL();
+		LineOrder lineOrder = new LineOrder(IdWorker.nextId(), orderByXL, userId, line.getCity_id(), line_id,
+				line_time_id, line_station_id, date, ParameterConstant.ORDER_STATUS, ParameterConstant.ORDER_EXP,
+				ParameterConstant.LINE_ORDER_TYPE_DIRECT, date, ParameterConstant.IS_CHECK);
+		if (lineOrderDao.insert(lineOrder) < 0) {
+			throw new ServiceRuntimeException("线路订单添加异常");
+		}
+
+		MoneyOrder moneyOrder = new MoneyOrder(IdWorker.nextId(), userId, card_num, orderByXL, line.getPrice(),
+				ParameterConstant.PAY_TYPE_BALANCE, ParameterConstant.ORDER_STATUS, date);
+		if (moneyOrderDao.insert(moneyOrder) < 0) {
+			throw new ServiceRuntimeException("消费记录添加异常");
+		}
+
+		ExpScoreRecord expScoreRecord = new ExpScoreRecord(IdWorker.nextId(), userId, ParameterConstant.EXP_CRAD,
+				ParameterConstant.ORDER_EXP, date, ParameterConstant.IS_CHECK);
+
+		if (expScoreRecordDao.insert(expScoreRecord) < 0) {
+			throw new ServiceRuntimeException("积分添加异常(记录)");
+		}
+		userDetail.setExp_score(userDetail.getExp_score() + ParameterConstant.ORDER_EXP);
+		if (userDetailDao.updateByPrimaryKeySelective(userDetail) != 1) {
+			throw new ServiceRuntimeException("积分添加异常(用户)");
+		}
+		userDetail.setBalance(balance - price);
+		if (userDetailDao.updateByPrimaryKeySelective(userDetail) < 0) {
+			return 4; // 扣费失败！请重试
+		}
+		return 2;
+	}
+
+}

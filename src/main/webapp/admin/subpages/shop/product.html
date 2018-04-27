@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>product</title>
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/product.js"></script>
+
+<table id="productDg" class="easyui-datagrid" data-options="url:'./../product/query',rownumbers:true,toolbar:'#productDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false,rowStyler: product.rowStyler">
+    <thead>
+    <tr>
+    	<th data-options="checkbox:true"></th>
+        <th data-options="field:'id',width:80">产品编号</th>
+        <th data-options="field:'city_name',width:80">所属地区</th>
+        <th data-options="field:'company_name',width:80">所属公司</th>
+        <th data-options="field:'pro_name',width:80">产品名称</th>
+        <th data-options="field:'pro_type_name',width:80">产品类型</th>
+        <th data-options="field:'remote_url',width:200">外链</th>
+        <th data-options="field:'market_price',width:80">市场价格</th>
+        <th data-options="field:'shop_price',width:80">商城价格</th>
+        <th data-options="field:'exp_score',width:80">积分数</th>
+        <th data-options="field:'pro_picture',width:300">产品图片</th>
+        <th data-options="field:'detail',width:200">详细信息</th>
+        <th data-options="field:'stock',width:80">库存数</th>
+        <th data-options="field:'sell_type_name',width:80">销售类别</th>
+        <th data-options="field:'limit_buy',width:80">可购买次数</th>
+        <th data-options="field:'is_check',width:80,formatter: product.is_checkFormatter">是否有效</th>
+        <th data-options="field:'remark',width:80">备注</th>
+        <th data-options="field:'create_time',width:120">创建时间</th>
+    </tr>
+    </thead>
+</table>
+<div id="productDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+                &nbsp;&nbsp;产品名称：&nbsp;&nbsp;
+                <input id="pro_nameParam" name="pro_name" class="easyui-validatebox" style="width: 150px;">
+                &nbsp;&nbsp;产品类型：&nbsp;&nbsp;
+                <input id="pro_typeParam" class="easyui-combobox" name="pro_type" data-options="
+								valueField:'id',textField:'name',url:'./../productType/select',
+								editable:false,
+								loader: common.comboBoxLoader,
+								onBeforeLoad: function(param){
+									param.page = 0;param.rows = 100; 
+								} " />
+                &nbsp;&nbsp;销售类别：&nbsp;&nbsp;
+                <input id="sell_typeParam" class="easyui-combobox" name="sell_type" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=30',
+								editable:false,
+								loader: common.comboBoxLoader,
+								onBeforeLoad: function(param){
+									param.page = 0;param.rows = 100; 
+								} " />
+				&nbsp;&nbsp;所属公司：&nbsp;&nbsp;
+				<input id="company_idParam" class="easyui-combobox" name="company_id" data-options="
+									valueField:'id',textField:'name',url:'./../company/selectByProduct',
+									editable:false,
+									loader: common.comboBoxLoaderPage"/>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查 询</a>
+            </td>
+            <td align="right" width="550px">
+            	<a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查看图片</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-add" plain="true">添加</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">删除</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">审核</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">恢复使用</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">永久删除</a>
+                <a id="export" class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-excel" plain="true">导 出</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+<div id="productDlg" class="easyui-dialog" style="width:400px;height:600px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#productDlgBtn">
+    <form id="productFm" class="fm" method="post" novalidate enctype="multipart/form-data">
+        <div class="fitem">
+            <label> 产品名称： </label>
+            <input id="id" name="id" type="hidden">
+            <input id="pro_name" name="pro_name" class="easyui-validatebox" required="true"
+            	data-options="validType: ['maxLength[18]','specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 所属地区： </label>
+            <input id="city_id" class="easyui-combobox" name="city_id" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=10',
+								editable:false,
+								loader: common.comboBoxLoader,
+								onBeforeLoad: function(param){
+									param.page = 1;param.rows = 100; 
+								} " required="true"/>
+        </div>
+        <div class="fitem">
+            <label> 所属公司： </label>
+            <input id="company_id" class="easyui-combobox" name="company_id" data-options="
+									valueField:'id',textField:'name',url:'./../company/query',
+									editable:false,
+									loader: common.comboBoxLoaderPage,
+									onBeforeLoad: function(param){
+										param.page = 1;param.rows = 100; 
+									} " required="true"/>
+        </div>
+        <div class="fitem">
+            <label> 产品类型： </label>
+            <input id="pro_type" class="easyui-combobox" name="pro_type" data-options="
+								valueField:'id',textField:'name',url:'./../productType/select',
+								editable:false,
+								loader: common.comboBoxLoader" required="true"/>
+        </div>
+        <div class="fitem">
+            <label> 外链： </label>
+            <input id="remote_url" name="remote_url" class="easyui-validatebox"
+            	data-options="validType: ['url']">
+        </div>
+        <div class="fitem">
+            <label> 市场价格： </label>
+            <input id="market_price" name="market_price" class="easyui-validatebox" required="true"
+            	data-options="validType: ['price']">
+        </div>
+        <div class="fitem">
+            <label> 商城价格： </label>
+            <input id="shop_price" name="shop_price" class="easyui-validatebox" required="true"
+            	data-options="validType: ['price']">
+        </div>
+        <div class="fitem">
+            <label> 积分数： </label>
+            <input id="exp_score" name="exp_score" class="easyui-validatebox" required="true"
+            	data-options="validType: ['num']">
+        </div>
+        <div class="fitem">
+            <label> 产品图片： </label>
+            <input id="pro_picture" name="pro_pictureFile" type="file" multiple=true>
+        </div>
+        <div class="fitem">
+            <label> 详细信息： </label>
+            <input id="detail" name="detail" class="easyui-validatebox" required="true"
+            	data-options="validType: ['maxLength[200]']">
+        </div>
+        <div class="fitem">
+            <label> 库存数： </label>
+            <input id="stock" name="stock" class="easyui-validatebox" required="true"
+            	data-options="validType: ['num']">
+        </div>
+        <div class="fitem">
+            <label> 销售类别： </label>
+            <input id="sell_type" class="easyui-combobox" name="sell_type" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=30',
+								editable:false,
+								loader: common.comboBoxLoader,
+								onBeforeLoad: function(param){
+									param.page = 1;param.rows = 100; 
+								} " required="true"/>
+        </div>
+        <div class="fitem">
+            <label> 可购买次数： </label>
+            <input id="limit_buy" name="limit_buy" class="easyui-validatebox" required="true"
+            	data-options="validType: ['num']">
+        </div>
+        <div class="fitem">
+            <label> 备注： </label>
+            <input id="remark" name="remark" class="easyui-validatebox">
+        </div>
+    </form>
+    <div id="productDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+    <div id="productImg" class="easyui-dialog" style="width:400px;height:450px;padding:20px"
+   			data-options="resizable:true,modal:true,closable: false" closed="true" buttons="#productImgBtn">
+    	<div id="img"></div>
+    	<div id="productImgBtn">
+	        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">关闭</a>
+    	</div>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,101 @@
+package com.tmtc.controller.appAPI;
+
+import com.pingplusplus.model.Event;
+import com.pingplusplus.model.Webhooks;
+import com.tmtc.po.Log;
+import com.tmtc.service.LogService;
+import com.tmtc.utils.DateUtil;
+import com.tmtc.utils.IdWorker;
+import com.tmtc.utils.pingpp.WebHooksVerify;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.HashMap;
+
+/**
+ * Function: ping++回调
+ *
+ * @auther: hbwhypw
+ * Date: 2016-01-13 11:16
+ */
+@Controller
+@RequestMapping("/hooks")
+public class PingPPHooksController {
+
+    @Autowired
+    private LogService logService;
+
+    @ResponseBody
+    @RequestMapping("/pp")
+    public void pingPP(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        request.setCharacterEncoding("UTF8");
+        //获取头部所有信息
+        Enumeration headerNames = request.getHeaderNames();
+        HashMap<String, String> param = new HashMap<>();
+        while (headerNames.hasMoreElements()) {
+            String key = (String) headerNames.nextElement();
+            String value = request.getHeader(key);
+            param.put(key, value);
+            System.out.println(key + " " + value);
+        }
+
+        // 获得 http body 内容
+        BufferedReader reader = request.getReader();
+        StringBuffer body = new StringBuffer();
+        String string;
+        while ((string = reader.readLine()) != null) {
+            body.append(string);
+        }
+        reader.close();
+
+        String sign = param.get("x-pingplusplus-signature");
+        String data = body.toString();
+        try {
+            if (!WebHooksVerify.verifyData(data.getBytes(), sign.getBytes(), WebHooksVerify.getPubKey())) {
+                // 验证失败
+                response.setStatus(502);
+                log("验证失败", "错误sign", "");
+                return;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            log("验证失败", "getPubKey失败", StringUtils.substring(e.getMessage(), 0, 300));
+            response.setStatus(500);
+        }
+
+        // 解析异步通知数据
+        Event event = Webhooks.eventParse(body.toString());
+        if ("charge.succeeded".equals(event.getType())) {
+            response.setStatus(200);
+            log("充值成功", "charge.succeeded", StringUtils.substring(data, 0, 300));
+        } else if ("refund.succeeded".equals(event.getType())) {
+            response.setStatus(200);
+            log("退款成功", "refund.succeeded", StringUtils.substring(data, 0, 300));
+        } else {
+            response.setStatus(500);
+            log("失败", "event fail", StringUtils.substring(data, 0, 300));
+        }
+    }
+
+    private void log(String name, String description, String exceptionDetail) {
+        Log log = new Log();
+        log.setId(IdWorker.nextId());
+        log.setName(name);
+        log.setDescription(description);
+        log.setType(0);
+        log.setExceptionCode(null);
+        log.setExceptionDetail(exceptionDetail);
+        log.setParams(null);
+        log.setCreateDate(DateUtil.getCurrentDate());
+        //保存数据库
+        logService.insert(log);
+    }
+}

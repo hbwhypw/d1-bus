@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>appResource</title>
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/appResource.js"></script>
+<table id="appResourceDg" class="easyui-datagrid" data-options="url:'./../appResource/query',rownumbers:true,toolbar:'#appResourceDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false,rowStyler: appResource.rowStyler">
+    <thead>
+    <tr>
+        <th data-options="field:'id',width:80,checkbox:true">编号</th>
+        <th data-options="field:'name',width:80">资源名称</th>
+        <th data-options="field:'url',width:80">资源路径</th>
+        <th data-options="field:'param',width:80">参数</th>
+        <th data-options="field:'remark',width:80">备注</th>
+        <th data-options="field:'create_time',width:80">创建时间</th>
+        <th data-options="field:'is_check',width:80,formatter: appResource.is_checkFormatter">是否有效</th>
+    </tr>
+    </thead>
+</table>
+<div id="appResourceDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+                &nbsp;&nbsp;资源名称：&nbsp;&nbsp;
+                <input id="nameParam" name="name" class="easyui-validatebox" style="width: 150px;">
+                &nbsp;&nbsp;资源路径：&nbsp;&nbsp;
+	        	<input id="urlParam" name="url" class="easyui-validatebox" style="width: 150px;">
+               	 &nbsp;&nbsp;是否有效：&nbsp;&nbsp;
+               	<select id="is_checkParam" name="is_check" style="width: 150px;">
+                    <option value="" selected="selected">全部</option>
+                    <option value="1">有效</option>
+                    <option value="0">无效</option>
+                </select>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查 询</a>
+            </td>
+            <td align="right" width="350px">
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-add" plain="true">添加</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">删除</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">恢复使用</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">永久删除</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+<div id="appResourceDlg" class="easyui-dialog" style="width:450px;height:300px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#appResourceDlgBtn">
+    <form id="appResourceFm" class="fm" method="post" novalidate enctype="multipart/form-data">
+        <div class="fitem">
+            <label> 资源名称： </label>
+            <input id="id" name="id" type="hidden">
+            <input id="name" name="name" class="easyui-validatebox" required="true"
+            	data-options="validType: ['maxLength[18]','specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 资源路径： </label>
+            <input id="url" name="url" class="easyui-validatebox" required="true">
+        </div>
+        <div class="fitem">
+            <label> 参数： </label>
+            <input id="param" name="param" class="easyui-validatebox" >
+        </div>
+        <div class="fitem">
+            <label> 备注： </label>
+            <input id="remark" name="remark" class="easyui-validatebox"
+            	data-options="validType: ['specialChar']">
+        </div>
+    </form>
+    <div id="appResourceDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+</div>
+</body>
+</html>

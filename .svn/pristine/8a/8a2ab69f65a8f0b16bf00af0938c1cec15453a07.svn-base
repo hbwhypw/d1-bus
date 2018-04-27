@@ -1,0 +1,54 @@
+package com.tmtc.serviceImpl.appAPI;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.dao.CarDao;
+import com.tmtc.dao.LineTimeDao;
+import com.tmtc.po.Car;
+import com.tmtc.po.LineTime;
+import com.tmtc.service.appAPI.DriveAppService;
+@Service
+public class DriveAppServiceImpl implements DriveAppService{
+
+	@Autowired
+	LineTimeDao lineTimeDao;
+	@Autowired
+	CarDao carDao;
+	
+	@Override
+	public int updateStart(String line_time_id) {
+		LineTime lineTime = lineTimeDao.selectByPrimaryKey(line_time_id);
+		if(null != lineTime){
+			Car car = carDao.selectByPrimaryKey(Long.valueOf(lineTime.getCar_id()));
+			
+			if(ParameterConstant.CAR_STATUS_IS == car.getCar_status()){
+				return 0;
+			}
+			
+			car.setSeat(car.getTotal_seat()-ParameterConstant.SEATGAP);
+			car.setCar_status(ParameterConstant.CAR_STATUS_IS);
+			carDao.updateByPrimaryKeySelective(car);
+			lineTime.setDriving_state(ParameterConstant.CAR_STATUS_IS);
+			return lineTimeDao.updateByPrimaryKeySelective(lineTime);
+		}
+		
+		return 0;
+	}
+
+	@Override
+	public int updateEnd(String line_time_id) {
+		LineTime lineTime = lineTimeDao.selectByPrimaryKey(line_time_id);
+		if(null != lineTime){
+			lineTime.setDriving_state(ParameterConstant.CAR_STATUS_END);
+			Car car = carDao.selectByPrimaryKey(Long.valueOf(lineTime.getCar_id()));
+			car.setSeat(car.getTotal_seat()-ParameterConstant.SEATGAP);
+			car.setCar_status(ParameterConstant.CAR_STATUS_END);
+			carDao.updateByPrimaryKeySelective(car);
+			return lineTimeDao.updateByPrimaryKeySelective(lineTime);
+		}
+		return 0;
+	}
+
+}

@@ -1,0 +1,523 @@
+package com.tmtc.constant;
+
+import com.tmtc.utils.PropertiesUtil;
+
+/**
+ * Function: 系统消息变量
+ * 
+ * @auther: hbwhypw Date: 2015/10/26 11:25
+ */
+public class MessageVar {
+	
+	private static String getMsg(String key) {
+		return PropertiesUtil.getMessage(key);
+	}
+
+	// App消息提示
+	// 登录注册
+	/**
+	 * 用户名不能为空
+	 */
+	public static final String NAME_NOT_ENPTY = getMsg("username.not.empty");
+	/**
+	 * 用户名长度必须介于{min}-{max}之间的字母或数字
+	 */
+	public static final String NAME_LENGTH = getMsg("username.length");
+	/**
+	 * 密码不能为空
+	 */
+	public static final String PW_NOT_ENPTY = getMsg("password.not.empty");
+	/**
+	 * 密码长度必须介于{min}-{max}之间的字母或数字
+	 */
+	public static final String PW_LENGTH = getMsg("password.length");
+	/**
+	 * 登录成功
+	 */
+	public static final String LOGIN_SUCCESS = getMsg("login.success");
+	/**
+	 * 用户名或密码错误，您还可以登录
+	 */
+	public static final String LOGIN_WARN = getMsg("login.warn");
+	/**
+	 * 用户已被锁定
+	 */
+	public static final String LOGIN_ERROR = getMsg("login.error");
+	/**
+	 * 请重新登录
+	 */
+	public static final String ERROR_LOGIN = getMsg("error.login");
+	/**
+	 * 无效的请求
+	 */
+	public static final String ERROR_ENC = getMsg("error.enc");
+	/**
+	 * 用户名或密码错误
+	 */
+	public static final String LOGIN_USER_PWD_ERROR = getMsg("login.user.pwd.error");
+	/**
+	 * 注册成功
+	 */
+	public static final String RIGISTER_SUCCESS = getMsg("rigister.success");
+	/**
+	 * 注册失败
+	 */
+	public static final String RIGISTER_ERROR = getMsg("rigister.error");
+	/**
+	 * 密码错误
+	 */
+	public static final String PWD_ERROR = getMsg("pwd.error");
+	/**
+	 * 手机号未验证
+	 */
+	public static final String PHONE_ONT_VERIFICATION = getMsg("phone.ont.verification");
+	/**
+	 * 验证码已过期，请重新验证
+	 */
+	public static final String VERIFICATION_CODE_OVER = getMsg("verification.code.over");
+	/**
+	 * 验证码错误
+	 */
+	public static final String VERIFICATION_CODE_FALSE = getMsg("verification.code.false");
+	/**
+	 * 验证码正确
+	 */
+	public static final String VERIFICATION_CODE_TRUE = getMsg("verification.code.true");
+	// 密码找回
+	/**
+	 * 密码找回成功，请重新登录
+	 */
+	public static final String FINDPW_SUCCESS = getMsg("findPWD.success");
+	/**
+	 * 该手机号没有注册
+	 */
+	public static final String PHONE_NULL_RIGISTER = getMsg("phone.null.rigister");
+	/**
+	 * 找回错误
+	 */
+	public static final String FIND_ERROR = getMsg("find.error");
+	// 首页显示线路
+	/**
+	 * 查询成功
+	 */
+	public static final String LINE_SUCCESS = getMsg("line.success");
+	/**
+	 * 日期错误
+	 */
+	public static final String DATE_ERROR = getMsg("date.error");
+	// 发送手机号
+	/**
+	 * 发送验证码成功
+	 */
+	public static final String SEND_VERIFICATION_CODE_SUCCESS = getMsg("send.verification.code.success");
+	/**
+	 * 该手机号已注册
+	 */
+	public static final String SEND_VERIFICATION_CODE_ERROR = getMsg("send.verification.code.error");
+	/**
+	 * 验证码已发送
+	 */
+	public static final String SEND_GO = getMsg("send.go");
+	/**
+	 * 发送失败
+	 */
+	public static final String SEND_ERROR = getMsg("send.error");
+	/**
+	 * 发送成功
+	 */
+	public static final String SEND_SUCCESS = getMsg("send.success");
+	// 手机验证
+	/**
+	 * 手机号错误
+	 */
+	public static final String PHONE_NUM_ERROR = getMsg("phone.num.error");
+	/**
+	 * 用户信息错误
+	 */
+	public static final String USER_QUERY_IDISNULL = getMsg("user.query.idisnull");
+	/**
+	 * 用户密码修改失败
+	 */
+	public static final String USER_CHANGEPWD_ERROR = getMsg("user.changepwd.error");
+	/**
+	 * 用户更换手机号失败
+	 */
+	public static final String USER_CHANGEPHONE_UPDATE_FAIL = getMsg("user.changephone.updateFail");
+	/**
+	 * 验证码错误
+	 */
+	public static final String USER_CHANGEPHONE_CODEERROR = getMsg("user.changephone.codeError");
+	/**
+	 * 头像上传失败
+	 */
+	public static final String USER_CHANGEPHOTO_FAIL = getMsg("user.changephoto.fail");
+	/**
+	 * 获取二维码失败
+	 */
+	public static final String USER_QRCODE_FAIL = getMsg("user.qrcode.fail");
+	// 司机端车辆位置
+	/**
+	 * 请输入ID
+	 */
+	public static final String CARLOCATION_UPDATE_ERROR = getMsg("CarLocation.update.error");
+	/**
+	 * 操作失败
+	 */
+	public static final String CARLOCATION_ERROR = getMsg("CarLocation.error");
+	/**
+	 * 操作成功
+	 */
+	public static final String CARLOCATION_SUCCESS = getMsg("CarLocation.success");
+	/**
+	 * 车辆位置没有修改
+	 */
+	public static final String CARLOCTION_UPDATE_ERROR = getMsg("CarLoction.update.error");
+	/**
+	 * 车辆位置修改成功
+	 */
+	public static final String CARLOCTION_UPDATE_SUCCESS = getMsg("CarLoction.update.success");
+	/**
+	 * 设备不存在
+	 */
+	public static final String DRIVER_ID_NULL = getMsg("driver_id.null");
+	// 申请线路
+	/**
+	 * 申请成功
+	 */
+	public static final String LINEAPPLY_INSERT_SUCCESS = getMsg("LineApply.insert.success");
+	/**
+	 * 查询成功
+	 */
+	public static final String LINEAPPLY_QUERY_SUCCESS = getMsg("lineApply.query.success");
+	// Appid点击记录
+	/**
+	 * 收集成功
+	 */
+	public static final String APPLOG_ADD_SUCCESS = getMsg("appLog.add.success");
+
+	// 后台消息提示
+	// 后台添加用户
+	/**
+	 * 请输入所属城市
+	 */
+	public static final String USER_CITY_NULL = getMsg("user.city.null");
+	/**
+	 * 请输入所属公司
+	 */
+	public static final String USER_COMPANY_NULL = getMsg("user.company.null");
+	/**
+	 * 请输入员工号/学生号
+	 */
+	public static final String USER_NUMBER_NULL = getMsg("user.number.null");
+	/**
+	 * 密码重置成功
+	 */
+	public static final String USER_RESETPASSWORD_SUCCESS = getMsg("user.resetPassWord.success");
+	/**
+	 * 密码重置失败
+	 */
+	public static final String USER_RESETPASSWORD_ERROR = getMsg("user.resetPassWord.error");
+	// 后台管理广告
+	/**
+	 * 操作失败
+	 */
+	public static final String DO_ERROR = getMsg("do.error");
+	/**
+	 * 查找成功
+	 */
+	public static final String ADPIC_SELECT_SUCCESS = getMsg("adPic.select.success");
+	// 后台字典管理
+	/**
+	 * 无此父节点
+	 */
+	public static final String DICTIONARY_ADDSUB_NOTROOT = getMsg("dictionary.addsub.notroot");
+	/**
+	 * 请选择父节点
+	 */
+	public static final String DICTIONARY_ADDSUB_PLROOT = getMsg("dictionary.addsub.plroot");
+	// 后台司机管理
+	/**
+	 * 添加失败，请输入手机号
+	 */
+	public static final String DRIVER_ADD_ERROR = getMsg("Driver.add.error");
+	/**
+	 * 修改成功
+	 */
+	public static final String DRIVER_UPDATE_SUCCESS = getMsg("Driver.update.success");
+	/**
+	 * 修改失败
+	 */
+	public static final String DRIVER_UPDATE_ERROR = getMsg("Driver.update.error");
+	/**
+	 * 旧密码为空
+	 */
+	public static final String DRIVER_UPDATE_NULL = getMsg("Driver.update.null");
+	// 消息反馈成功
+	/**
+	 * 反馈成功
+	 */
+	public static final String FEEDBACK_SUCCESS = getMsg("feedback.success");
+	// 恢复成功
+	/**
+	 * 恢复成功,可用
+	 */
+	public static final String ISCHECK_SUCCESS = getMsg("ischeck.success");
+	/**
+	 * 恢复失败
+	 */
+	public static final String ISCHECK_ERROR = getMsg("ischeck.error");
+	// 审核成功
+	/**
+	 * 审核成功
+	 */
+	public static final String AUDIT_SUCCESS = getMsg("audit.success");
+	/**
+	 * 审核失败
+	 */
+	public static final String AUDIT_ERROR = getMsg("audit.error");
+	// 后台App资源管理
+	/**
+	 * App资源添加成功
+	 */
+	public static final String APPRESOURCE_ADD_SUCCESS = getMsg("appResource.add.success");
+	/**
+	 * App资源添加失败
+	 */
+	public static final String APPRESOURCE_ADD_ERROR = getMsg("appResource.add.error");
+	/**
+	 * App资源修改成功
+	 */
+	public static final String APPRESOURCE_UPDATE_SUCCESS = getMsg("appResource.update.success");
+	/**
+	 * App资源修改失败
+	 */
+	public static final String APPRESOURCE_UPDATE_ERROR = getMsg("appResource.update.error");
+	/**
+	 * App资源删除成功
+	 */
+	public static final String APPRESOURCE_DELETE_SUCCESS = getMsg("appResource.delete.success");
+	/**
+	 * App资源删除失败
+	 */
+	public static final String APPRESOURCE_DELETE_ERROR = getMsg("appResource.delete.error");
+	/**
+	 * 查找成功
+	 */
+	public static final String APPRESOURCE_SELECT_SUCCESS = getMsg("appResource.selete.success");
+	/**
+	 * 查找失败
+	 */
+	public static final String APPRESOURCE_SELECT_ERROR = getMsg("appResource.selete.error");
+	/**
+	 * 操作失败
+	 */
+	public static final String APPRESOURCE_ERROR = getMsg("appResource.error");
+	// 基础操作
+	/**
+	 * 删除成功
+	 */
+	public static final String DELETE_SUCCESS = getMsg("delete.success");
+	/**
+	 * 修改成功
+	 */
+	public static final String UPDATE_SUCCESS = getMsg("update.success");
+	/**
+	 * 添加成功
+	 */
+	public static final String ADD_SUCCESS = getMsg("add.success");
+	/**
+	 * 删除失败
+	 */
+	public static final String DELETE_ERROR = getMsg("delete.error");
+	/**
+	 * 修改失败
+	 */
+	public static final String UPDATE_ERROR = getMsg("update.error");
+	/**
+	 * 添加失败
+	 */
+	public static final String ADD_ERROE = getMsg("add.error");
+	// 劵码领取
+	/**
+	 * 已经使用
+	 */
+	public static final String CARDRECORD_USE = getMsg("cardRecord.use");
+	/**
+	 * 还未使用
+	 */
+	public static final String CARDRECORD_NOTUSE = getMsg("cardRecord.notUse");
+	
+	/**
+	 * 下单成功
+	 */
+	public static final String ORDER_SUCCESS = getMsg("order.success");
+	
+	/**
+	 * 下单失败
+	 */
+	public static final String ORDER_ERROR = getMsg("order.error");
+	/**
+	 * 企业用户
+	 */
+	public static final String USERTYPE_COMPANY = getMsg("userType.company");
+	/**
+	 * 企业付费用户
+	 */
+	public static final String USERTYPE_COMPANY_NORMAL = getMsg("userType.company_normal");
+	/**
+	 * 上车
+	 */
+	public static final String GETON = getMsg("getOn");
+	/**
+	 * 下车
+	 */
+	public static final String GETOFF = getMsg("getOff"); 
+	/**
+	 * 已付费扫描
+	 */
+	public static final String SCANTYPE1 = getMsg("scanType1"); 
+	/**
+	 * 未付费扫描
+	 */
+	public static final String SCANTYPE2 = getMsg("scanType2"); 
+	/**
+	 * 企业付费用户，没下单，跳到下单页面
+	 */
+	public static final String SCANNOLINETIME = getMsg("scanNoLineTime"); 
+	/**
+	 * 企业用户，直接到扫码页面
+	 */
+	public static final String SCANGETON = getMsg("scanGetOn"); 
+	/**
+	 * 搜索成功
+	 */
+	public static final String SEARCHSUCCESS = getMsg("searchSuccess"); 
+	/**
+	 * 该线路暂未开通，请先定制该线路
+	 */
+	public static final String SEARCHERROR = getMsg("searchError"); 
+	/**
+	 * 未付款，跳到支付页面
+	 */
+	public static final String SCANNOPAY = getMsg("scanNoPay");
+    /**
+     * 该班次不存在
+     */
+    public static final String LINETIMENOTEXIST = getMsg("lineTimeNotExist");
+    /**
+     * 已经开始驾驶
+     */
+    public static final String CARDRIVING = getMsg("carDriving");
+	/**
+	 * 车还有未结束的班次
+	 */
+    public static final String LINETIMENOTEND = getMsg("lineTimeNotEnd");
+    /**
+     * 该班次已经发车
+     */
+    public static final String LINETIMEDEPARTED = getMsg("lineTimeDeparted");
+    /**
+     * 班次开始驾驶失败
+     */
+    public static final String DRIVESTARTERROR = getMsg("driveStartError");
+	/**
+	 * 开始驾驶
+	 */
+	public static final String DRIVESTART = getMsg("driveStart"); 
+	/**
+	 * 结束驾驶
+	 */
+	public static final String DRIVEEND = getMsg("driveEnd");
+    /**
+     * 号车未驾驶
+     */
+    public static final String CARNOTDRIVE = getMsg("carNotDrive");
+    /**
+     * 该班次未出发
+     */
+    public static final String LINETIMENOTDEPART = getMsg("lineTimeNotDepart");
+    /**
+     * 结束驾驶出错
+     */
+    public static final String DRIVEENDERROR = getMsg("driveEndError");
+    /**
+     * 参数错误
+     */
+    public static final String PARAMERROR = getMsg("paramError");
+    /**
+     * 卡号信息为空
+     */
+    public static final String CARDEMPTY = getMsg("cardEmpty");
+	/**
+	 * 操作失败
+	 */
+	public static final String _NULL = ""; 
+	/**
+	 * 管理员重置密码
+	 */
+	public static final String ADMINSUPDATEPW = getMsg("adminsUpdatePW"); 
+	/**
+	 * 司机管理，请输入手机号
+	 */
+	public static final String DRIVER_PHONE_NULL = getMsg("driver.phone.null"); 
+	/**
+	 * 请输入公司名
+	 */
+	public static final String COMPANY_NAME_NULL = getMsg("company.name.null"); 
+	/**
+	 * 公司名重复
+	 */
+	public static final String COMPANY_NAME_REPEAT = getMsg("company.name.repeat"); 
+	/**
+	 * 管理员用户名为空
+	 */
+	public static final String ADMINS_USERNAME_NULL = getMsg("admins.username.null"); 
+	/**
+	 * 管理员用户名重复
+	 */
+	public static final String ADMINS_USERNAME_REPEAT = getMsg("admins.username.repeat"); 
+	/**
+	 * 统计到站时间，无此站点
+	 */
+	public static final String ARRIVALTIME_STATION_NULL = getMsg("arrivalTime.station.null"); 
+	/**
+	 * 手机号已存在
+	 */
+	public static final String PHONE_NUM_REPEAT = getMsg("phone.num.repeat"); 
+	
+	/**
+	 * 数据错误
+	 */
+	public static final String UP_ERROR = getMsg("up.error"); 
+	
+	/**
+	 * 上传成功
+	 */
+	public static final String UP_SUCCESS = getMsg("up.success"); 
+	
+	/**
+	 * 充值错误
+	 */
+	public static final String RECHARGE_ERROR = getMsg("recharge.error");
+	
+	/**
+	 * 充值成功
+	 */
+	public static final String RECHARGE_SUCCESS = getMsg("recharge.success");
+	/**
+	 * 激活成功
+	 */
+	public static final String INVOKE_SUCCESS = getMsg("invoke.success");
+	/**
+	 * 激活失败
+	 */
+	public static final String INVOKE_ERROR = getMsg("invoke.error");
+	/**
+	 * 可用，无需激活
+	 */
+	public static final String INVOKE_NO = getMsg("invoke.no");
+	/**
+	 * 卡号已存在
+	 */
+	public static final String USER_CARDNUM_REPEAT = getMsg("user.cardNum.repeat");
+}

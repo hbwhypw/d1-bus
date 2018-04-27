@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>driver</title>
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/driver.js"></script>
+
+<table id="driverDg" class="easyui-datagrid" data-options="url:'./../driver/query',rownumbers:true,toolbar:'#driverDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false,rowStyler: driver.rowStyler">
+    <thead>
+    <tr>
+    	<th data-options="checkbox:true"></th>
+        <th data-options="field:'id',width:80">ID</th>
+        <th data-options="field:'real_name',width:80">真实姓名</th>
+        <th data-options="field:'mobile',width:80,formatter: driver.mobileFormatter">手机号</th>
+        <th data-options="field:'gender',width:80,formatter: driver.genderFormatter">性别</th>
+        <th data-options="field:'driver_age',width:80">驾龄</th>
+        <th data-options="field:'birthday',width:80">生日</th>
+        <th data-options="field:'idcard',width:80,formatter: driver.idcardFormatter">身份证</th>
+        <th data-options="field:'license_no',width:80">驾照号</th>
+        <th data-options="field:'license_pic',width:80">驾照图片</th>
+        <th data-options="field:'license_type_name',width:80">驾照类型</th>
+        <th data-options="field:'native_place',width:80">籍贯</th>
+        <th data-options="field:'address',width:80">住址</th>
+        <th data-options="field:'driver_source_name',width:80">司机来源</th>
+        <th data-options="field:'city_name',width:80">城市id</th>
+        <th data-options="field:'photo',width:80">头像</th>
+        <th data-options="field:'bg_pic',width:80">背景图</th>
+        <th data-options="field:'create_time',width:80">创建时间</th>
+        <th data-options="field:'is_check',width:80,formatter: driver.is_checkFormatter">是否有效</th>
+        <th data-options="field:'remark',width:80">备注</th>
+    </tr>
+    </thead>
+</table>
+<div id="driverDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+                &nbsp;&nbsp;手机号：&nbsp;&nbsp;
+                <input id="mobileParam" name="mobileParam" class="easyui-validatebox" style="width: 150px;">
+                &nbsp;&nbsp;真实姓名：&nbsp;&nbsp;
+                <input id="real_nameParam" name="real_nameParam" class="easyui-validatebox" style="width: 150px;">
+                &nbsp;&nbsp;所属城市：&nbsp;&nbsp;
+                <input id="city_idParam" class="easyui-combobox" name="city_id" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=10',
+								loader: common.comboBoxLoader,
+								onBeforeLoad: function(param){
+									param.page = 0;param.rows = 100; 
+								} " />
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查 询</a>
+            </td>
+            <td align="right" width="600px">
+            	<a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查看图片</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-add" plain="true">添加</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">重置密码</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">删除</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">恢复使用</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">永久删除</a>
+                <a id="export" class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-excel" plain="true">导 出</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+<div id="driverDlg" class="easyui-dialog" style="width:400px;height:700px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#driverDlgBtn">
+    <form id="driverFm" class="fm" method="post" novalidate enctype="multipart/form-data">
+        <div class="fitem">
+            <label> 真实姓名： </label>
+            <input id="id" name="id" type="hidden">
+            <input id="real_name" name="real_name" class="easyui-validatebox" required="true"
+            	data-options="validType: ['maxLength[18]','specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 手机号： </label>
+            <input id="mobile" name="mobile" class="easyui-validatebox" required="true"
+            	data-options="validType: 'mobilephone'">
+        </div>
+        <div class="fitem">
+            <label> 性别： </label>
+            <select id="gender" name="gender" style="width: 173px;">
+                <option value="1" selected="selected">男</option>
+                <option value="2">女</option>
+            </select>
+        </div>
+        <div class="fitem">
+            <label> 驾龄： </label>
+            <input id="driver_age" name="driver_age" class="easyui-validatebox" required="true"
+            	data-options="validType: ['num']">
+        </div>
+        <div class="fitem">
+            <label> 生日： </label>
+            <input id="birthday" name="birthday" class="Wdate" type="text" style="width: 172px" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd'})"/>
+        </div>
+        <div class="fitem">
+            <label> 身份证： </label>
+            <input id="idcard" name="idcard" class="easyui-validatebox"
+            	data-options="validType: ['idcard']">
+        </div>
+        <div class="fitem">
+            <label> 驾照号： </label>
+            <input id="license_no" name="license_no" class="easyui-validatebox" required="true"
+            	data-options="validType: ['specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 驾照图片： </label>
+            <input id="license_pic" name="license_picFile" type="file">
+        </div>
+        <div class="fitem">
+            <label> 驾照类型： </label>
+            <input id="license_type" class="easyui-combobox" name="license_type" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=18',
+								loader: common.comboBoxLoader,
+								onBeforeLoad: function(param){
+									param.page = 0;param.rows = 100; 
+								} " required="true"/>
+        </div>
+        <div class="fitem">
+            <label> 籍贯： </label>
+            <input id="native_place" name="native_place" class="easyui-validatebox" required="true"
+            	data-options="validType: ['specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 住址： </label>
+            <input id="address" name="address" class="easyui-validatebox" required="true"
+            	data-options="validType: ['specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 司机来源： </label>
+            <input id="driver_source" class="easyui-combobox" name="driver_source" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=20',
+								loader: common.comboBoxLoader,
+								onBeforeLoad: function(param){
+									param.page = 0;param.rows = 100; 
+								} " required="true"/>
+        </div>
+        <div class="fitem">
+            <label> 城市： </label>
+            <input id="city_id" class="easyui-combobox" name="city_id" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=10',
+								loader: common.comboBoxLoader,
+								onBeforeLoad: function(param){
+									param.page = 0;param.rows = 100; 
+								} " required="true"/>
+        </div>
+        <div class="fitem">
+            <label> 头像： </label>
+            <input id="photo" name="photoFile" type="file" >
+        </div>
+        <div class="fitem">
+            <label> 背景图： </label>
+            <input id="bg_pic" name="bg_picFile" type="file">
+        </div>
+        <div class="fitem">
+            <label> 备注： </label>
+            <input id="remark" name="remark" class="easyui-validatebox">
+        </div>
+    </form>
+    <div id="driverDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+    <div id="driverImg" class="easyui-dialog" style="width:400px;height:450px;padding:20px"
+   			data-options="resizable:true,modal:true,closable: false" closed="true" buttons="#driverImgBtn">
+    	<div id="img"></div>
+    	<div id="driverImgBtn">
+	        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">关闭</a>
+    	</div>
+    </div>
+</div>
+</body>
+</html>

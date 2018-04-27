@@ -1,0 +1,271 @@
+package com.tmtc.serviceImpl;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.tmtc.dao.CompanyDao;
+import com.tmtc.dao.DictionaryDao;
+import com.tmtc.dao.MoneyOrderDao;
+import com.tmtc.dao.UserDao;
+import com.tmtc.dao.UserDetailDao;
+import com.tmtc.frame.PageResult;
+import com.tmtc.po.Company;
+import com.tmtc.po.Dictionary;
+import com.tmtc.po.DictionaryRepository;
+import com.tmtc.po.MoneyOrder;
+import com.tmtc.po.MoneyOrderRepository;
+import com.tmtc.po.User;
+import com.tmtc.po.UserDetail;
+import com.tmtc.po.UserDetailRepository;
+import com.tmtc.po.UserRepository;
+import com.tmtc.service.MoneyOrderService;
+import com.tmtc.utils.VerificationUtil;
+import com.tmtc.vo.MoneyOrderVo;
+
+@Service(value="moneyOrderService")
+public class MoneyOrderServiceImpl implements MoneyOrderService{
+
+	@Autowired
+	MoneyOrderDao moneyOrderDao;
+	
+	@Autowired
+	DictionaryDao dictionaryDao;
+	
+	@Autowired
+	UserDetailDao userDetailDao;
+	
+	@Autowired
+	UserDao userDao;
+	
+	@Autowired
+	CompanyDao companyDao;
+	
+	@Override
+	public int count(MoneyOrderRepository example) {
+		return moneyOrderDao.countByExample(example);
+	}
+
+	@Override
+	public int delete(String id) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int delete(MoneyOrderRepository example) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int insert(MoneyOrder record) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public List<MoneyOrder> select(MoneyOrderRepository example) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public MoneyOrder selectByPrimaryKey(String id) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public int update(MoneyOrder record) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public int update(MoneyOrder record, MoneyOrderRepository example) {
+		// TODO Auto-generated method stub
+		return 0;
+	}
+
+	@Override
+	public PageResult selectByPage(MoneyOrderRepository example) {
+		List<MoneyOrder> list = moneyOrderDao.selectByExample(example);
+		List<MoneyOrderVo> listVo = new ArrayList<MoneyOrderVo>();
+		for(MoneyOrder moneyOrder: list){
+			String userId = moneyOrder.getUserId();
+			Integer payType = moneyOrder.getPay_type();
+			Integer orderStatus = moneyOrder.getOrder_status();
+			
+			String userName = null;
+			String realName = null;
+			String payTypeName = null;
+			String orderStatusName = null;
+			String companyName = null;
+			
+			if(0 != VerificationUtil.length(userId)){
+				userName = getUserName(userId);
+			}
+			if(0 != VerificationUtil.length(userId)){
+				realName = getRealName(userId);
+			}
+			if(0 != VerificationUtil.integerIsNull(payType)){
+				payTypeName = getName(payType);
+			}
+			if(0 != VerificationUtil.integerIsNull(orderStatus)){
+				orderStatusName = getName(orderStatus);
+			}
+			if(0 != VerificationUtil.length(userId)){
+				User user = userDao.selectByPrimaryKey(userId);
+				String companyId = user.getCompany_id();
+				if(0 != VerificationUtil.length(companyId)){
+					Company company = companyDao.selectByPrimaryKey(companyId);
+					if(null != company){
+						companyName = company.getName();
+					}
+				}
+			}
+			
+			MoneyOrderVo moneyOrderVo = new MoneyOrderVo(moneyOrder, realName, userName, payTypeName, orderStatusName,companyName);
+			listVo.add(moneyOrderVo);
+		}
+		return new PageResult(this.count(example), listVo, 1);
+	}
+
+	private String getUserName(String userId){
+		String userName = null;
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(userId);
+		if(null != userDetail){
+			userName = userDetail.getUsername();
+		}
+		return userName;
+	}
+	
+	private String getRealName(String userId){
+		String realName = null;
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(userId);
+		if(null != userDetail){
+			realName = userDetail.getReal_name();
+		}
+		return realName;
+	}
+	
+	private String getName(Integer code) {
+		String name = null;
+		DictionaryRepository dictionaryRepository = new DictionaryRepository();
+		DictionaryRepository.Criteria criteria = dictionaryRepository.createCriteria();
+		criteria.andCodeEqualTo(code);
+		List<Dictionary> list = dictionaryDao.selectByExample(dictionaryRepository);
+		if (0 != VerificationUtil.size(list)) {
+			name = list.get(0).getName();
+		}
+		return name;
+	}
+
+	@Override
+	public PageResult query(int page, int rows, String userName, String realName, Integer payType, String start, String end,String company_id) throws ParseException {
+		MoneyOrderRepository moneyOrderRepository = new MoneyOrderRepository();
+		moneyOrderRepository.setPageSize(rows);
+		moneyOrderRepository.setRowIndex((page-1)*rows);
+		moneyOrderRepository.setOrderByClause("create_time desc");
+		MoneyOrderRepository.Criteria criteria = moneyOrderRepository.createCriteria();
+		
+		if(0 != VerificationUtil.length(userName)){
+			String userId = null;
+			
+			UserDetailRepository userDetailRepository = new UserDetailRepository();
+			UserDetailRepository.Criteria criteria1 = userDetailRepository.createCriteria();
+			criteria1.andUsernameLike("%"+userName+"%");
+			List<UserDetail> list = userDetailDao.selectByExample(userDetailRepository);
+			if(0 != VerificationUtil.size(list)){
+				userId = list.get(0).getId();
+				criteria.andUserIdEqualTo(userId);
+			}
+		}
+		if(0 != VerificationUtil.length(realName)){
+			String userId = null;
+			
+			UserDetailRepository userDetailRepository = new UserDetailRepository();
+			UserDetailRepository.Criteria criteria1 = userDetailRepository.createCriteria();
+			criteria1.andReal_nameLike("%"+realName+"%");
+			List<UserDetail> list = userDetailDao.selectByExample(userDetailRepository);
+			if(0 != VerificationUtil.size(list)){
+				userId = list.get(0).getId();
+				criteria.andUserIdEqualTo(userId);
+			}
+		}
+		if(0 != VerificationUtil.integerIsNull(payType)){
+			criteria.andPay_typeEqualTo(payType);
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		if(null != start){
+			Date start_time = sdf.parse(start);
+			criteria.andCreate_timeGreaterThan(start_time);
+		}
+		if(null != end){
+			Date end_time = sdf.parse(end);
+			criteria.andCreate_timeLessThan(end_time);
+		}
+		if(0 != VerificationUtil.length(company_id)){
+			UserRepository userRepository = new UserRepository();
+			UserRepository.Criteria criteria2 = userRepository.createCriteria();
+			criteria2.andCompany_idEqualTo(company_id);
+			List<User> userList = userDao.selectByExample(userRepository);
+			List<String> list = new ArrayList<String>();
+			for(User user: userList){
+				list.add(user.getId());
+			}
+			
+			criteria.andUserIdIn(list);
+		}
+		return selectByPage(moneyOrderRepository);
+	}
+
+	@Override
+	public List<MoneyOrderVo> selectById(MoneyOrderRepository example) {
+		List<MoneyOrder> list = moneyOrderDao.selectByExample(example);
+		List<MoneyOrderVo> listVo = new ArrayList<MoneyOrderVo>();
+		for(MoneyOrder moneyOrder: list){
+			String userId = moneyOrder.getUserId();
+			Integer payType = moneyOrder.getPay_type();
+			Integer orderStatus = moneyOrder.getOrder_status();
+			
+			String userName = null;
+			String realName = null;
+			String payTypeName = null;
+			String orderStatusName = null;
+			String companyName = null;
+			
+			if(0 != VerificationUtil.length(userId)){
+				userName = getUserName(userId);
+			}
+			if(0 != VerificationUtil.length(userId)){
+				realName = getRealName(userId);
+			}
+			if(0 != VerificationUtil.integerIsNull(payType)){
+				payTypeName = getName(payType);
+			}
+			if(0 != VerificationUtil.integerIsNull(orderStatus)){
+				orderStatusName = getName(orderStatus);
+			}
+			if(0 != VerificationUtil.length(userId)){
+				User user = userDao.selectByPrimaryKey(userId);
+				String companyId = user.getCompany_id();
+				if(0 != VerificationUtil.length(companyId)){
+					Company company = companyDao.selectByPrimaryKey(companyId);
+					if(null != company){
+						companyName = company.getName();
+					}
+				}
+			}
+			MoneyOrderVo moneyOrderVo = new MoneyOrderVo(moneyOrder, realName, userName, payTypeName, orderStatusName,companyName);
+			listVo.add(moneyOrderVo);
+		}
+		return listVo;
+	}
+}

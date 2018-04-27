@@ -1,0 +1,23 @@
+package com.tmtc.utils.secret;
+
+import test.RSA.RSACoder;
+
+public class slkdjfl {
+
+	public static void main(String[] args) {
+		String string = SRSACoder.decryptByPrivateKey("gk7UuieeLJaLaDg/kV/4qfF7fS0LwR4WhGmwff6b6qGSk1TamAHrOpKG2h5zxl5jf7EySNTCelQ794zU4YdWwfjOEuhusn9/Z5v5AaJ3YyaXxxJ55kYsWVFqAzabKbO0pmvk+Taq26kAbSzYu8cQZ72cpQYOk1yTpkv/p90cpqH1tFjjOlfW8ZSP7v2Hh0QflMmNs9dYuRBmK+/HGqm7QAV+Vl5xppXMF1QXTfpqs0sebsQ3lQw+CdPmAAxAyNixylK5aSbJCbKz02gW4PC9ZhPtrl3FIdRiIESJRPDrzhMvEPMVXRytRCP9T0Qo2fkQ/L8dtZDvArCCGjbJM5aUTQ==");
+		System.err.println(string);
+//		
+//		try {
+//			String ss = new String(RSACoder.decryptByPrivateKey(Base64.decode("NmYWj4oqtJi8rNHxOpxQNskMmZbLBudPMcwMvTi9yRT0qzuza6PcYFTrxMPkI+F1fTvB4MZmx1Kg8SG8sKTUZ7k5p5ezh2WgQQMJC0Rr5Xv8aaaEQLOe08Fik3c+qEesmDFd7C4uCyzcSW7JsF3dsRaGz9nKaWqOCQ2cwbsOR5KuIeWZPyktAdBznAfpZ8S+qQumuJuQ1iIEh+UxCHt8TZJ2K9WajA/g6ZKHDfhBtPcGHwHRqmx6k52KK3rVHg8gfiAvVlOGQP4IcYKIWyYIZwQoFAAQwJPql2XZmz6g8cHyR4SCjEO5O6dfqGXLD6eiPy2ikBSdzCxWf25NbltE/A=="),"MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCzqpszEZ/kOV0YCV+Qcf721RyE8VlN7L46Ux4TjerBniinL1iSlBb/OP1Vm5S16eo9Cy/mekyTB6aXhT4eF9KVm+npbfusx+Q9cf6SB/AY0amISuFatHrRbOf1YCVUgjBDedhH52HzMk44V0bIkeE7vp40E9hpCkHO2aJI1UynccTfpnvPC51UAfk8cxjbfAFxfZ88gVHWcbzt0eqTf5TSKMyjjODzgvTfI+L1hw4L3uJOo7yKXWWzMHidQ1oGF9RDDPCf1DhVwnSCwolKm+Dj65FC7WuE2fET+wKROb9hej1KUVKC8sCVkOh0XelElqfS5xEEhAf8aFNIcEbcqKbhAgMBAAECggEAW48X5GCY8P9it7sfHkdZvYRBMmakMhfxoVt2OlTaS61D3l88bgZV6d6rC5Nrp4D7Q/yNfpDYsRz3AsR+MWvGf0OjYrgPx69eWwnax6SP8LX4BWLTkRvkcxFi7CMBIx3tZpWTaKE7w2nhfsjLY68j7wRnLvbmFDGL89Po5eD9XV68QgHWH82jQjE7Tef3Yulw5ffHe2N3rFFPt+Xr9f8sP0RDqCfseBgle7RPmLp+BCXoiJqXtylJK6MMIA7whjPEpUnNoXCcdFLH03k7vwJRXD+/3nZg1I6pdtWIQhulCJfdQv+Rv/e03o7M9+Rh5eXAVfBdoR5mneV1AwDMTT+wWQKBgQDf2aBZ/xxdw68lM/lZlVqSjxTwf/gcwr7SnOSmniA2vsg3FX7Nr+qmkqo6ShGEE5RIm/xwDJrF6agIC/YuPYJq9ztl4bzUmSa5wzvMwC+scZ57vAk6bXU4Derwi4+IeVjum497ybsSwnJ++kqKPHkvEIWRXGdRTdCuS6oKNiHKvwKBgQDNeHavkuwFU04r9XDkRkMhaOlSr0SckruzArbvpIcCeVmpxbUAbErExamaGRm4ZnxjSW7tTrwTWuCi8x2cso1DssH9cwhWCieWF2/uWMxSoJ7irMFWD5BGnil22hzEzUO9f5w6V9QaQOqpI1t8gnf25igDdHLu2YwUGPvGh84WXwKBgQCZr62y/D66dXZTYYqpoawMgWXL9OAgxugCa6tkZZ4SWAvYHc7wYv4EnR94Y5ABEPw2mbnIKC8/ADvYQnYjqyFWVSWXvlNJ11hKI6tz2OMiTuOTajcfwTTAZnXN7tN9zGptb6okQA1LROsdGLSCkiBVWs+JTFq27GkAsXwuBJpQuwKBgQDItuiZ0pglC5/NaVICbHCfbnCeiQApQ12AHSK/LqWEUS65nZyW8TKIzd5D3kk1zUetZcqqnsMy1Q+jnoJK1FES1MiT4Y8/HWRWRkbdOnk+LhGHtOKYQ1PY6B/xLlf0F+AYeVQP2kQj8U5KM3PnSTwPP/3Ogi7UDEe+SjmJUpiLWQKBgAKHZR/aU4GSI9rh8BaVFnCGpKZUrmbJa8pxqr+jidnFJrw3i2oHdBdR5kXtAiY5KdE1fZHdWO0CsYMyL+lpOH1ApV60LHq2xyTdMTKHjwLkTlnooYGSwlPlJQowBgz9PoInzHN0s7oT9cvjSBimYF8589RKEy4oEIqzwrdUz0Wo"));
+//			System.out.println(ss);
+//		} catch (Exception e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+	}
+//	public static void main(String[] args) {
+//		String s = "{\"money\":\"100\",\"timeKey\":\"1450251335389\",\"enc\":\"fe19b506104470ca1cb06c4a5bb73895\",\"card_no\":\"1234567890\"}";
+//		
+//	}
+}

@@ -1,0 +1,59 @@
+@CHARSET "UTF-8";
+/**merchantDiscount页面样式**/
+#tbOne{
+	padding:8px;
+}
+/**上传图片的样式*/
+#demo{overflow:hidden;width:200px;height:150px;}
+#demo img{border:none;width:200px;height:150px;border:5px solid #f4f4f4}
+#enlarge_images{position:absolute;display:none;z-index:2;border:5px solid #f4f4f4}
+
+
+/**<fieldset>样式*/
+.fieldset{
+	border: gray 1px dashed;
+	width:900px;
+	border-radius:3px;
+}
+.legend{
+	margin-left:10px;
+}
+.legend_label{
+	color: red;
+}
+
+/**baiyu---------公共的------------------***/
+/**--向上隔行--***/
+.button-table-tr-td-top{
+	padding-top:10px;	
+}
+
+
+/**--用户列表管理--***/
+.div-border-common{
+	width:78%;
+	margin:100px auto;
+	border:1px solid red;
+	background:#fafafa; 
+	padding:8px; 
+	font-size:13px;
+	border:1px solid #d4d4d4;
+	border-radius:5px;
+	color: #666;
+	font-family:"微软雅黑,宋体"
+}
+.div-border-common table{
+	padding:10px;
+	border:1px solid #d4d4d4;
+	border-radius:5px;
+	margin: 0px auto;
+}
+.div-border-common table tr td{
+		padding-top:8px;
+}
+
+/**--车辆管理--**/
+
+
+
+

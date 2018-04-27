@@ -1,0 +1,629 @@
+package com.tmtc.serviceImpl;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.constant.SystemVar;
+import com.tmtc.dao.*;
+import com.tmtc.frame.PageResult;
+import com.tmtc.frame.ServiceException;
+import com.tmtc.po.*;
+import com.tmtc.service.UserDetailService;
+
+import java.io.File;
+import java.io.IOException;
+import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.validation.constraints.Null;
+
+import com.tmtc.utils.*;
+import com.tmtc.utils.secret.MD5;
+import com.tmtc.vo.UserDetailVo;
+import com.tmtc.vo.UserVo;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.commons.CommonsMultipartFile;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.constant.SystemVar;
+import com.tmtc.dao.CompanyDao;
+import com.tmtc.dao.DictionaryDao;
+import com.tmtc.dao.ExpOrderDao;
+import com.tmtc.dao.UserDao;
+import com.tmtc.dao.UserDetailDao;
+import com.tmtc.frame.PageResult;
+import com.tmtc.frame.ServiceException;
+import com.tmtc.po.ExpOrder;
+import com.tmtc.po.ExpOrderRepository;
+import com.tmtc.po.User;
+import com.tmtc.po.UserDetail;
+import com.tmtc.po.UserDetailRepository;
+import com.tmtc.po.UserRepository;
+import com.tmtc.service.UserDetailService;
+import com.tmtc.vo.UserDetailVo;
+import com.tmtc.vo.UserVo;
+
+@Service
+public class UserDetailServiceImpl implements UserDetailService {
+
+	@Autowired
+	UserDetailDao userDetailDao;
+
+	@Autowired
+	UserDao userDao;
+
+	@Autowired
+	DictionaryDao dictionaryDao;
+
+	@Autowired
+	CompanyDao companyDao;
+
+	@Autowired
+	ExpOrderDao expOrderDao;
+
+	private StringBuffer errorInfo;
+
+	@Override
+	public int count(UserDetailRepository example) {
+		return userDetailDao.countByExample(example);
+	}
+
+	@Override
+	public int delete(String id) {
+		UserDetail userDetail = new UserDetail();
+		userDetail.setId(id);
+		userDetail.setIs_check(ParameterConstant.IS_NOT_CHECK);
+		return this.update(userDetail);
+	}
+
+	@Override
+	public int delete(UserDetailRepository example) {
+		return 0;
+	}
+
+	@Override
+	public int insert(UserDetail record) {
+		return userDetailDao.insert(record);
+	}
+
+	@Override
+	public List<UserDetail> select(UserDetailRepository example) {
+		return userDetailDao.selectByExample(example);
+	}
+
+	@Override
+	public UserDetail selectByPrimaryKey(String id) {
+		return userDetailDao.selectByPrimaryKey(id);
+	}
+
+	@Override
+	public int update(UserDetail record) {
+		return userDetailDao.updateByPrimaryKeySelective(record);
+	}
+
+	@Override
+	public int update(UserDetail record, UserDetailRepository example) {
+		return 0;
+	}
+
+	@Override
+	public PageResult selectByPage(UserDetailRepository example) {
+		return null;
+	}
+
+    @Override
+	public int insertVo(UserDetailVo record) {
+		Map<String, String> map = createQR_code(record.getId());
+		record.setQr_code(map.get("qr_code"));
+		record.setQr_code_secret(map.get("qr_code_secret"));
+		record.setLink_num(getLinkNum());
+		record.setLast_order_time(DateUtil.AddDate(new Date(), 21));
+
+		User user = new User(record.getId(), record.getCity_id(), record.getCompany_id(), record.getUsername(),
+				getDefaultPassword(record.getUsername(), record.getNumber()), record.getNumber(), record.getUser_type(),
+				null, null, null, null, null, null);
+		userDao.insert(user);
+		return userDetailDao.insert(record);
+	}
+	/**
+	 * 添加用户信息及用户
+	 * 
+	 * @throws ServiceException
+	 */
+	@Override
+	public int insert(UserDetailVo record, CommonsMultipartFile portrait, CommonsMultipartFile background, String id)
+			throws ServiceException {
+
+		String portraitUrl = UploadImg.upload(portrait, SystemVar.LOCAL_IMG_URL + SystemVar.USER_PORTRAIT);
+		String backgroundUrl = UploadImg.upload(background, SystemVar.LOCAL_IMG_URL + SystemVar.USER_BACKGROUND);
+		Map<String, String> map = createQR_code(id);
+		record.setPortrait(portraitUrl);
+		record.setBackground(backgroundUrl);
+		record.setQr_code_secret(map.get("qr_code_secret"));
+		record.setQr_code(map.get("qr_code"));
+		record.setLink_num(getLinkNum());
+		record.setLast_order_time(DateUtil.AddDate(new Date(), 21));
+		User user = new User(id, record.getCity_id(), record.getCompany_id(), record.getUsername(),
+				getDefaultPassword(record.getUsername(), record.getNumber()), record.getNumber(), record.getUser_type(),
+				null, null, null, null, null, null);
+		userDao.insert(user);
+		return insert(record);
+	}
+
+	@Override
+	public int update(UserDetailVo record, CommonsMultipartFile portrait, CommonsMultipartFile background)
+			throws ServiceException {
+		String portraitUrl = UploadImg.upload(portrait, SystemVar.LOCAL_IMG_URL + SystemVar.USER_PORTRAIT);
+		String backgroundUrl = UploadImg.upload(background, SystemVar.LOCAL_IMG_URL + SystemVar.USER_BACKGROUND);
+		if (StringUtils.isNotEmpty(backgroundUrl)) {
+			record.setBackground(backgroundUrl);
+		}
+		if (StringUtils.isNotEmpty(portraitUrl)) {
+			record.setPortrait(portraitUrl);
+		}
+		// String pw = getDefaultPassword(record.getUsername(),
+		// record.getNumber());
+		UserDetail userDetail = new UserDetailVo(record);
+		User user = new User(record.getId(), record.getCity_id(), record.getCompany_id(), record.getUsername(), null,
+				record.getNumber(), record.getUser_type(), null, null, null, null, null, null);
+		userDao.updateByPrimaryKeySelective(user);
+		return this.update(userDetail);
+	}
+
+	@Override
+	public int updateQrCode(String id) {
+		Map<String, String> map = createQR_code(id);
+		UserDetail userDetail = new UserDetail();
+		userDetail.setId(id);
+		userDetail.setQr_code_secret(map.get("qr_code_secret"));
+		userDetail.setQr_code(map.get("qr_code"));
+		return this.update(userDetail);
+	}
+
+	@Override
+	public int updatePhone(String userid, String phone) {
+		User user = new User();
+		user.setId(userid);
+		user.setUsername(phone);
+		UserDetail userDetail = new UserDetail();
+		userDetail.setId(userid);
+		userDetail.setUsername(phone);
+		if (userDao.updateByPrimaryKeySelective(user) == 1 && this.update(userDetail) == 1) {
+			return 1;
+		}
+		return 0;
+	}
+
+	@Override
+	public String updatePhoto(String userid, CommonsMultipartFile file) {
+		String shortFileUrl = null;
+		try {
+			shortFileUrl = UploadImg.upload(file, SystemVar.LOCAL_IMG_URL + SystemVar.USER_PORTRAIT);
+		} catch (ServiceException e) {
+			e.printStackTrace();
+		}
+		UserDetail userDetail = new UserDetail();
+		userDetail.setId(userid);
+		userDetail.setPortrait(shortFileUrl);
+		if (this.update(userDetail) == 1) {
+			return SystemVar.SERVER_IMG_URL + SystemVar.USER_PORTRAIT + shortFileUrl;
+		} else {
+			return null;
+		}
+	}
+
+	@Override
+	public int updatePassWord(User user) {
+		user.setPassword(getDefaultPassword(user.getUsername(), user.getNumber()));
+		return userDao.updateByPrimaryKeySelective(user);
+	}
+
+	@Override
+	public Map<String, List<String>> img(String id) {
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(id);
+		Map<String, List<String>> map = new HashMap<String, List<String>>();
+		List<String> qrcodeList = new ArrayList<String>();
+		List<String> portraitList = new ArrayList<String>();
+		List<String> backgroundList = new ArrayList<String>();
+
+		if (null != userDetail) {
+			if (null != userDetail.getQr_code() && !userDetail.getQr_code().isEmpty()) {
+				String a[] = userDetail.getQr_code().split(",");
+				for (int i = 0; i < a.length; i++) {
+					qrcodeList.add(SystemVar.SERVER_IMG_URL + SystemVar.USER_QR_CODE + a[i]);
+				}
+			}
+			if (null != userDetail.getPortrait() && !userDetail.getPortrait().isEmpty()) {
+				String b[] = userDetail.getPortrait().split(",");
+				for (int i = 0; i < b.length; i++) {
+					portraitList.add(SystemVar.SERVER_IMG_URL + SystemVar.USER_PORTRAIT + b[i]);
+				}
+			}
+			if (null != userDetail.getBackground() && !userDetail.getBackground().isEmpty()) {
+				String c[] = userDetail.getBackground().split(",");
+				for (int i = 0; i < c.length; i++) {
+					backgroundList.add(SystemVar.SERVER_IMG_URL + SystemVar.USER_BACKGROUND + c[i]);
+				}
+			}
+			map.put("qrcode", qrcodeList);
+			map.put("portrait", portraitList);
+			map.put("background", backgroundList);
+		}
+		return map;
+	}
+
+	@Override
+	public int updateRecover(String id) {
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(id);
+		userDetail.setIs_check(ParameterConstant.IS_CHECK);
+		return this.update(userDetail);
+	}
+
+	@Override
+	public int deleteForEver(String id) {
+		userDao.deleteByPrimaryKey(id);
+		return userDetailDao.deleteByPrimaryKey(id);
+	}
+
+	@Override
+	public List<UserVo> selectUser(Map map) {
+		return userDetailDao.selectUser(map);
+	}
+
+	@Override
+	public int countUser(Map map) {
+		Integer count = userDetailDao.countUser(map);
+		return count == null ? 0 : count;
+	}
+
+	@Override
+	public String insertExcel(Map map) {
+		CommonsMultipartFile file = (CommonsMultipartFile) map.get("file");
+		String company_id = (String) map.get("company_id");
+		errorInfo = new StringBuffer("");
+		if (!file.isEmpty()) {
+			try {
+				String monthStr = new SimpleDateFormat("yyyyMM").format(new Date());
+				String dir = SystemVar.LOCAL_IMG_URL + SystemVar.USER_IMPORT + monthStr;
+				String fileName = file.getOriginalFilename();
+				File localFile = MakeQRCode.createFile(dir + "/" + fileName);
+				file.transferTo(localFile);
+				List<List<Object>> list = ReadExcel.readExcel(localFile);
+				readList(list, company_id);
+			} catch (IOException e) {
+				e.printStackTrace();
+				errorInfo.append("文件上传失败");
+			}
+		}
+		if (errorInfo == null) {
+			return null;
+		}
+		String result = errorInfo.toString();
+		errorInfo = null;
+		return result;
+	}
+
+	@Override
+	public int updateExpOrder(ExpOrder expOrder) {
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(expOrder.getUser_id());
+		userDetail.setExp_score(userDetail.getExp_score() - expOrder.getCost_exp_score());
+		int i = this.update(userDetail);
+		if (i > 0) {
+			return expOrderDao.insert(expOrder);
+		}
+		return 0;
+	}
+
+	@Override
+	public int updateExpOrder(String orderNum) {
+		ExpOrderRepository expOrderRepository = new ExpOrderRepository();
+		expOrderRepository.or().andAreaEqualTo(orderNum).andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+		List<ExpOrder> expOrderList = expOrderDao.selectByExample(expOrderRepository);
+		if (0 == VerificationUtil.size(expOrderList)) {
+			return 0;
+		}
+		ExpOrder expOrder = expOrderList.get(0);
+		expOrder.setIs_check(ParameterConstant.IS_NOT_CHECK);
+		expOrderDao.updateByPrimaryKeySelective(expOrder);
+
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(expOrder.getUser_id());
+		userDetail.setExp_score(userDetail.getExp_score() + expOrder.getCost_exp_score());
+		int i = this.update(userDetail);
+		if (i > 0) {
+			return 1;
+		}
+		return 0;
+	}
+
+	@Override
+	public List<UserVo> selectUserById(List<String> map) {
+		return userDetailDao.selectUserById(map);
+	}
+
+	// 共有的私有方法
+
+	/**
+	 * 生成默认密码
+	 * 
+	 * @param userName
+	 *            用户名
+	 * @param number
+	 *            密码
+	 * @return
+	 */
+	private String getDefaultPassword(String userName, String number) {
+		// 添加user表
+		String password = null;
+
+		if (0 != VerificationUtil.length(userName)) {
+			password = userName.substring(userName.length() - 6, userName.length());
+			return MD5.makeMd5(password);
+		}
+
+		if (number.length() >= 6) {
+			password = number.substring(number.length() - 6, number.length());
+		} else {
+			// password="000000"+number; 密码6位，不足6位的，用0补足
+			password = new DecimalFormat("000000").format(Integer.parseInt(number));
+		}
+		password = password.substring(password.length() - 6, password.length());
+		return MD5.makeMd5(password);
+	}
+
+	/**
+	 * 自动生成关联账号
+	 * 
+	 * @return
+	 */
+	public String getLinkNum() {
+
+		String link_num = null;
+		String linkNum = userDetailDao.selectMaxLinkNum();
+		if (0 != VerificationUtil.length(linkNum)) {
+			int num = Integer.parseInt(linkNum.substring(SystemVar.LINK_NUM.length())) + 1;
+			link_num = SystemVar.LINK_NUM + num;
+		}
+		return link_num;
+	}
+
+	/**
+	 * 检查用户是否重复
+	 * 
+	 * @param username
+	 *            用户名
+	 * @param number
+	 *            工号、学号
+	 * @param company_id
+	 *            公司、学校id
+	 * @return true 不重复 false 重复
+	 */
+	private boolean checkUserRepeat(String username, String number, String company_id) {
+		UserRepository userRepository = new UserRepository();
+		UserRepository.Criteria criteria = userRepository.createCriteria();
+		// 工号为空，检查手机号； 否则，检查工号是否重复
+		if (StringUtils.isEmpty(number)) {
+			criteria.andUsernameEqualTo(username);
+			return userDao.countByExample(userRepository) == 0;
+		} else {
+			if (StringUtils.isNotEmpty(company_id)) {
+				criteria.andNumberEqualTo(number).andCompany_idEqualTo(company_id);
+				return userDao.countByExample(userRepository) == 0;
+			} else {
+				errorInfo.append("工号为").append(number).append("用户的公司编号不能为空");
+				return false;
+			}
+		}
+	}
+
+	/**
+	 * 导入读取用户信息
+	 * 
+	 * @param list
+	 * @param company_id
+	 */
+	private void readList(List<List<Object>> list, String company_id) {
+		boolean flag = true;// 是否使用当前管理员的公司id，true使用
+		boolean error = true;
+		List<Object> rowData = list.get(0);
+		if (rowData.size() <= 10 || StringUtils.isEmpty((String) rowData.get(10))) {
+			flag = true;
+			if (StringUtils.isEmpty(company_id)) {
+				errorInfo.append("集团公司管理员的公司编号为空，无法导入");
+				return;
+			}
+		} else if (rowData.get(10).equals("公司")) {
+			//  若表格列头中存在 公司 这一列，则不使用当前管理员的公司id导入，而是根据表格导入公司id
+			flag = false;
+		}
+		for (int i = 1; i < list.size(); i++) {
+			List<Object> objectList = list.get(i);
+            String username = objectList.get(0).toString();
+            String number = objectList.get(1).toString();
+            String card_num = objectList.get(2).toString();
+            String real_name = objectList.get(3).toString();
+            String nick_name = objectList.get(4).toString();
+            String birthday = objectList.get(5).toString();
+            String sex = objectList.get(6).toString();
+            String email = objectList.get(7).toString();
+            String address = objectList.get(8).toString();
+			if (!flag) {
+				company_id = objectList.get(10).toString();
+			}
+			if (checkUserRepeat(username, number, company_id)) {
+				User user = new User();
+				UserDetail userDetail = new UserDetail();
+				String id = IdWorker.nextId();
+				user.setId(id);
+			
+                user.setCity_id(1001);
+				userDetail.setId(id);
+				userDetail.setExp_score(0);
+				userDetail.setBalance(0);
+				userDetail.setLink_num(getLinkNum());
+				userDetail.setIs_check(ParameterConstant.IS_CHECK);
+				user.setCompany_id(company_id);
+				if (Pattern.matches("[0-9a-zA-Z]{4,18}", number)) {
+					user.setNumber(number);
+				} else if(StringUtils.isBlank(number)) {
+                    // 忽略不处理
+				} else {
+					errorInfo.append("<br/>第" + i + "行出错，工号:" + number + "必须是4-18个字母或数字");
+					error = false;
+				}
+
+				if (Pattern.matches("[0-9a-zA-Z]{6,18}", username)) {
+					user.setUsername(username);
+					user.setUser_type(ParameterConstant.USER_TYPE_COMPANY);
+                    String password;
+                    if (username.length() >= 6) {
+                        password = username.substring(username.length() - 6, username.length());
+                    } else {
+                        // password="000000"+number; 密码,手机号后6位，不足6位的，用0补足
+                        password = new DecimalFormat("000000").format(Integer.parseInt(username));
+                    }
+                    user.setPassword(MD5.makeMd5(password));
+                    userDetail.setUser_type(ParameterConstant.USER_TYPE_COMPANY);
+					userDetail.setUsername(username);
+				} else if (StringUtils.isBlank(username)) {
+					// 用户名为空，使用初始密码123456
+					user.setPassword(MD5.makeMd5("123456"));
+					userDetail.setUser_type(ParameterConstant.USER_TYPE_COMPANY);
+					user.setUser_type(ParameterConstant.USER_TYPE_COMPANY);
+				} else {
+					errorInfo.append("<br/>第" + i + "行出错，用户名:" + username + "必须是6-18个字母或数字");
+					error = false;
+				}
+
+                if (StringUtils.isBlank(card_num) || Pattern.matches("[0-9]{6,30}", card_num)) {
+                    userDetail.setCard_num(card_num);
+                } else {
+                    errorInfo.append("第" + i + "行出错，卡号:" + card_num + " 必须是小于30位的数字");
+                    error = false;
+                }
+
+                if (real_name.length() <= 20 && notHasSpecialChar(real_name)) {
+					userDetail.setReal_name(real_name);
+				} else {
+                    errorInfo.append("第" + i + "行出错，真实姓名:" + real_name + "必须是非特殊字符且长度小于20位");
+					error = false;
+				}
+
+                if (nick_name.length() <= 18 && notHasSpecialChar(nick_name)) {
+                    userDetail.setNick_name(nick_name);
+				} else {
+                    errorInfo.append("第" + i + "行出错，昵称:" + nick_name + "必须是非特殊字符且长度小于18位");
+					error = false;
+				}
+
+                if (StringUtils.isNotBlank(birthday)){
+                    userDetail.setBirthday(DateUtil.tryGetDate(birthday));
+                } else {
+                    userDetail.setBirthday(new Date());
+                }
+                if (StringUtils.isNotBlank(sex)){
+                    userDetail.setSex(Integer.valueOf(sex));
+                } else {
+                    userDetail.setSex(1303); // 保密
+                }
+
+				if (email.length() == 0
+						|| email.length() <= 50 && Pattern.matches("[\\w\\.\\-]+@([\\w\\-]+\\.)+[\\w\\-]+", email)) {
+					userDetail.setEmail(email);
+				} else {
+					errorInfo.append("<br/>第" + i + "行出错，" + email + "不是有效邮箱或者过长");
+					error = false;
+				}
+				if (address.length() <= 100) {
+					userDetail.setAddress(address);
+				} else {
+					errorInfo.append("<br/>第" + i + "行出错，" + address + "地址超出长度");
+					error = false;
+				}
+				userDetail.setRegister_time(new Date());
+				userDetail.setRegister_source(ParameterConstant.REGISTER_SOURCE_COMPANY);
+				if (error) {
+					userDao.insert(user);
+					Map<String, String> map = createQR_code(id);
+					userDetail.setQr_code(map.get("qr_code"));
+                    userDetail.setQr_code_secret(map.get("qr_code_secret"));
+					insert(userDetail);
+                }
+			} else {
+				errorInfo.append("<br/>第" + i + "行出错，用户重复");
+			}
+		}
+	}
+
+    public boolean notHasSpecialChar(String str){
+        String regEx = "[`~!@#$%^&*()+=|{}':;',\\[\\].<>/?~！@#￥%……&*（）——+|{}【】‘；：”“’。，、？]";
+        Matcher m = Pattern.compile(regEx).matcher(str);
+        boolean result = m.find();
+        return !result;
+    }
+
+	/**
+	 * 生成二维码
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public Map<String, String> createQR_code(String id) {
+		Map<String, String> map = new HashMap<>();
+		String md5 = id + "," + ParameterConstant.PRIVATE_KEY + "," + String.valueOf(System.currentTimeMillis());
+		String makeMd5 = MD5.makeMd5(md5);
+		String qrCodeUrl = MakeQRCode.makeQRCode(id + "," + makeMd5, SystemVar.LOCAL_IMG_URL + SystemVar.USER_QR_CODE,
+				id);
+		map.put("qr_code", qrCodeUrl);
+		map.put("qr_code_secret", makeMd5);
+		return map;
+	}
+
+	/**
+	 * 激活
+	 */
+	@Override
+	public int updateInvoke(String id) {
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(id);
+		if (null == userDetail) {
+			return 0;
+		}
+		if (null == userDetail.getCard_num()) {
+			userDetail.setCard_num("0");
+			this.update(userDetail);
+		}
+
+		Date lastOrderTime = userDetail.getLast_order_time();
+		if (null == lastOrderTime) {
+			userDetail.setLast_order_time(new Date());
+			this.update(userDetail);
+			lastOrderTime = userDetailDao.selectByPrimaryKey(id).getLast_order_time();
+		}
+		Date valid = DateUtil.AddDate(new Date(), ParameterConstant.VALID_TIME);
+		if (valid.before(lastOrderTime)) {
+			return 2;
+		}
+		if (lastOrderTime.before(new Date())) {
+			userDetail.setLast_order_time(DateUtil.AddDate(new Date(), ParameterConstant.INVOKE_TIME));
+			this.update(userDetail);
+			return 1;
+		}
+		userDetail.setLast_order_time(DateUtil.AddDate(lastOrderTime, ParameterConstant.INVOKE_TIME));
+		this.update(userDetail);
+		return 1;
+	}
+
+	/**
+	 * 验证卡号是否存在
+	 */
+	@Override
+	public String selectCard(String companyId, String cardNum) {
+		return userDao.selectCompanyCardNum(companyId, cardNum);
+	}
+}

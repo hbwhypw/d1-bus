@@ -1,0 +1,171 @@
+package com.tmtc.serviceImpl.appAPI;
+
+import java.text.DecimalFormat;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.constant.SystemVar;
+import com.tmtc.dao.UserDao;
+import com.tmtc.dao.UserDetailDao;
+import com.tmtc.dao.VerificationCodeDao;
+import com.tmtc.po.User;
+import com.tmtc.po.UserDetail;
+import com.tmtc.po.UserRepository;
+import com.tmtc.po.UserRepository.Criteria;
+import com.tmtc.po.VerificationCode;
+import com.tmtc.po.VerificationCodeRepository;
+import com.tmtc.service.appAPI.RegisterAPIService;
+import com.tmtc.utils.ConvertCity;
+import com.tmtc.utils.DateUtil;
+import com.tmtc.utils.IdWorker;
+import com.tmtc.utils.MakeQRCode;
+import com.tmtc.utils.VerificationUtil;
+import com.tmtc.utils.secret.MD5;
+
+@Service
+public class RegisterAPIServiceImpl implements RegisterAPIService {
+
+	@Autowired
+	VerificationCodeDao verificationCodeDao;
+
+	@Autowired
+	UserDetailDao userDetailDao;
+
+	@Autowired
+	UserDao userDao;
+
+	@Override
+	public boolean addVerificationCode(VerificationCode verificationCode) {
+		int insert = verificationCodeDao.insert(verificationCode);
+		return 0 < insert ? true : false;
+	}
+
+	@Override
+	public User selectPhone(String phone) {
+		UserRepository userRepository = new UserRepository();
+		Criteria criteria = userRepository.createCriteria();
+		criteria.andUsernameEqualTo(phone);
+		List<User> userlist = userDao.selectByExample(userRepository);
+		if (0 == VerificationUtil.size(userlist)) {
+			return null;
+		}
+		return userlist.get(0);
+	}
+
+	@Override
+	public VerificationCode selectVerificationCode(String phone) {
+		VerificationCodeRepository verificationCodeRepository = new VerificationCodeRepository();
+		VerificationCodeRepository.Criteria criteria = verificationCodeRepository.createCriteria();
+		criteria.andMobile_phoneEqualTo(phone);
+		verificationCodeRepository.setOrderByClause("create_time desc");
+		List<VerificationCode> list = verificationCodeDao.selectByExample(verificationCodeRepository);
+		if (0 == VerificationUtil.size(list)) {
+			return null;
+		}
+		return list.get(0);
+	}
+
+	@Override
+	public boolean addUserDetail(UserDetail userDetail) {
+		int insert = userDetailDao.insert(userDetail);
+		return 0 < insert ? true : false;
+	}
+
+	@Override
+	public boolean updateUser(User user) {
+		UserDetail userDetail = new UserDetail();
+		userDetail.setId(user.getId());
+		userDetail.setIs_check(ParameterConstant.IS_CHECK);
+		userDetailDao.updateByPrimaryKeySelective(userDetail);
+		int i = userDao.updateByPrimaryKeySelective(user);
+		return 0 < i ? true : false;
+	}
+
+	@Override
+	public int add(String username,String cityName,String ip_address) {
+		String id = IdWorker.nextId();
+		Map<String, String> map = createQR_code(id);
+		UserDetail userDetail = new UserDetail(ParameterConstant.USER_TYPE_COMPANY_NORMAL, id, getLinkNum(), new Date(), ParameterConstant.REGISTER_SOURCE_ANDROID, username, null, null, map.get("qr_code"), map.get("qr_code_secret"), ParameterConstant.DEDAULT_SEX, null, null, ParameterConstant.DEFAULT_PORTRAIT, null, null, null, "0", 0, null, null, DateUtil.AddDate(new Date(), ParameterConstant.INVOKE_TIME), ParameterConstant.IS_CHECK);
+		User user = new User(id, ConvertCity.gerCity_code(cityName), ParameterConstant.C_COMPANY_ID, username, getDefaultPassword(username,"0"), null, ParameterConstant.USER_TYPE_COMPANY_NORMAL, 0, null, 0, null, 0, ip_address);
+		userDao.insert(user);
+		return userDetailDao.insert(userDetail);
+	}
+	
+	@Override
+	public String addUser(String username,String cityName,String ip_address,Integer login_source) {
+		String id = IdWorker.nextId();
+		Map<String, String> map = createQR_code(id);
+		UserDetail userDetail = new UserDetail(ParameterConstant.USER_TYPE_COMPANY_NORMAL, id, getLinkNum(), new Date(), login_source, username, null, null, map.get("qr_code"), map.get("qr_code_secret"), ParameterConstant.DEDAULT_SEX, null, null, ParameterConstant.DEFAULT_PORTRAIT, null, null, null, "0", 0, null, null, DateUtil.AddDate(new Date(), ParameterConstant.INVOKE_TIME), ParameterConstant.IS_CHECK);
+		User user = new User(id, ConvertCity.gerCity_code(cityName), ParameterConstant.C_COMPANY_ID, username, getDefaultPassword(username,"0"), null, ParameterConstant.USER_TYPE_COMPANY_NORMAL, login_source, null, 0, null, 0, ip_address);
+		userDao.insert(user);
+		userDetailDao.insert(userDetail);
+		return id;
+	}
+
+	/**
+	 * 自动生成关联账号
+	 * 
+	 * @return
+	 */
+	public String getLinkNum() {
+
+		String link_num = null;
+		String linkNum = userDetailDao.selectMaxLinkNum();
+		if (0 != VerificationUtil.length(linkNum)) {
+			int num = Integer.parseInt(linkNum.substring(SystemVar.LINK_NUM.length())) + 1;
+			link_num = SystemVar.LINK_NUM + num;
+		}
+		return link_num;
+	}
+	
+	/**
+	 * 生成二维码
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public Map<String, String> createQR_code(String id) {
+		Map<String, String> map = new HashMap<>();
+		String md5 = id + "," + ParameterConstant.PRIVATE_KEY + "," + String.valueOf(System.currentTimeMillis());
+		String makeMd5 = MD5.makeMd5(md5);
+		String qrCodeUrl = MakeQRCode.makeQRCode(id + "," + makeMd5, SystemVar.LOCAL_IMG_URL + SystemVar.USER_QR_CODE,
+				id);
+		map.put("qr_code", qrCodeUrl);
+		map.put("qr_code_secret", makeMd5);
+		return map;
+	}
+	
+	/**
+	 * 生成默认密码
+	 * 
+	 * @param userName
+	 *            用户名
+	 * @param number
+	 *            密码
+	 * @return
+	 */
+	private String getDefaultPassword(String userName, String number) {
+		// 添加user表
+		String password = null;
+
+		if (0 != VerificationUtil.length(userName)) {
+			password = userName.substring(userName.length() - 6, userName.length());
+			return MD5.makeMd5(password);
+		}
+
+		if (number.length() >= 6) {
+			password = number.substring(number.length() - 6, number.length());
+		} else {
+			// password="000000"+number; 密码6位，不足6位的，用0补足
+			password = new DecimalFormat("000000").format(Integer.parseInt(number));
+		}
+		password = password.substring(password.length() - 6, password.length());
+		return MD5.makeMd5(password);
+	}
+}

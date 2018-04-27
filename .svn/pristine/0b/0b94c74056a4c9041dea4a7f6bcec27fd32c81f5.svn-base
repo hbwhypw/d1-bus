@@ -1,0 +1,246 @@
+package com.tmtc.serviceImpl.appAPI;
+
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.constant.SystemVar;
+import com.tmtc.dao.DictionaryDao;
+import com.tmtc.dao.ExpOrderDao;
+import com.tmtc.dao.ProductDao;
+import com.tmtc.dao.ShopOrderDao;
+import com.tmtc.dao.UserDetailDao;
+import com.tmtc.po.Dictionary;
+import com.tmtc.po.DictionaryRepository;
+import com.tmtc.po.ExpOrder;
+import com.tmtc.po.ExpOrderRepository;
+import com.tmtc.po.Product;
+import com.tmtc.po.ShopOrder;
+import com.tmtc.po.ShopOrderRepository;
+import com.tmtc.po.UserDetail;
+import com.tmtc.service.appAPI.OrderAppService;
+import com.tmtc.utils.IdWorker;
+import com.tmtc.utils.OrderNumUtil;
+import com.tmtc.utils.VerificationUtil;
+import com.tmtc.vo.ExpOrderVo;
+import com.tmtc.vo.OrderVo;
+import com.tmtc.vo.ShopOrderVo;
+
+@Service
+public class OrderAppServiceImpl implements OrderAppService {
+
+	@Autowired
+	ShopOrderDao shopOrderDao;
+
+	@Autowired
+	ProductDao productDao;
+
+	@Autowired
+	ExpOrderDao expOrderDao;
+
+	@Autowired
+	UserDetailDao userDetailDao;
+
+	@Autowired
+	DictionaryDao dictionaryDao;
+
+	@Override
+	public ShopOrder addShopOrder(String order, ShopOrder shopOrder) {
+
+		List<OrderVo> list = new Gson().fromJson(order, new TypeToken<List<OrderVo>>() {
+		}.getType());
+
+		double money = 0D;
+		String stringProduct = "";
+		String stringId = "";
+		for (Iterator<OrderVo> iterator = list.iterator(); iterator.hasNext();) {
+			OrderVo orderVo = iterator.next();
+			Product product = productDao.selectByPrimaryKey(orderVo.getId());
+			if (null == product || 0 == VerificationUtil.length(product.getId())) {
+				return null;
+			}
+			stringProduct += (orderVo.getId() + "," + orderVo.getNum());
+			
+			double d = (product.getShop_price() * 100) * Double.valueOf(orderVo.getNum());
+			money += d;
+			String id = IdWorker.nextId();
+			stringId += id;
+			if (iterator.hasNext()) {
+				stringProduct += ",";
+				stringId += ",";
+			}
+			
+			shopOrder.setId(id);
+			shopOrder.setOrder_no(OrderNumUtil.getOrderByZX());
+			shopOrder.setPro_id(orderVo.getId() + "," + orderVo.getNum());
+			shopOrder.setMoney(d / 100);
+			shopOrder.setSub_order_no(String.valueOf(ParameterConstant.TRUE));
+			shopOrderDao.insert(shopOrder);
+		}
+		shopOrder.setId(IdWorker.nextId());
+		shopOrder.setOrder_no(OrderNumUtil.getOrderByZX());
+		shopOrder.setPro_id(stringProduct);
+		shopOrder.setMoney(money / 100);
+		shopOrder.setSub_order_no(stringId);
+		int i = shopOrderDao.insert(shopOrder);
+		if (i > 0) {
+			return shopOrder;
+		}
+		return null;
+	}
+
+	@Override
+	public ExpOrder addExpOrder(ExpOrder expOrder) {
+		String pro_id = expOrder.getPro_id();
+		Product product = productDao.selectByPrimaryKey(pro_id);
+		expOrder.setCost_exp_score(product.getExp_score());
+		expOrderDao.insert(expOrder);
+		return expOrder;
+	}
+
+	@Override
+	public List<ExpOrderVo> select(ExpOrderRepository expOrderRepository) {
+		List<ExpOrder> list = expOrderDao.selectByExample(expOrderRepository);
+		List<ExpOrderVo> listVo = new ArrayList<ExpOrderVo>();
+		if (0 != VerificationUtil.size(list)) {
+			for (ExpOrder expOrder : list) {
+				String real_name = null;
+				String user_name = null;
+				String pro_name = null;
+				String city_name = null;
+				String order_status_name = null;
+
+//				String userId = expOrder.getUser_id();
+				String proId = expOrder.getPro_id();
+//				Integer cityId = expOrder.getCity_id();
+				Integer orderStatus = expOrder.getOrder_status();
+
+//				if (0 != VerificationUtil.length(userId)) {
+//					UserDetail userDetail = getUser(userId);
+//					if (null != userDetail) {
+//						real_name = userDetail.getReal_name();
+//						user_name = userDetail.getUsername();
+//					}
+//				}
+				if (0 != VerificationUtil.length(proId)) {
+					pro_name = getProName(proId);
+				}
+//				if (0 != VerificationUtil.integerIsNull(cityId)) {
+//					city_name = getName(cityId);
+//				}
+				if (0 != VerificationUtil.integerIsNull(orderStatus)) {
+					order_status_name = getName(orderStatus);
+				}
+
+				// 把产品封装近订单里
+				String pro_id = expOrder.getPro_id();
+				if (0 != VerificationUtil.length(pro_id)) {
+					Product product = productDao.selectByPrimaryKey(pro_id);
+					String[] picList = product.getPro_picture().split(",");
+					if (null != picList && 0 != picList.length) {
+						String pic = SystemVar.SERVER_IMG_URL + SystemVar.PRO_PICTURE + picList[0];
+						product.setPro_picture(pic);
+					}
+					expOrder.setProduct(product);
+				}
+
+				ExpOrderVo expOrderVo = new ExpOrderVo(expOrder, real_name, user_name, pro_name, city_name,
+						order_status_name);
+				listVo.add(expOrderVo);
+			}
+		}
+		return listVo;
+	}
+
+	@Override
+	public List<ShopOrderVo> select(ShopOrderRepository shopOrderRepository) {
+		List<ShopOrder> list = shopOrderDao.selectByExample(shopOrderRepository);
+		List<ShopOrderVo> listVo = new ArrayList<ShopOrderVo>();
+		if (0 != VerificationUtil.size(list)) {
+			for (ShopOrder shopOrder : list) {
+				String real_name = null;
+				String user_name = null;
+				String pro_name = null;
+				String city_name = null;
+				String order_status_name = null;
+				String pay_type_name = null;
+
+				String userId = shopOrder.getUser_id();
+				String proId = shopOrder.getPro_id();
+				Integer cityId = shopOrder.getCity_id();
+				Integer orderStatus = shopOrder.getOrder_status();
+				Integer payType = shopOrder.getPay_type();
+
+				if (0 != VerificationUtil.length(userId)) {
+					UserDetail userDetail = getUser(userId);
+					if (null != userDetail) {
+						real_name = userDetail.getReal_name();
+						user_name = userDetail.getUsername();
+					}
+				}
+				if (0 != VerificationUtil.length(proId)) {
+					pro_name = getProName(proId);
+				}
+				if (0 != VerificationUtil.integerIsNull(cityId)) {
+					city_name = getName(cityId);
+				}
+				if (0 != VerificationUtil.integerIsNull(orderStatus)) {
+					order_status_name = getName(orderStatus);
+				}
+				if (0 != VerificationUtil.integerIsNull(payType)) {
+					pay_type_name = getName(payType);
+				}
+
+				// 把产品封装近订单里
+				String pro_id = shopOrder.getPro_id();
+				if (0 != VerificationUtil.length(pro_id)) {
+					Product product = productDao.selectByPrimaryKey(pro_id);
+					String[] picList = product.getPro_picture().split(",");
+					if (null != picList && 0 != picList.length) {
+						String pic = SystemVar.SERVER_IMG_URL + SystemVar.PRO_PICTURE + picList[0];
+						product.setPro_picture(pic);
+					}
+					shopOrder.setProduct(product);
+				}
+				ShopOrderVo shopOrderVo = new ShopOrderVo(shopOrder, real_name, user_name, pro_name, city_name,
+						order_status_name, pay_type_name);
+				listVo.add(shopOrderVo);
+			}
+			return listVo;
+		}
+		return listVo;
+	}
+
+	private UserDetail getUser(String userId) {
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(userId);
+		return userDetail;
+	}
+
+	private String getProName(String proId) {
+		String proName = null;
+		Product product = productDao.selectByPrimaryKey(proId);
+		if (null != product) {
+			proName = product.getPro_name();
+		}
+		return proName;
+	}
+
+	private String getName(Integer code) {
+		String name = null;
+		DictionaryRepository dictionaryRepository = new DictionaryRepository();
+		DictionaryRepository.Criteria criteria = dictionaryRepository.createCriteria();
+		criteria.andCodeEqualTo(code);
+		criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+		List<Dictionary> list = dictionaryDao.selectByExample(dictionaryRepository);
+		if (0 != VerificationUtil.size(list)) {
+			name = list.get(0).getName();
+		}
+		return name;
+	}
+}

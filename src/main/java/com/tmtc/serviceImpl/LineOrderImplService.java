@@ -1,0 +1,242 @@
+package com.tmtc.serviceImpl;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.dao.DictionaryDao;
+import com.tmtc.dao.LineDao;
+import com.tmtc.dao.LineOrderDao;
+import com.tmtc.dao.LineStationDao;
+import com.tmtc.dao.LineTimeDao;
+import com.tmtc.frame.PageResult;
+import com.tmtc.po.Dictionary;
+import com.tmtc.po.DictionaryRepository;
+import com.tmtc.po.Line;
+import com.tmtc.po.LineOrder;
+import com.tmtc.po.LineOrderRepository;
+import com.tmtc.po.LineRepository;
+import com.tmtc.po.LineStation;
+import com.tmtc.po.LineStationRepository;
+import com.tmtc.po.LineTime;
+import com.tmtc.service.LineOrderService;
+import com.tmtc.utils.IdWorker;
+import com.tmtc.utils.OrderNumUtil;
+import com.tmtc.utils.VerificationUtil;
+import com.tmtc.vo.LineOrderVo;
+@Service
+public class LineOrderImplService implements LineOrderService{
+
+	@Autowired
+	LineOrderDao lineOrderDao;
+	@Autowired
+	LineDao lineDao;
+	@Autowired
+	LineStationDao lineStationDao;
+	@Autowired
+	DictionaryDao dictionaryDao;
+	@Autowired
+	LineTimeDao lineTimeDao;
+	
+	@Override
+	public int count(LineOrderRepository example) {
+		return 0;
+	}
+
+	@Override
+	public int delete(String id) {
+		return lineOrderDao.deleteByPrimaryKey(id);
+	}
+
+	@Override
+	public int delete(LineOrderRepository example) {
+		return 0;
+	}
+
+	@Override
+	public int insert(LineOrder record) {
+		return lineOrderDao.insert(record);
+	}
+
+	@Override
+	public List<LineOrder> select(LineOrderRepository example) {
+		List<LineOrder> list = lineOrderDao.selectByExample(example);
+		if (0 == VerificationUtil.size(list)) {
+			return null;
+		}
+		
+		for(LineOrder lo : list){
+			String line_id = lo.getLine_id();
+			if (0 == VerificationUtil.length(line_id)) {
+				continue;
+			}
+			Line line = lineDao.selectByPrimaryKey(line_id);
+			lo.setLine(line);
+		}
+		return list;
+	}
+
+	@Override
+	public LineOrder selectByPrimaryKey(String id) {
+		return null;
+	}
+
+	@Override
+	public int update(LineOrder record) {
+		return lineOrderDao.updateByPrimaryKeySelective(record);
+	}
+
+	@Override
+	public int update(LineOrder record, LineOrderRepository example) {
+		return 0;
+	}
+
+	@Override
+	public PageResult selectByPage(LineOrderRepository example) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public PageResult select(Integer page, Integer rows, Integer city_id, String line_name, String station_name,
+			Integer order_status, String start, String end) throws ParseException {
+		LineOrderRepository lineOrderRepository = new LineOrderRepository();
+		LineOrderRepository.Criteria criteria = lineOrderRepository.createCriteria();
+		lineOrderRepository.setPageSize(rows);
+		lineOrderRepository.setRowIndex((page-1)*rows);
+		criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+		if(0 != VerificationUtil.integerIsNull(city_id)){
+			criteria.andCity_idEqualTo(city_id);
+		}
+		if(0 != VerificationUtil.length(line_name)){
+			LineRepository lineRepository = new LineRepository();
+			LineRepository.Criteria criteria2 = lineRepository.createCriteria();
+			criteria2.andLine_nameLike("%"+line_name+"%");
+			criteria2.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+			List<Line> lineList = lineDao.selectByExample(lineRepository);
+			List<String> line_idList = new ArrayList<String>();
+			for(Line line:lineList){
+				line_idList.add(line.getId());
+			}
+			criteria.andLine_idIn(line_idList);
+		}
+		if(0 != VerificationUtil.length(station_name)){
+			LineStationRepository lineStationRepository = new LineStationRepository();
+			LineStationRepository.Criteria criteria2 = lineStationRepository.createCriteria();
+			criteria2.andStation_nameLike("%"+station_name+"%");
+			List<LineStation> lineStationList = lineStationDao.selectByExample(lineStationRepository);
+			List<String> lineStation_idList = new ArrayList<String>();
+			for(LineStation linestation:lineStationList){
+				lineStation_idList.add(linestation.getId());
+			}
+			criteria.andStation_idIn(lineStation_idList);
+		}
+		if(0 != VerificationUtil.integerIsNull(order_status)){
+			criteria.andOrder_statusEqualTo(order_status);
+		}
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		if(null != start){
+			Date start_time = sdf.parse(start);
+			criteria.andScan_timeGreaterThan(start_time);
+		}
+		if(null != end){
+			Date end_time = sdf.parse(end);
+			criteria.andScan_timeLessThan(end_time);
+		}
+		List<LineOrder> list = lineOrderDao.selectByExample(lineOrderRepository);
+		List<LineOrderVo> listVo = new ArrayList<LineOrderVo>();
+		for(LineOrder lineOrder:list){
+			Integer cityid = lineOrder.getCity_id();
+			String lineid = lineOrder.getLine_id();
+			String lineTimeid = lineOrder.getTime_line_id();
+			String lineStationid = lineOrder.getStation_id();
+			Integer orderStatus = lineOrder.getOrder_status();
+			
+			String city_name = null;
+			String linename = null;
+			Date depart_time = null;
+			String stationName = null;
+			String order_status_name = null;
+			
+			if(0 != VerificationUtil.integerIsNull(cityid)){
+				city_name = getName(cityid);
+			}
+			if(0 != VerificationUtil.length(lineid)){
+				linename = getLineName(lineid);
+			}
+			if(0 != VerificationUtil.length(lineTimeid)){
+				depart_time = getDepartTime(lineTimeid);
+			}
+			if(0 != VerificationUtil.length(lineStationid)){
+				stationName = getLineStationName(lineStationid);
+			}
+			if(0 != VerificationUtil.integerIsNull(orderStatus)){
+				order_status_name = getName(orderStatus);
+			}
+			LineOrderVo lineOrderVo = new LineOrderVo(lineOrder, city_name, linename, depart_time, stationName, order_status_name);
+			listVo.add(lineOrderVo);
+		}
+		return new PageResult(lineOrderDao.countByExample(lineOrderRepository), listVo, 1);
+	}
+	
+	private String getName(int code) {
+		String name = null;
+		List<Dictionary> listDictionary = dictionaryDao.selectByExample(new DictionaryRepository());
+		for (Dictionary dictionary : listDictionary) {
+			if (dictionary.getCode().equals(code)) {
+				name = dictionary.getName();
+			}
+		}
+		return name;
+	}
+	private String getLineName(String lineid) {
+		String lineName = null;
+		Line line = lineDao.selectByPrimaryKey(lineid);
+		if(null != line){
+			lineName = line.getLine_name();
+		}
+		return lineName;
+	}
+	
+	private Date getDepartTime(String lineTimeid) {
+		Date depart_time = null;
+		LineTime lineTime = lineTimeDao.selectByPrimaryKey(lineTimeid);
+		if(null != lineTime){
+			depart_time = lineTime.getDepart_time();
+		}
+		return depart_time;
+	}
+	
+	private String getLineStationName(String lineStationid){
+		String lineStationName = null;
+		LineStation lineStation = lineStationDao.selectByPrimaryKey(lineStationid);
+		if(null != lineStation){
+			lineStationName = lineStation.getStation_name();
+		}
+		return lineStationName;
+	}
+
+	@Override
+	public int insert(String user_id, String time_line_id, String station_id) {
+		LineOrder lineOrder = new LineOrder();
+		lineOrder.setId(IdWorker.nextId());
+		lineOrder.setOrder_no(OrderNumUtil.getOrderByXL());
+		lineOrder.setUser_id(user_id);
+		lineOrder.setTime_line_id(time_line_id);
+		lineOrder.setStation_id(station_id);
+		lineOrder.setOrder_time(new Date());
+		lineOrder.setOrder_status(ParameterConstant.ORDER_STATUS);
+		lineOrder.setOrder_exp(ParameterConstant.ORDER_EXP);
+		lineOrder.setOrder_type(ParameterConstant.LINE_ORDER_TYPE_DIRECT);
+		lineOrder.setScan_time(new Date());
+		lineOrder.setIs_check(ParameterConstant.IS_CHECK);
+		int a = insert(lineOrder);
+		return a;
+	}
+}

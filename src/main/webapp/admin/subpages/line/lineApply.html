@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>lineApply</title>
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/lineApply.js"></script>
+
+<table id="lineApplyVoDg" class="easyui-datagrid" data-options="url:'./../lineApply/query',rownumbers:true,toolbar:'#lineApplyVoDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false,rowStyler: lineApplyVo.rowStyler">
+    <thead>
+    <tr>
+        <th data-options="field:'id',width:80">ID</th>
+        <th data-options="field:'realName',width:80">用户名</th>
+        <th data-options="field:'cityName',width:80">城市</th>
+        <th data-options="field:'start_station',width:80">起点</th>
+        <th data-options="field:'end_station',width:80">终点</th>
+        <th data-options="field:'time',width:80">出行时间</th>
+        <th data-options="field:'departRate',width:80">出行频率</th>
+        <th data-options="field:'commite_time',width:80">提交时间</th>
+        <th data-options="field:'update_time',width:80">修改时间</th>
+        <th data-options="field:'is_check',width:80,formatter: lineApplyVo.is_checkFormatter">是否有效</th>
+    </tr>
+    </thead>
+</table>
+<div id="lineApplyVoDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+                &nbsp;&nbsp;所在城市：&nbsp;&nbsp;
+	            <input id="city_idParam" class="easyui-combobox" name="city_id" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=10',
+								loader: common.comboBoxLoader,
+								onBeforeLoad: function(param){
+									param.page = 0;param.rows = 100; 
+								} " />
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查 询</a>
+            </td>
+            <td align="right" width="400px">
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">删除</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">恢复使用</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">永久删除</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+<div id="lineApplyVoDlg" class="easyui-dialog" style="width:400px;height:450px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#lineApplyVoDlgBtn">
+    <form id="lineApplyVoFm" class="fm" method="post" novalidate enctype="multipart/form-data">
+        <div class="fitem">
+            <label> 城市： </label>
+            <input id="id" name="id" type="hidden">
+            <input id="city_id" class="easyui-combobox" name="city_id" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=10',
+								editable:false,
+								loader: common.comboBoxLoader,
+								onBeforeLoad: function(param){
+									param.page = 1;param.rows = 100; 
+								} " required="true"/>
+        </div>
+        <div class="fitem">
+            <label> 起点： </label>
+            <input id="start_station" name="start_station" class="easyui-validatebox" required="true"
+            	data-options="validType: ['specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 终点： </label>
+            <input id="end_station" name="end_station" class="easyui-validatebox" required="true"
+            	data-options="validType: ['specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 出行时间： </label>
+            <input id="time" name="time" class="Wdate" type="text" style="width: 172px" onFocus="WdatePicker({dateFmt:'HH:mm'})">
+        </div>
+        <div class="fitem">
+            <label> 出行频率： </label>
+            <input id="depart_rate" class="easyui-combobox" name="depart_rate" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=32',
+								editable:false,
+								loader: common.comboBoxLoader,
+								onBeforeLoad: function(param){
+									param.page = 1;param.rows = 100; 
+								} " required="true"/>
+        </div>
+    </form>
+    <div id="lineApplyVoDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+    <div id="lineApplyVoImg" class="easyui-dialog" style="width:400px;height:450px;padding:20px"
+   			data-options="resizable:true,modal:true,closable: false" closed="true" buttons="#lineApplyVoImgBtn">
+    	<div id="img"></div>
+    	<div id="lineApplyVoImgBtn">
+	        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">关闭</a>
+    	</div>
+    </div>
+</div>
+</body>
+</html>

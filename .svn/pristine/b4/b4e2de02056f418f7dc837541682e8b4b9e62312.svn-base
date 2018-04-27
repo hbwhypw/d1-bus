@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>message</title>
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/message.js"></script>
+<table id="messageDg" class="easyui-datagrid" data-options="url:'./../message/query',rownumbers:true,toolbar:'#messageDgTbar',
+		pageSize:30,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false,rowStyler: message.rowStyler">
+    <thead>
+    <tr>
+        <th data-options="field:'id',width:80">编号</th>
+        <th data-options="field:'title',width:80">标题</th>
+        <th data-options="field:'content',width:80">内容</th>
+        <th data-options="field:'type_name',width:80">消息类型</th>
+        <th data-options="field:'create_time',width:80">创建时间</th>
+    </tr>
+    </thead>
+</table>
+<div id="messageDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+               	&nbsp;&nbsp;标题：&nbsp;&nbsp;
+                <input id="titleParam" name="title" class="easyui-validatebox" style="width: 150px;">
+                &nbsp;&nbsp;消息类型：&nbsp;&nbsp;
+                <input id="typeParam" class="easyui-combobox" name="type" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=22',
+								loader: common.comboBoxLoader"/>
+                <a id="query" class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查 询</a>
+                <a id="push" class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">推送广播消息</a>
+            </td>
+            <td align="right" width="400px">
+            	<a id="show" class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">消息记录</a>
+            	<a id="add" class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-add" plain="true">添加</a>
+                <a id="update" class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改</a>
+                <a id="delete" class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">删除</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+<div id="messageDlg" class="easyui-dialog" style="width:490px;height:300px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#messageDlgBtn">
+    <form id="messageFm" class="fm" method="post" novalidate enctype="multipart/form-data">
+        <div class="fitem">
+            <label> 标题： </label>
+            <input id="id" name="id" type="hidden">
+            <input id="title" name="title" class="easyui-validatebox" required="true"
+            	data-options="validType: ['maxLength[12]','specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 消息类型： </label>
+            <input id="type" class="easyui-combobox" name="type" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=22',
+								editable:false, loader: common.comboBoxLoader " required="true"/>
+        </div>
+        <div class="fitem">
+            <label> 内容： </label>
+            <textarea id="content" name="content" rows="5" cols="35" maxlength="200"></textarea>
+        </div>
+    </form>
+    <div id="messageDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+</div>
+<div id="messageRecord" class="easyui-dialog" style="width:800px;height:640px;"
+		data-options="modal:true,closable: false" closed="true" buttons="#messageRecordBtn">
+    <table id="recordDg" class="easyui-datagrid" data-options="rownumbers:true,pageSize:20,pagination:true,
+                striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false">
+        <thead>
+            <tr>
+                <th data-options="field:'messageName',width:80">消息</th>
+                <th data-options="field:'adminsName',width:80">发送人</th>
+                <th data-options="field:'userName',width:80">接收人</th>
+                <th data-options="field:'send_time',width:80">发送时间</th>
+                <th data-options="field:'isCheckName',width:20">是否有效</th>
+            </tr>
+        </thead>
+    </table>
+	<div id="messageRecordBtn">
+     	<a href="#" class="easyui-linkbutton" iconCls="icon-ok">关闭</a>
+	</div>
+ </div>
+<div id="pushDlg" class="easyui-dialog" style="width:370px;height:300px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#pushDlgBtn">
+    <form id="pushFm" class="fm" method="post">
+        <label> 推送给： </label>
+        <input type="hidden" id="message_id" name="message_id">
+        <input id="user_type" class="easyui-combobox" name="user_type" data-options="
+                valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=14',
+                editable:false, loader: common.comboBoxLoader" required="true"/>
+    </form>
+    <div id="pushDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+</div>
+</body>
+</html>

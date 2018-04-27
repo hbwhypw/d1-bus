@@ -1,0 +1,388 @@
+var Driver = function(){};
+Driver.prototype.init = function() {
+    this.url = "";
+    this.INPUT = 0;
+    this.SELCET = 1;
+    this.COBOBOX = 2;
+    this.bind();
+};
+
+Driver.prototype.add = function() {
+    var _this = this;
+    $("#driverDlg").dialog("open").dialog("setTitle", "添加司机");
+    $('#driverFm').form('clear');
+    _this.url = '/driver/add';
+    $('#driverDg').datagrid('reload');
+};
+
+Driver.prototype.update = function() {
+    var _this = this;
+    var row = $('#driverDg').datagrid('getSelected');
+    if (row) {
+    	if(0==row.is_check){
+    		$.messager.show({
+                title: '系统提示',
+                msg: '此项已删除'
+            });
+    		return;
+    	}
+        $("#driverDlg").dialog("open").dialog("setTitle", "修改司机");
+        $('#driverFm').form('load', row);
+        _this.url = '/driver/update';
+        $('#driverDg').datagrid('reload');
+    } else {
+        $.messager.alert('警告','请选择一项！','warning');
+    }
+};
+
+Driver.prototype.updatePassWord = function() {
+	var row = $('#driverDg').datagrid('getSelected');
+	if (row) {
+		if(0==row.is_check){
+			$.messager.show({
+                title: '系统提示',
+                msg: '此项已删除'
+            });
+    		return;
+    	}
+		$.post('/driver/updatePassWord', {
+			"driver_id": row.id
+		}, function(data) {
+			$.messager.show({
+                title: '系统提示',
+                msg: data.msg
+            });
+			$('#driverDg').datagrid('reload');
+		}, 'json');
+	} else {
+        $.messager.alert('警告','请选择一项！','warning');
+    }
+}
+
+Driver.prototype.delete = function() {
+    var row = $('#driverDg').datagrid('getSelected');
+    if (row) {
+    	$.messager.confirm('系统确认', '是否确定删除？', function(r) {
+            if (r) {
+                $.post('/driver/delete', {
+                	ids: row.id.toString()
+                }, function(data) {
+                    if (data.code === 1) {
+                        $.messager.show({
+                            title: '系统提示',
+                            msg: data.msg
+                        });
+                        $('#driverDg').datagrid('reload');
+                    } else {
+                        $.messager.show({
+                            title: '系统错误',
+                            msg: data.msg
+                        });
+                    }
+                }, 'json');
+            }
+        });
+    } else {
+        $.messager.alert('警告','请选择一项！','warning');
+    }
+};
+
+Driver.prototype.forEver = function() {
+    var row = $('#driverDg').datagrid('getSelected');
+    if (row) {
+        $.messager.confirm('系统确认', '是否确定删除？', function(r) {
+            if (r) {
+                $.post('/driver/forEver', {
+                	ids: row.id.toString()
+                }, function(data) {
+                    if (data.code === 1) {
+                        $.messager.show({
+                            title: '系统提示',
+                            msg: data.msg
+                        });
+                        $('#driverDg').datagrid('reload');
+                    } else {
+                        $.messager.show({
+                            title: '系统错误',
+                            msg: data.msg
+                        });
+                    }
+                }, 'json');
+            }
+        });
+    } else {
+        $.messager.alert('警告','请选择一项！','warning');
+    }
+}
+
+Driver.prototype.query = function() {
+    this.checkInput('mobileParam',this.INPUT);
+    this.checkInput('real_nameParam',this.INPUT);
+    this.checkInput('city_idParam',this.COBOBOX);
+    $('#driverDg').datagrid('queryReload');
+};
+
+Driver.prototype.look = function() {
+	var _this = this;
+    var row = $('#driverDg').datagrid('getSelected');
+    if (row) {
+    	if(0==row.is_check){
+    		$.messager.show({
+                title: '系统提示',
+                msg: '此项已删除'
+            });
+    		return;
+    	}
+    	$.post('/driver/selectById', {
+    		"id": row.id
+    	}, function(data) {
+    		var result = eval("("+data+")");
+    		var map = result.data;
+    		var html = '';
+    		var alist = map.licensePic;
+    		var blist = map.photo;
+    		var clist = map.bgPic;
+    		if(1==result.code){
+    			html += "<div>驾照图片</div>";
+    			for(var i = 0;i < alist.length; i++){
+    				html += '<img src="' + alist[i] + '" width=100%>';
+    			}
+    			html += "<div>司机头像</div>";
+    			for(var i = 0;i < blist.length; i++){
+    				html += '<img src="' + blist[i] + '" width=100%>';
+    			}
+    			html += "<div>背景图片</div>";
+    			for(var i = 0;i < clist.length; i++){
+    				html += '<img src="' + clist[i] + '" width=100%>';
+    			}
+    			$('#img').append(html);
+    			$("#driverImg").dialog("open").dialog("setTitle", "司机图片");
+    		}
+    	});
+    } else {
+        $.messager.alert('警告','请选择一项！','warning');
+    }
+
+}
+
+Driver.prototype.recover = function() {
+	var row = $('#driverDg').datagrid('getSelected');
+	if (row) {
+		$.post('/driver/updateRecover', {
+			ids: row.id.toString()
+		}, function(data) {
+			$.messager.show({
+                title: '系统提示',
+                msg: data.msg
+            });
+			$('#driverDg').datagrid('reload');
+		}, 'json');
+	} else {
+        $.messager.alert('警告','请选择一项！','warning');
+    }
+
+}
+
+Driver.prototype.checkInput = function(paramName,formType) {
+    var param;
+    switch (formType){
+        case 0:
+            param = $('#' + paramName).val();
+            break;
+        case 1:
+            param = $('#' + paramName + ' option:selected').val();
+            break;
+        case 2:
+            param = $('#' + paramName ).combobox('getValue');
+            break;
+        default :
+            param = $('#' + paramName).val();
+    }
+    var requestParam = paramName.substring(0, paramName.indexOf("P"));
+    if (param != "") {
+        var queryParams = $('#driverDg').datagrid('options').queryParams;
+        queryParams[requestParam] = param;
+    } else {
+        var queryParams = $('#driverDg').datagrid('options').queryParams;
+        delete queryParams[requestParam];
+    }
+};
+
+Driver.prototype.export = function() {
+	var row = $('#driverDg').datagrid('getChecked');
+    if (row) {
+    	var ids = [];
+        if ($.isArray(row)){
+            for(var i = 0; i < row.length; i++){
+                ids.push(row[i].id);
+            }
+        } else {
+            ids = ids.push(row.id);
+        }
+        var param = $.param({
+			ids: ids.toString()
+        });
+    document.location.href = "/driver/export/?" + param;
+    } else {
+        $.messager.alert('警告','请选择一项！','warning');
+    }
+};
+
+Driver.prototype.bind = function() {
+    var _this = this;
+    /*  datagrid */
+    //	查询按钮
+    $("#driverDgTbar table tbody tr td a").eq(0).click(function () {
+        _this.query();
+    });
+    $("#drivernameParam").keyup(function (event) {
+        if (event.keyCode == 13) _this.query();
+    });
+    //	查看图片按钮
+    $("#driverDgTbar table tbody tr td a").eq(1).click(function () {
+        _this.look();
+    });
+    //	添加按钮
+    $("#driverDgTbar table tbody tr td a").eq(2).click(function () {
+        _this.add();
+    });
+    //	修改按钮
+    $("#driverDgTbar table tbody tr td a").eq(3).click(function () {
+        _this.update();
+    });
+    //	重置密码按钮
+    $("#driverDgTbar table tbody tr td a").eq(4).click(function () {
+        _this.updatePassWord();
+    });
+    // 删除按钮
+    $("#driverDgTbar table tbody tr td a").eq(5).click(function () {
+        _this.delete();
+    });
+    // 恢复按钮
+    $("#driverDgTbar table tbody tr td a").eq(6).click(function () {
+        _this.recover();
+    });
+    // 永久删除按钮
+    $("#driverDgTbar table tbody tr td a").eq(7).click(function () {
+        _this.forEver();
+    });
+    $("#export").click(function () {
+        _this.export();
+    });
+    /* 司机dialog */
+    // 确定按钮
+    $("#driverDlgBtn a").eq(0).click(function() {
+        $('#driverFm').form('submit', {
+            url: _this.url,
+            onSubmit: function() {
+                return $(this).form('validate');
+            },
+            success: function(data) {
+                var data = eval('(' + data + ')');
+                if (data.code === 1) {
+                	
+                    $('#driverDlg').dialog('close');
+                    $('#driverDg').datagrid('reload');
+                }
+                $.messager.show({
+                    title: '系统提示',
+                    msg: data.msg
+                });
+            }
+        });
+    });
+    // 取消按钮
+    $("#driverDlgBtn a").eq(1).click(function() {
+        $('#driverDlg').dialog('close');
+    });
+    // 关闭按钮
+    $("#driverImgBtn a").eq(0).click(function() {
+    	_this.clearImg();
+        $('#driverImg').dialog('close');
+    });
+    
+    /*_this.validMobile();
+    _this.validIdCard();*/
+};
+
+Driver.prototype.clearImg = function() {
+	$('#img').empty();
+};
+
+/*Driver.prototype.validMobile = function() {
+	$("#mobile").focusout(function(){
+		var mobile = $("#mobile").val();
+		$.post('/driver/selectByPhone', {
+    		"mobile": mobile,
+    	}, function(data) {
+    		if(0==data.code){
+    			$.messager.show({
+                    title: '系统提示',
+                    msg: data.msg
+                });
+    			$('#mobile').attr("value","");
+    		}
+    	},"json");
+	});
+}*/
+
+/*Driver.prototype.validIdCard = function() {
+	$("#idcard").focusout(function(){
+		var idcard = $("#idcard").val();
+		$.post('/driver/selectByIdcard', {
+    		"idcard": idcard
+    	}, function(data) {
+    		if(0==data.code){
+    			$.messager.show({
+                    title: '系统提示',
+                    msg: '身份证已存在'
+                });
+    			$('#idcard').attr("value","");
+    		}
+    	},"json");
+	});
+}*/
+
+Driver.prototype.genderFormatter = function(value,row,index){
+    var gender = row.gender;
+    switch (gender) {
+        case 1:
+            return '男';
+        case 2:
+            return '女';
+        default :
+            return '';
+    }
+};
+Driver.prototype.is_checkFormatter = function(value,row,index){
+    var is_check = row.is_check;
+    switch (is_check) {
+        case 1:
+            return '√';
+        case 0:
+            return 'X';
+        default :
+            return '';
+    }
+};
+Driver.prototype.mobileFormatter = function(value,row,index){
+    var mobile = row.mobile;
+    if (mobile)
+    	mobile = mobile.substr(0,3) + "*****" + mobile.substr(8, mobile.length);
+    return mobile;
+};
+Driver.prototype.idcardFormatter = function(value,row,index){
+    var idcard = row.idcard;
+    if (idcard)
+    	idcard = idcard.substr(0,6) + "*****" + idcard.substr(14, idcard.length);
+    return idcard;
+};
+Driver.prototype.rowStyler = function(index,row){
+    if (row.is_check == 0){
+        return 'background-color:rgb(183, 182, 182);color:#fff;';
+    }
+};
+$(function(){
+    window.driver = new Driver();
+    driver.init();
+});

@@ -1,0 +1,247 @@
+package com.tmtc.serviceImpl.appAPI;
+
+import java.util.Date;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.constant.SystemVar;
+import com.tmtc.dao.DriverDao;
+import com.tmtc.dao.UserDao;
+import com.tmtc.dao.UserDetailDao;
+import com.tmtc.dao.UserLoginDao;
+import com.tmtc.po.UserRepository;
+import com.tmtc.po.Driver;
+import com.tmtc.po.DriverRepository;
+import com.tmtc.po.DriverRepository.Criteria;
+import com.tmtc.po.User;
+import com.tmtc.po.UserDetail;
+import com.tmtc.po.UserLogin;
+import com.tmtc.service.appAPI.LoginAPIService;
+import com.tmtc.utils.ConvertUtil;
+import com.tmtc.utils.StringUtility;
+import com.tmtc.utils.VerificationUtil;
+
+@Service
+public class LoginAPIServiceImpl implements LoginAPIService {
+
+	@Autowired
+	UserLoginDao userLoginDao;
+
+	@Autowired
+	UserDao userDao;
+
+	@Autowired
+	UserDetailDao userDetailDao;
+
+	@Autowired
+	DriverDao driverDao;
+
+	/**
+	 * 7天时间
+	 */
+	private static final Long OVER_TIME = 7L * 24L * 60L * 60L * 1000L;
+
+	// private static final Long OVER_TIME = 30L * 1000L;
+
+	/**
+	 * 30天时间
+	 */
+	private static final Long OUT_TIME = 30L * 24L * 60L * 60L * 1000L;
+
+	// private static final Long OUT_TIME = 40L * 1000L;
+
+	@Override
+	public String saveLogin(String name, String company_id, Integer user_type, Integer login_source, String password,
+			String ip_address, Integer city_id, Integer is_driver) {
+
+		// 企业端登录
+		// 判断是否存在公司id
+		if (0 != VerificationUtil.length(company_id)) {
+			UserRepository userRepository = new UserRepository();
+			UserRepository.Criteria criteria = userRepository.createCriteria();
+			criteria.andCompany_idEqualTo(company_id);
+			List<User> userList = userDao.selectByExample(userRepository);
+			for (User u : userList) {
+				// 判断用户用户名
+				if (0 != VerificationUtil.length(u.getNumber()) && name.equals(u.getNumber())) {
+					return this.checkPwd(password, u, user_type, login_source, ip_address, city_id);
+				} else if (0 != VerificationUtil.length(u.getUsername()) && name.equals(u.getUsername())) {
+					return this.checkPwd(password, u, user_type, login_source, ip_address, city_id);
+				}
+			}
+		}
+
+		// 司机端登录
+		// 判断是否为司机端
+		if (0 != VerificationUtil.integerIsNull(is_driver)) {
+
+			DriverRepository driverRepository = new DriverRepository();
+			Criteria criteria = driverRepository.createCriteria();
+			criteria.andMobileEqualTo(name);
+			List<Driver> driverlist = driverDao.selectByExample(driverRepository);
+			if (0 == VerificationUtil.size(driverlist)) {
+				return String.valueOf(0);
+			}
+			Driver driver = driverlist.get(0);
+			if (password.equals(driver.getPassword())) {
+				return driver.getId() + "," + driver.getReal_name();
+			} else {
+				return String.valueOf(0);
+			}
+		}
+
+		// 个人端未完成
+		// if(){
+		//
+		// }
+
+		return String.valueOf(0);
+	}
+
+	/**
+	 * 创建登录session userLogin
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@Override
+	public UserLogin addUserLogin(String id) {
+		long l = ConvertUtil.stringToLong(id);
+		if (0 == l) {
+			return null;
+		}
+		UserLogin userLogin = userLoginDao.selectByPrimaryKey(l);
+		if (null == userLogin) {
+			userLogin = new UserLogin(id, StringUtility.UUID(), String.valueOf(System.currentTimeMillis()));
+			userLoginDao.insert(userLogin);
+			return userLogin;
+		} else {
+			userLogin = new UserLogin(id, StringUtility.UUID(), String.valueOf(System.currentTimeMillis()));
+			userLoginDao.updateByPrimaryKeySelective(userLogin);
+			return userLogin;
+		}
+	}
+
+	/**
+	 * 验证session session不存在，返回null 超过30天，返回null 超过7天，重新生成返回新的UserLogin
+	 * 小于7天，返回原来的UserLogin
+	 */
+	@Override
+	public UserLogin findLogin(String session) {
+		List<UserLogin> userLoginlist = userLoginDao.selectBySession(session);
+		if (0 == VerificationUtil.size(userLoginlist)) {
+			return null;
+		}
+		UserLogin userLogin = userLoginlist.get(0);
+		Long loginTime = ConvertUtil.stringToLong(userLogin.getLogin_time());
+		Long nowTime = System.currentTimeMillis();
+		Long time = nowTime - loginTime;
+		if (OUT_TIME < time) {
+			return null;
+		}
+		if (OVER_TIME < time) {
+			return this.addUserLogin(userLogin.getId());
+		}
+		return userLogin;
+	}
+
+	/**
+	 * 用户验证密码
+	 * 
+	 * @param password
+	 * @param u
+	 * @return
+	 */
+	public String checkPwd(String password, User u, Integer user_type, Integer login_source, String ip_address,
+			Integer city_id) {
+
+		Integer login_cnt = VerificationUtil.integerIsNull(u.getLogin_cnt());
+		User user = null;
+		if (ParameterConstant.LOCK_CNT <= login_cnt) {
+			user = new User(u.getId(), city_id, null, null, null, null, user_type, login_source, null,
+					VerificationUtil.integerIsNull(u.getLock_cnt()) + 1, new Date(), null, ip_address);
+			this.updateUserLogin(user);
+			this.updateUserDetail(u.getId(), ParameterConstant.IS_TWO_CHECK);
+			return String.valueOf(ParameterConstant.LOCK_CNT);
+		}
+
+		// 验证密码
+		if (password.equals(u.getPassword())) {
+
+			// 验证用户是否被锁定
+			if (null != this.selectUserDetail(u.getId())) {
+				User user1 = new User(u.getId(), city_id, null, null, null, null, user_type, login_source, null, null,
+						new Date(), 0, ip_address);
+				this.updateUserLogin(user1);
+				return String.valueOf(u.getId());
+			} else {
+				return String.valueOf(ParameterConstant.LOCK_CNT);
+			}
+		} else {
+			user = new User(u.getId(), city_id, null, null, null, null, user_type, login_source, null, null, new Date(),
+					login_cnt + 1, ip_address);
+			this.updateUserLogin(user);
+		}
+		return String.valueOf(login_cnt + 1);
+
+	}
+
+	/**
+	 * 修改用户的状态
+	 * 
+	 * @param id
+	 * @param is_check
+	 * @return
+	 */
+	public UserDetail updateUserDetail(String id, Integer is_check) {
+		UserDetail userDetail = new UserDetail();
+		userDetail.setId(id);
+		userDetail.setIs_check(is_check);
+		userDetailDao.updateByPrimaryKeySelective(userDetail);
+		return userDetail;
+	}
+
+	/**
+	 * 修改用户信息
+	 * 
+	 * @param userLogin
+	 * @return
+	 */
+	public User updateUserLogin(User user) {
+		userDao.updateByPrimaryKeySelective(user);
+		return user;
+	}
+
+	/**
+	 * 查询用户是否有效
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public UserDetail selectUserDetail(String id) {
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(id);
+		if (null != userDetail) {
+			if (ParameterConstant.IS_CHECK == userDetail.getIs_check()) {
+				String portrait = SystemVar.SERVER_IMG_URL + SystemVar.USER_PORTRAIT + userDetail.getPortrait();
+				String qr_code = SystemVar.SERVER_IMG_URL + SystemVar.USER_QR_CODE + userDetail.getQr_code();
+				if (0 != VerificationUtil.length(userDetail.getPortrait())) {
+					userDetail.setPortrait(portrait);
+				} else {
+					userDetail.setPortrait(SystemVar.SERVER_IMG_URL + SystemVar.USER_PORTRAIT + ParameterConstant.DEFAULT_PORTRAIT);
+				}
+				if (0 != VerificationUtil.length(userDetail.getQr_code())) {
+					userDetail.setQr_code(qr_code);
+				}
+				if(0 >= VerificationUtil.length(userDetail.getNick_name())){
+					userDetail.setNick_name(ParameterConstant.DEFAULT_NICKNAME);
+				}
+				return userDetail;
+			}
+		}
+		return null;
+	}
+
+}

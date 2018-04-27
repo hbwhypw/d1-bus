@@ -1,0 +1,299 @@
+package com.tmtc.serviceImpl.appAPI;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.constant.SystemVar;
+import com.tmtc.dao.*;
+import com.tmtc.frame.ServiceRuntimeException;
+import com.tmtc.po.*;
+import com.tmtc.service.appAPI.OrderAppService;
+import com.tmtc.utils.IdWorker;
+import com.tmtc.utils.OrderNumUtil;
+import com.tmtc.utils.VerificationUtil;
+import com.tmtc.vo.ExpOrderVo;
+import com.tmtc.vo.OrderVo;
+import com.tmtc.vo.ShopOrderVo;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
+
+@Service
+public class OrderAppServiceImpl implements OrderAppService {
+
+	private static Logger logger = LoggerFactory.getLogger(OrderAppServiceImpl.class);
+	
+	private String zaodiandao = "667176510356070400";
+
+	@Autowired
+	ShopOrderDao shopOrderDao;
+
+	@Autowired
+	ProductDao productDao;
+
+	@Autowired
+	ExpOrderDao expOrderDao;
+
+	@Autowired
+	UserDetailDao userDetailDao;
+
+	@Autowired
+	DictionaryDao dictionaryDao;
+
+	@Override
+	public ShopOrder addShopOrder(String order, ShopOrder shopOrder) {
+
+		List<OrderVo> list = new Gson().fromJson(order, new TypeToken<List<OrderVo>>() {
+		}.getType());
+
+		double money = 0D;
+		String stringProduct = "";
+		String stringId = "";
+		for (Iterator<OrderVo> iterator = list.iterator(); iterator.hasNext();) {
+			OrderVo orderVo = iterator.next();
+			Product product = productDao.selectByPrimaryKey(orderVo.getId());
+			if (null == product || 0 == VerificationUtil.length(product.getId())) {
+				return null;
+			}
+			stringProduct += (orderVo.getId() + "," + orderVo.getNum());
+
+			double d = (product.getShop_price() * 100) * Double.valueOf(orderVo.getNum());
+			money += d;
+			String id = IdWorker.nextId();
+			stringId += id;
+			if (iterator.hasNext()) {
+				stringProduct += ",";
+				stringId += ",";
+			}
+
+			// 增加子订单
+			shopOrder.setId(id);
+			shopOrder.setOrder_no(OrderNumUtil.getOrderByZX());
+			shopOrder.setPro_id(orderVo.getId() + "," + orderVo.getNum());
+			shopOrder.setMoney(Double.parseDouble(String.format("%.2f", d / 100)));
+			shopOrder.setSub_order_no(String.valueOf(ParameterConstant.TRUE));
+			shopOrderDao.insert(shopOrder);
+
+			// 更新商品库存数
+			Product balanceProduct = new Product();
+			balanceProduct.setId(orderVo.getId());
+			int balanceStock = product.getStock() - Integer.valueOf(orderVo.getNum());
+			if (balanceStock < 0) {
+				throw new ServiceRuntimeException("库存不足");
+			}
+			balanceProduct.setStock(balanceStock);
+			productDao.updateByPrimaryKeySelective(balanceProduct);
+		}
+		shopOrder.setId(IdWorker.nextId());
+		shopOrder.setOrder_no(OrderNumUtil.getOrderByZX());
+		shopOrder.setPro_id(stringProduct);
+		shopOrder.setMoney(Double.parseDouble(String.format("%.2f", money / 100)));
+		shopOrder.setSub_order_no(stringId);
+		shopOrder.setRemark("*");
+		int i = shopOrderDao.insert(shopOrder);
+		if (i > 0) {
+			return shopOrder;
+		}
+		return null;
+	}
+
+	/**
+	 * 更新过期订单
+	 */
+	public synchronized void updateShopOrderTimeOut() {
+		ShopOrderRepository shopOrderRepository = new ShopOrderRepository();
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.MINUTE, -1);
+		shopOrderRepository.or().andOrder_timeLessThan(calendar.getTime())
+				.andOrder_statusEqualTo(ParameterConstant.SHOP_ORDER_NOT_PAY);
+		List<ShopOrder> shopOrderList = shopOrderDao.selectByExample(shopOrderRepository);
+		if (shopOrderList.size() == 0) {
+			return;
+		}
+		for (int i = 0; i < shopOrderList.size(); i++) {
+			ShopOrder shopOrder = shopOrderList.get(i);
+			// 判断是否为未支付订单
+			ShopOrder shopOrderTimeOut = new ShopOrder();
+			shopOrderTimeOut.setId(shopOrder.getId());
+			shopOrderTimeOut.setOrder_status(ParameterConstant.C_CANCEL_SHOP_ORDER);
+			logger.info("---------超时订单------------------" + shopOrderTimeOut.toString()
+					+ "----------------------------------\n");
+			// 判断是否为子订单，子订单恢复产品库存数
+			if ("1".equals(shopOrder.getSub_order_no())) {
+				String[] pro_id = shopOrder.getPro_id().split(",");
+				Product product = productDao.selectByPrimaryKey(pro_id[0]);
+				logger.info("---------产品还原开始------------------" + pro_id[1] + "----------------------------------\n");
+				product.setStock(product.getStock() + Integer.valueOf(pro_id[1]));
+				int j = productDao.updateByPrimaryKeySelective(product);
+				logger.info("----------产品还原结束---------------" + j + "------------------------------------\n");
+			}
+			logger.info("----------订单还原开始---------------" + shopOrderTimeOut.toString()
+					+ "------------------------------------\n");
+			int j = shopOrderDao.updateByPrimaryKeySelective(shopOrderTimeOut);
+			logger.info("----------订单还原结束---------------" + j + "------------------------------------\n");
+		}
+
+		logger.info("----------订单任务执行结束------------------------------------\n");
+	}
+
+	@Override
+	public ExpOrder addExpOrder(ExpOrder expOrder) {
+		String pro_id = expOrder.getPro_id();
+		Product product = productDao.selectByPrimaryKey(pro_id);
+		expOrder.setCost_exp_score(product.getExp_score());
+		expOrderDao.insert(expOrder);
+		return expOrder;
+	}
+
+	@Override
+	public List<ExpOrderVo> select(ExpOrderRepository expOrderRepository) {
+		List<ExpOrder> list = expOrderDao.selectByExample(expOrderRepository);
+		List<ExpOrderVo> listVo = new ArrayList<ExpOrderVo>();
+		if (0 != VerificationUtil.size(list)) {
+			for (ExpOrder expOrder : list) {
+				String real_name = null;
+				String user_name = null;
+				String pro_name = null;
+				String city_name = null;
+				String order_status_name = null;
+
+				// String userId = expOrder.getUser_id();
+				String proId = expOrder.getPro_id();
+				// Integer cityId = expOrder.getCity_id();
+				Integer orderStatus = expOrder.getOrder_status();
+
+				// if (0 != VerificationUtil.length(userId)) {
+				// UserDetail userDetail = getUser(userId);
+				// if (null != userDetail) {
+				// real_name = userDetail.getReal_name();
+				// user_name = userDetail.getUsername();
+				// }
+				// }
+				if (0 != VerificationUtil.length(proId)) {
+					pro_name = getProName(proId);
+				}
+				// if (0 != VerificationUtil.integerIsNull(cityId)) {
+				// city_name = getName(cityId);
+				// }
+				if (0 != VerificationUtil.integerIsNull(orderStatus)) {
+					order_status_name = getName(orderStatus);
+				}
+
+				// 把产品封装近订单里
+				String pro_id = expOrder.getPro_id();
+				if (0 != VerificationUtil.length(pro_id)) {
+					Product product = productDao.selectByPrimaryKey(pro_id);
+					String[] picList = product.getPro_picture().split(",");
+					if (null != picList && 0 != picList.length) {
+						String pic = SystemVar.SERVER_IMG_URL + SystemVar.PRO_PICTURE + picList[0];
+						product.setPro_picture(pic);
+					}
+					expOrder.setProduct(product);
+				}
+
+				ExpOrderVo expOrderVo = new ExpOrderVo(expOrder, real_name, user_name, pro_name, city_name,
+						order_status_name);
+				listVo.add(expOrderVo);
+			}
+		}
+		return listVo;
+	}
+
+	@Override
+	public List<ShopOrderVo> select(ShopOrderRepository shopOrderRepository) {
+		List<ShopOrder> list = shopOrderDao.selectByExample(shopOrderRepository);
+		List<ShopOrderVo> listVo = new ArrayList<ShopOrderVo>();
+		if (0 != VerificationUtil.size(list)) {
+			for (ShopOrder shopOrder : list) {
+				String real_name = null;
+				String user_name = null;
+				String pro_name = null;
+				String city_name = null;
+				String order_status_name = null;
+				String pay_type_name = null;
+
+				String userId = shopOrder.getUser_id();
+				String proId = shopOrder.getPro_id();
+				Integer cityId = shopOrder.getCity_id();
+				Integer orderStatus = shopOrder.getOrder_status();
+				Integer payType = shopOrder.getPay_type();
+
+				if (0 != VerificationUtil.length(userId)) {
+					UserDetail userDetail = getUser(userId);
+					if (null != userDetail) {
+						real_name = userDetail.getReal_name();
+						user_name = userDetail.getUsername();
+					}
+				}
+				if (0 != VerificationUtil.length(proId)) {
+					pro_name = getProName(proId);
+				}
+				if (0 != VerificationUtil.integerIsNull(cityId)) {
+					city_name = getName(cityId);
+				}
+				if (0 != VerificationUtil.integerIsNull(orderStatus)) {
+					order_status_name = getName(orderStatus);
+				}
+				if (0 != VerificationUtil.integerIsNull(payType)) {
+					pay_type_name = getName(payType);
+				}
+
+				// 把产品封装近订单里
+				String pro_id = shopOrder.getPro_id();
+				if (0 != VerificationUtil.length(pro_id)) {
+					Product product = productDao.selectByPrimaryKey(pro_id);
+					if (null == product || 0 == VerificationUtil.length(product.getPro_picture())) {
+						continue;
+					}
+					String[] picList = product.getPro_picture().split(",");
+					if (null != picList && 0 != picList.length) {
+						String pic = SystemVar.SERVER_IMG_URL + SystemVar.PRO_PICTURE + picList[0];
+						product.setPro_picture(pic);
+					}
+					if (zaodiandao.equals(product.getPro_type())) {
+						product.setPro_name(product.getPro_name().substring(2));
+					}
+					shopOrder.setProduct(product);
+				}
+				ShopOrderVo shopOrderVo = new ShopOrderVo(shopOrder, real_name, user_name, pro_name, city_name,
+						order_status_name, pay_type_name);
+				listVo.add(shopOrderVo);
+			}
+			return listVo;
+		}
+		return listVo;
+	}
+
+	private UserDetail getUser(String userId) {
+		UserDetail userDetail = userDetailDao.selectByPrimaryKey(userId);
+		return userDetail;
+	}
+
+	private String getProName(String proId) {
+		String proName = null;
+		Product product = productDao.selectByPrimaryKey(proId);
+		if (null != product) {
+			proName = product.getPro_name();
+		}
+		return proName;
+	}
+
+	private String getName(Integer code) {
+		String name = null;
+		DictionaryRepository dictionaryRepository = new DictionaryRepository();
+		DictionaryRepository.Criteria criteria = dictionaryRepository.createCriteria();
+		criteria.andCodeEqualTo(code);
+		criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+		List<Dictionary> list = dictionaryDao.selectByExample(dictionaryRepository);
+		if (0 != VerificationUtil.size(list)) {
+			name = list.get(0).getName();
+		}
+		return name;
+	}
+}

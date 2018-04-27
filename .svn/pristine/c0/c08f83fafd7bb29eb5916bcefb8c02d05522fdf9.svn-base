@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>resource</title>
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/resource.js"></script>
+<table id="resourceDg" class="easyui-treegrid" data-options="url:'./../resource/queryTree',rownumbers:true,toolbar:'#resourceDgTbar',
+		striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false,idField: 'id', treeField: 'name'">
+    <thead>
+    <tr>
+        <th data-options="field:'id',width:80">编号</th>
+        <th data-options="field:'name',width:80">资源名称</th>
+        <th data-options="field:'url',width:80">路径</th>
+        <th data-options="field:'is_root',width:80,formatter: resource.is_rootFormatter">是否根节点</th>
+        <th data-options="field:'parent',width:80">根节点</th>
+        <th data-options="field:'remark',width:80">备注</th>
+        <th data-options="field:'is_check',width:80,formatter: common.is_checkFormatter">是否有效</th>
+    </tr>
+    </thead>
+</table>
+<div id="resourceDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">刷 新</a>
+            </td>
+            <td align="right" width="280px">
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-add" plain="true">添加</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">删除</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查看</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+<div id="resourceDlg" class="easyui-dialog" style="width:400px;height:450px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#resourceDlgBtn">
+    <div class="ftitle">
+        资源信息
+    </div>
+    <form id="resourceFm" class="fm" method="post" novalidate>
+        <div class="fitem">
+            <label> 资源名称： </label>
+            <input id="id" name="id" type="hidden">
+            <input id="name" name="name" class="easyui-validatebox" required="true"
+            	data-options="validType: ['maxLength[18]','specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 路径： </label>
+            <input id="url" name="url" class="easyui-validatebox" required="true"
+            	data-options="validType: ['maxLength[50]']">
+        </div>
+        <div class="fitem">
+            <label> 是否根节点： </label>
+            <select id="is_root" name="is_root" style="width: 173px;">
+                <option value="1">√</option>
+                <option value="0">X</option>
+            </select>
+        </div>
+        <div class="fitem">
+            <label> 根节点： </label>
+            <input id="parent" name="parent" class="easyui-combobox" data-options="disabled: true,editable: false,
+                url:'./../resource/queryRoot',valueField:'id',textField:'name',loader: common.comboBoxLoader,
+                onBeforeLoad: function(param){
+                    param.is_root = 1;
+                } "/>
+        </div>
+        <div class="fitem">
+            <label> 备注： </label>
+            <input id="remark" name="remark" class="easyui-validatebox">
+        </div>
+        <div class="fitem">
+            <label> 是否有效： </label>
+            <select id="is_check" name="is_check" style="width: 173px;">
+                <option value="1">√</option>
+                <option value="0">X</option>
+            </select>
+        </div>
+    </form>
+    <div id="resourceDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+</div>
+<div id="menuWin" class="easyui-window" style="width:370px;height:300px;padding:20px"
+     data-options="resizable:true" closed="true" buttons="#menuDlgBtn">
+    <div id="menu" class="easyui-accordion" border="true">
+        菜单加载中……
+    </div>
+</div>
+</body>
+</html>

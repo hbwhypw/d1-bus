@@ -1,0 +1,110 @@
+package com.tmtc.controller.appAPI;
+
+import java.util.Date;
+import java.util.Map;
+import javax.servlet.http.HttpServletRequest;
+
+import com.tmtc.po.UserPush;
+import com.tmtc.service.UserPushService;
+import com.tmtc.utils.IdWorker;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.tmtc.constant.MessageVar;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.po.UserDetail;
+import com.tmtc.po.UserLogin;
+import com.tmtc.service.appAPI.LoginAPIService;
+import com.tmtc.utils.ConvertCity;
+import com.tmtc.utils.ConvertUtil;
+import com.tmtc.utils.IP;
+
+/**
+ * 登录接口
+ * 
+ * @author qiukai
+ *
+ */
+@Controller
+@RequestMapping("/App/login")
+public class LoginAppController extends BaseController {
+
+	@Autowired
+	LoginAPIService loginAPIService;
+	@Autowired
+	UserPushService userPushService;
+
+	/**
+	 * 企业登录 /App/login/query?
+	 * 
+	 * @param city_id
+	 *            城市id（int类型）
+	 * @param name
+	 *            登录名（手机号或者工号，string类型）
+	 * @param company_id
+	 *            公司id（String类型）
+	 * @param user_type
+	 *            用户类型（用户类型编号 ，int类型）
+	 * @param login_source
+	 *            登录来源（登录来源编号，int类型）
+	 * @param password
+	 *            登录密码（经过md5后的32位16进制数，string类型）
+	 * @param is_driver
+	 *            是否是司机，（是司机is_driver=1）不是司机可以不发送，或者发送0
+	 * @param channelId
+	 *            通道id （String类型）
+	 * @return
+	 */
+	@RequestMapping("/query")
+	@ResponseBody
+	public Map<String, Object> query(HttpServletRequest request, @RequestParam String name, String company_id,
+			@RequestParam String cityName, Integer user_type, Integer login_source, @RequestParam String password,
+			Integer is_driver,@RequestParam String channelId) {
+
+		Integer city_id = ConvertCity.gerCity_code(cityName);
+		// 获取ip地址
+		String ip_address = IP.getIP(request);
+
+		String login = loginAPIService.saveLogin(name, company_id, user_type, login_source, password, ip_address,
+				city_id, is_driver);
+		long sign = 0L;
+		try {
+			sign = Long.valueOf(login);
+		} catch (Exception e) {
+			String[] split = login.split(",");
+			sign = ConvertUtil.stringToLong(split[0]);
+		}
+		
+		// 用于司机端验证
+		if (sign == STATUS_SUCCESS) {
+			return getMap(request, MessageVar.LOGIN_USER_PWD_ERROR,STATUS_ERROR);
+		}
+
+		if (sign < ParameterConstant.LOCK_CNT) {
+			return getMap(request, MessageVar.LOGIN_WARN + (5 - sign) + "次",
+					(int) sign);
+		}
+		
+		// 锁定用户
+		if (sign == ParameterConstant.LOCK_CNT) {
+			return getMap(request, MessageVar.LOGIN_ERROR,(int) sign);
+		}
+		UserLogin userLogin = loginAPIService.addUserLogin(String.valueOf(sign));
+		UserDetail userDetail = loginAPIService.selectUserDetail(String.valueOf(sign));
+		UserPush userPush = new UserPush();
+		userPush.setId(IdWorker.nextId());
+		userPush.setUser_id(String.valueOf(sign));
+		userPush.setChannel_id(channelId);
+		userPush.setCreate_time(new Date());
+		userPush.setDevice_type(login_source);
+		// 添加推送用户
+		userPushService.insertOrUpdate(userPush);
+		if (null == userDetail) {
+			return getMap(MessageVar.LOGIN_SUCCESS,STATUS_SUCCESS, login, userLogin.getLogin_token());
+		}
+		return getMap(MessageVar.LOGIN_SUCCESS,STATUS_SUCCESS, userDetail, userLogin.getLogin_token());
+	}
+}

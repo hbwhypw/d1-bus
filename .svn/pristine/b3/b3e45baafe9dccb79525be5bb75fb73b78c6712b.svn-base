@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+	<script type="text/javascript" src="/dist/js/subPages/lineTime.js"></script>
+	<!-- 数据表格 -->
+	<table id="lineTimeDg" class="easyui-datagrid"
+		data-options="url:'./../lineTime/query',rownumbers:true,toolbar:'#lineTimeDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: false, selectOnCheck: false">
+		<thead>
+			<tr>
+				<th data-options="field:'line_id',width:80,hidden: true">线路id</th>
+				<th data-options="field:'driver_id',width:80,hidden: true">司机id</th>
+				<th data-options="field:'car_id',width:80,hidden: true">车辆id</th>
+				<th data-options="field:'driving_state',width:80,hidden: true">行驶状态</th>
+				<th data-options="field:'line_station_sort',width:80,hidden: true">行驶状态</th>
+				
+				<th data-options="width:80, checkbox: true">全选/反选</th>
+				<th data-options="field:'id',width:80">编号</th>
+				<th data-options="field:'line_name',width:80">线路名称</th>
+				<th data-options="field:'real_name',width:80">司机姓名</th>
+				<th data-options="field:'car_num',width:80">车牌</th>
+				<th data-options="field:'depart_time',width:80">出发时间</th>
+				<th data-options="field:'arrival_time',width:80">预计到站时间</th>
+				<th data-options="field:'driving_state_name',width:80">行驶状态</th>
+				<th data-options="field:'line_station_sort_name',width:80">刚刚过去的站</th>
+				<th data-options="field:'remark',width:80">备注</th>
+				<th data-options="field:'create_time',width:80">创建时间</th>
+				<th
+					data-options="field:'is_check',width:80,formatter: common.is_checkFormatter">是否有效</th>
+			</tr>
+		</thead>
+	</table>
+	
+	<!-- 按钮 -->
+	<div id="lineTimeDgTbar">
+		<table width="100%">
+			<tr>
+				<td align="left">
+					&nbsp;&nbsp;线路名：&nbsp;&nbsp;
+					<input id="line_nameParam" name="line_nameParam" class="easyui-validatebox" style="width: 150px;">
+					<a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查询</a>
+				</td>
+				<td align="right" width="280px">
+				<a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改</a>
+					<a class="easyui-linkbutton" href="javascript:void(0);"
+					iconCls="icon-remove" plain="true">删除</a></td>
+				<td align="right" width="10px">&nbsp;</td>
+			</tr>
+		</table>
+	</div>
+	
+	<!-- 修改班次 -->
+	<div id="lineTimeDlg" class="easyui-dialog"
+		style="width: 300px; height: 360px;"
+		data-options="resizable:true,modal:true" closed="true"
+		buttons="#lineTimeDlgBtn">
+		<div style="background: #fafafa; padding: 15px;" align="center"
+			id="nomap">
+			<form id="lineTimeFm" method="post">
+				<input type="hidden" name="id">
+				<input type="hidden" name="line_id">
+				<input type="hidden" name="driver_id">
+				<input type="hidden" name="car_id">
+				<input type="hidden" name="driving_state">
+				<input type="hidden" name="line_station_sort">
+				<table style="padding: 10px 0px;">
+					<tr>
+						<th>线路名称:</th>
+						<td><input type="text" class="easyui-validatebox" name="line_name" id="line_name" readonly="readonly"
+							style="width: 140px;" /></td>
+					</tr>
+					<tr>
+						<th>司机姓名:</th>
+						<td><input class="easyui-validatebox"
+							data-options="required:true" type="text" name="real_name" readonly="readonly"
+							id="real_name" style="width: 140px;" />
+						</td>
+					</tr>
+					<tr>
+						<th>车牌:</th>
+						<td><input class="easyui-validatebox" type="text" name="car_num" id="car_num" readonly="readonly"
+							style="width: 140px;" /></td>
+					</tr>
+					<tr>
+						<th>出发时间:</th>
+						<td>
+						<input class="Wdate" 
+						data-options="required:true"
+							type="text" id="depart_time" name="depart_time"
+							style="width: 140px" maxlength="10" size="20"
+							 readonly="readonly" onfocus="WdatePicker({skin:'whyGreen',dateFmt:'yyyy-MM',minDate:'%y-%M',maxDate:'3008-12-20'})" />
+						
+						</td>
+					</tr>
+					<tr>
+						<th>预计到达时间:</th>
+						<td>
+						<input class="Wdate" 
+						data-options="required:true"
+							type="text" id="arrival_time" name="arrival_time"
+							style="width: 140px" maxlength="10" size="20"
+							 readonly="readonly" onfocus="WdatePicker({skin:'whyGreen',dateFmt:'yyyy-MM',minDate:'%y-%M',maxDate:'3008-12-20'})" />
+						</td>
+					</tr>
+					<tr>
+						<th>行驶状态:</th>
+						<td><input id="driving_state" class="easyui-combobox"
+							name="driving_state" style="width: 144px;" data-options="valueField:'code',
+											 textField:'name',
+											 url:'./../dictionary/selectByCode?code=26',
+											 loader: common.comboBoxLoader,
+											 onBeforeLoad: function(param){
+											 								param.page = 0;
+											 								param.rows = 100;
+											 								}
+											 "/></td>
+					</tr>
+					<tr>
+						<th>刚刚过去的站:</th>
+						<td><input id="line_station_sort_name" class="easyui-validatebox" readonly="readonly"
+							name="line_station_sort_name" style="width: 140px;"/>
+						</td>
+					</tr>
+					<tr>
+						<th>备注:</th>
+						<td><textarea rows="2" name="remark" style="width: 138px;"></textarea>
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
+		<div id="lineTimeDlgBtn">
+			<a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a> <a
+				href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+		</div>
+	</div>
+</body>
+</html>

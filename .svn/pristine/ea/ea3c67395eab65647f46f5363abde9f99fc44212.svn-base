@@ -1,0 +1,110 @@
+package com.tmtc.controller;
+
+import java.util.Date;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.tmtc.annotation.SystemControllerLog;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.frame.JsonResult;
+import com.tmtc.frame.PageResult;
+import com.tmtc.po.LineStation;
+import com.tmtc.po.LineStationRepository;
+import com.tmtc.po.LineStationRepository.Criteria;
+import com.tmtc.service.LineStationService;
+import com.tmtc.utils.IdWorker;
+
+/**
+ * 站点管理
+ * 
+ * @author qiukai
+ *
+ */
+@Controller
+@RequestMapping("/lineStation")
+public class LineStationController extends BaseController {
+
+	@Autowired
+	LineStationService lineStationService;
+
+	@ResponseBody
+	@RequestMapping(value = "/{edit}")
+	@SystemControllerLog("站点的添加或修改")
+	public JsonResult add(HttpServletRequest request, HttpServletResponse response, @PathVariable String edit,
+			@Valid @ModelAttribute LineStation lineStation, BindingResult bindingResult) {
+
+		if (bindingResult.hasErrors()) {
+			return handlerErrors(bindingResult);
+		}
+		if (edit.equals("add")) {
+			lineStation.setId(IdWorker.nextId());
+			lineStation.setIs_check(ParameterConstant.IS_CHECK);
+			lineStation.setCreate_time(new Date());
+			lineStationService.insert(lineStation);
+		} else if (edit.equals("update")) {
+			int i = lineStationService.update(lineStation);
+			if (0 == i) {
+				return new JsonResult(1, "修改失败！", null);
+			}
+		}
+		return new JsonResult();
+	}
+
+	/**
+	 * 查询一条线路的所有站点
+	 * 
+	 * @param request
+	 * @param line_id
+	 * @return
+	 */
+	@RequestMapping("/queryByLine_id")
+	@ResponseBody
+	public JsonResult query(HttpServletRequest request, String line_id) {
+
+		LineStationRepository lineStationRepository = new LineStationRepository();
+		Criteria criteria = lineStationRepository.createCriteria();
+		criteria.andLine_idEqualTo(line_id);
+		criteria.andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+		lineStationRepository.setOrderByClause("sort");
+		List<LineStation> lineStationlist = lineStationService.select(lineStationRepository);
+		return new JsonResult(1, "", lineStationlist);
+	}
+
+	@RequestMapping("/query")
+	@ResponseBody
+	public PageResult query(HttpServletRequest request, @RequestParam(required = false) Integer page,
+			@RequestParam(required = false) Integer rows, @RequestParam(required = false) String line_name,
+			@RequestParam(required = false) String station_name) {
+		return lineStationService.query(line_name, station_name, page, rows);
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/delete")
+	@SystemControllerLog("站点的删除")
+	public JsonResult delete(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(required = false) String id) {
+		lineStationService.delete(id);
+		return new JsonResult();
+	}
+	
+	@ResponseBody
+	@RequestMapping(value = "/deleteForEver")
+	@SystemControllerLog("站点的永久删除")
+	public JsonResult deleteForEver(HttpServletRequest request, HttpServletResponse response,
+			@RequestParam(required = false) String id) {
+		lineStationService.deleteForEver(id);
+		return new JsonResult();
+	}
+}

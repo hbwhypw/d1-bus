@@ -1,0 +1,139 @@
+package com.tmtc.controller.driver;
+
+import com.tmtc.constant.MessageVar;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.controller.appAPI.BaseController;
+import com.tmtc.po.*;
+import com.tmtc.service.LineService;
+import com.tmtc.service.LineStationService;
+import com.tmtc.service.LineTimeService;
+import com.tmtc.service.UserDetailService;
+import com.tmtc.service.UserService;
+import com.tmtc.service.appAPI.ScanAppService;
+import com.tmtc.utils.VerificationUtil;
+import com.tmtc.utils.XYCalculate;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Created: hbwhypw Date: 2015/10/16 17:54 Function: 扫描、验证二维码
+ */
+@Controller
+@RequestMapping("/App/driver")
+public class ScanValidCodeController extends BaseController {
+
+//	private static Logger logger = LoggerFactory.getLogger(ScanValidCodeController.class);
+	
+    @Autowired
+    UserDetailService userDetailService;
+
+    @Autowired
+    UserService userService;
+
+    @Autowired
+    LineTimeService lineTimeService;
+
+    @Autowired
+    LineService lineService;
+
+    @Autowired
+    LineStationService lineStationService;
+
+    @Autowired
+    ScanAppService scanAppService;
+
+    /**
+     * 扫描、验证二维码 /App/driver/scan?
+     *
+     * @param request
+     * @param response
+     * @param user_id      用户id
+     * @param secret       二位码密钥
+     * @param time_line_id 班次ID
+     * @param x_point      x坐标
+     * @param y_point      y坐标
+     * @return
+     */
+    @RequestMapping("/scan")
+    @ResponseBody
+    public Map<String, Object> scan(HttpServletRequest request, HttpServletResponse response,
+                                    @RequestParam String user_id, @RequestParam String secret, @RequestParam String time_line_id,
+                                    @RequestParam String x_point, @RequestParam String y_point) {
+
+        // 验证用户的二维码密钥和id是否匹配（二维码是否有效）
+        UserDetailRepository userDetailRepository = new UserDetailRepository();
+        userDetailRepository.or().andQr_code_secretEqualTo(secret).andIdEqualTo(user_id)
+                .andIs_checkEqualTo(ParameterConstant.IS_CHECK);
+        List<UserDetail> userDetailList = userDetailService.select(userDetailRepository);
+        if (0 == VerificationUtil.size(userDetailList)) {
+            return getMap(request, MessageVar._NULL, STATUS_ERROR);
+        }
+
+        // 判断是否为集团用户
+        UserDetail userDetail = userDetailList.get(0);
+        if (userDetail.getUser_type() != ParameterConstant.USER_TYPE_COMPANY
+                && userDetail.getUser_type() != ParameterConstant.USER_TYPE_COMPANY_NORMAL) {
+            return getMap(request, MessageVar._NULL, STATUS_ERROR);
+        }
+
+        // 验证线路
+        LineTime lineTime = lineTimeService.selectByPrimaryKey(time_line_id);
+        if (null == lineTime) {
+            return getMap(request, MessageVar._NULL, STATUS_ERROR);
+        }
+
+        // 验证线路状态
+        if (ParameterConstant.DRIVING != lineTime.getDriving_state()) {
+            return getMap(request, MessageVar._NULL, STATUS_ERROR);
+        }
+
+        if (0 == VerificationUtil.length(x_point) || 0 == VerificationUtil.length(y_point) || "0".equals(x_point)
+                || "0".equals(y_point)) {
+            return getMap(request, MessageVar._NULL, STATUS_ERROR);
+        }
+
+        Double x = Double.valueOf(x_point);
+        Double y = Double.valueOf(y_point);
+        double[] xy;
+        try {
+            xy = XYCalculate.xyCalculate(x, y);
+        } catch (Exception e) {
+            return getMap(request, MessageVar._NULL, STATUS_ERROR);
+        }
+        
+        // 定位站点
+        LineStation lineStation = lineStationService.location(xy[0], xy[1], xy[2], xy[3], lineTime.getLine_id());
+
+        if (null == lineStation) {
+            return getMap(request, MessageVar._NULL, 2);
+        }
+
+        String station_id = lineStation.getId();
+        int insertLineOrder = 0;
+
+        // 如果是公司员工
+        if (userDetail.getUser_type() == ParameterConstant.USER_TYPE_COMPANY) {
+            insertLineOrder = scanAppService.insertLineOrder(userDetail, lineTime, station_id, ParameterConstant.USER_TYPE_COMPANY);
+        } else {
+            insertLineOrder = scanAppService.insertLineOrder(userDetail, lineTime, station_id, ParameterConstant.USER_TYPE_COMPANY_NORMAL);
+        }
+
+        if (1 == insertLineOrder) {
+            return getMap(request, "扫描成功");
+        } else if (2 == insertLineOrder) {
+            return getMap(request, MessageVar._NULL, 3);
+        }
+
+        return getMap(request, MessageVar._NULL, STATUS_ERROR);
+    }
+}

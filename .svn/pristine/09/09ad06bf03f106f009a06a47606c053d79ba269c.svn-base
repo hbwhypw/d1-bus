@@ -1,0 +1,100 @@
+package com.tmtc.serviceImpl;
+
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.dao.AdminsDao;
+import com.tmtc.frame.PageResult;
+import com.tmtc.po.Admins;
+import com.tmtc.po.AdminsRepository;
+import com.tmtc.service.AdminsService;
+import com.tmtc.utils.secret.MD5;
+import com.tmtc.vo.AdminVo;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Creater: hbwhypw
+ * Date: 2015/9/18 9:33
+ * Function:
+ */
+@Service
+public class AdminsServiceImpl implements AdminsService {
+    @Autowired
+    AdminsDao adminsDao;
+
+    @Override
+    public int count(AdminsRepository example) {
+        return adminsDao.countByExample(example);
+    }
+
+    @Override
+    public int delete(String id) {
+        return adminsDao.deleteByPrimaryKey(id);
+    }
+
+    @Override
+    public int delete(AdminsRepository example) {
+        return adminsDao.deleteByExample(example);
+    }
+
+    @Override
+    public int insert(Admins record) {
+        return adminsDao.insertSelective(record);
+    }
+
+    @Override
+    public List<Admins> select(AdminsRepository example) {
+        return adminsDao.selectByExample(example);
+    }
+
+    @Override
+    public Admins selectByPrimaryKey(String id) {
+        return adminsDao.selectByPrimaryKey(id);
+    }
+
+    @Override
+    public int update(Admins record) {
+        return adminsDao.updateByPrimaryKeySelective(record);
+    }
+
+    @Override
+    public int update(Admins record, AdminsRepository example) {
+        return adminsDao.updateByExampleSelective(record, example);
+    }
+
+    @Override
+    public PageResult selectByPage(AdminsRepository example) {
+        return new PageResult(count(example), select(example), 1);
+    }
+
+    @Override
+    public List<AdminVo> selectAdmins(Map map) {
+        return adminsDao.selectAdmins(map);
+    }
+
+    @Override
+    public Integer countAdmins(Map map) {
+        Integer count = adminsDao.countAdmins(map);
+        return count == null ? Integer.valueOf(0) : count;
+    }
+
+    @Override
+    public PageResult selectByPage(Map map) {
+        return new PageResult(countAdmins(map), selectAdmins(map), 1);
+    }
+
+	@Override
+	public int updatePassWord(String id) {
+		String password = MD5.makeMd5(ParameterConstant.RESERTPW);
+		Admins admins = new Admins();
+		admins.setId(id);
+		admins.setPassword(password);
+		int updateNum = adminsDao.updateByPrimaryKeySelective(admins);
+		return updateNum;
+	}
+
+
+}

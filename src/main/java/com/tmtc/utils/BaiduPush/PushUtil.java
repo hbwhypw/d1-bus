@@ -1,0 +1,375 @@
+package com.tmtc.utils.BaiduPush;
+
+import com.baidu.yun.core.log.YunLogEvent;
+import com.baidu.yun.core.log.YunLogHandler;
+import com.baidu.yun.push.auth.PushKeyPair;
+import com.baidu.yun.push.client.BaiduPushClient;
+import com.baidu.yun.push.constants.BaiduPushConstants;
+import com.baidu.yun.push.exception.PushClientException;
+import com.baidu.yun.push.exception.PushServerException;
+import com.baidu.yun.push.model.*;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.constant.PushEnum;
+import com.tmtc.constant.SystemVar;
+import com.tmtc.po.Message;
+import com.tmtc.po.UserPush;
+
+import net.sf.json.JSONObject;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.List;
+
+/**
+ * Function:
+ * @auther: hbwhypw
+ * Date: 2015/10/23 15:00
+ */
+public class PushUtil {
+    private static final Logger logger = LoggerFactory.getLogger(PushUtil.class);
+
+    public static void AndroidPushMsgToAll(String title, String content)
+            throws PushClientException, PushServerException {
+        PushKeyPair pair = new PushKeyPair(SystemVar.DRIVER_APIKEY, SystemVar.DRIVER_SECRETKEY);
+        BaiduPushClient pushClient = new BaiduPushClient(pair, BaiduPushConstants.CHANNEL_REST_URL);
+        pushClient.setChannelLogHandler(new YunLogHandler() {
+            @Override
+            public void onHandle(YunLogEvent event) {
+            	logger.info(event.getMessage());
+            }
+        });
+
+        try {
+            JSONObject notification = new JSONObject();
+            notification.put("title", title);
+            notification.put("description", content);
+            JSONObject jsonAPS = new JSONObject();
+            jsonAPS.put("alert", content);
+            notification.put("aps", jsonAPS);
+
+            // 4. specify request arguments
+            PushMsgToAllRequest request = new PushMsgToAllRequest()
+                    .addMsgExpires(new Integer(3600)).addMessageType(1)
+                    .addMessage(notification.toString())
+                    .addSendTime(System.currentTimeMillis() / 1000 + 120);
+            // 5. http request
+            PushMsgToAllResponse response = pushClient.pushMsgToAll(request);
+            logger.info("driver push msgId: " + response.getMsgId() + ",sendTime: "
+                    + response.getSendTime() + ",timerId: "
+                    + response.getTimerId());
+        } catch (PushClientException e) {
+            if (BaiduPushConstants.ERROROPTTYPE) {
+                throw e;
+            } else {
+                e.printStackTrace();
+            }
+        } catch (PushServerException e) {
+            if (BaiduPushConstants.ERROROPTTYPE) {
+                throw e;
+            } else {
+                logger.info(String.format(
+                        "requestId: %d, errorCode: %d, errorMessage: %s",
+                        e.getRequestId(), e.getErrorCode(), e.getErrorMsg()));
+            }
+        }
+    }
+
+    public static void AndroidPushMsgToSingleDevice(String channelId, String title, String content)
+            throws PushClientException, PushServerException {
+        PushKeyPair pair = new PushKeyPair(SystemVar.ANDROID_APIKEY, SystemVar.ANDROID_SECRETKEY);
+        BaiduPushClient pushClient = new BaiduPushClient(pair, BaiduPushConstants.CHANNEL_REST_URL);
+        pushClient.setChannelLogHandler(new YunLogHandler() {
+            @Override
+            public void onHandle(YunLogEvent event) {
+                logger.info(event.getMessage());
+            }
+        });
+
+        try {
+            JSONObject notification = new JSONObject();
+            notification.put("title", title);
+            notification.put("description", content);
+            notification.put("open_type",2);
+            notification.put("pkg_content","#Intent;component=com.dykj.d1bus.bloc/.activity.WelcomeActivity;end");
+//            notification.put("user_confirm",0);
+            JSONObject jsonAPS = new JSONObject();
+            jsonAPS.put("alert", content);
+            notification.put("aps", jsonAPS);
+
+            PushMsgToSingleDeviceRequest request = new PushMsgToSingleDeviceRequest()
+                    .addChannelId(channelId)
+                    .addMsgExpires(new Integer(3600)).
+                            addMessageType(1).
+                            addMessage(notification.toString()).
+                            addDeviceType(3);
+            PushMsgToSingleDeviceResponse response = pushClient.pushMsgToSingleDevice(request);
+            logger.info("android push, msgId: " + response.getMsgId() + ",sendTime: " + response.getSendTime());
+        } catch (PushClientException e) {
+            if (BaiduPushConstants.ERROROPTTYPE) {
+                throw e;
+            } else {
+                e.printStackTrace();
+            }
+        } catch (PushServerException e) {
+            if (BaiduPushConstants.ERROROPTTYPE) {
+                throw e;
+            } else {
+                logger.info(String.format("requestId: %d, errorCode: %d, errorMessage: %s", e.getRequestId(), e.getErrorCode(), e.getErrorMsg()));
+            }
+        }
+    }
+
+    /**
+     * Android推送多人消息
+     * @param channelIds 频道id，最多10000个
+     * @throws PushClientException
+     * @throws PushServerException
+     */
+    public static void AndroidPushMultipleMsg(String[] channelIds,String title, String content)
+            throws PushClientException, PushServerException{
+        PushKeyPair pair = new PushKeyPair(SystemVar.ANDROID_APIKEY, SystemVar.ANDROID_SECRETKEY);
+        BaiduPushClient pushClient = new BaiduPushClient(pair, BaiduPushConstants.CHANNEL_REST_URL);
+        pushClient.setChannelLogHandler(new YunLogHandler() {
+            @Override
+            public void onHandle(YunLogEvent event) {
+                logger.info(event.getMessage());
+            }
+        });
+
+        try {
+            // 4. specify request arguments
+            //创建Android通知
+            JSONObject notification = new JSONObject();
+            notification.put("title", title);
+            notification.put("description", content);
+            JSONObject jsonAPS = new JSONObject();
+            jsonAPS.put("alert", content);
+            notification.put("aps", jsonAPS);
+
+            PushBatchUniMsgRequest request = new PushBatchUniMsgRequest()
+                    .addChannelIds(channelIds)
+                    .addMsgExpires(new Integer(3600)) //设置消息的有效时间,单位秒,默认3600*5.
+                    .addMessageType(0)                //设置消息类型,0表示透传消息,1表示通知,默认为0.
+                    .addMessage(notification.toString())
+                    .addDeviceType(3)                 // deviceType =>1 for web, 2 for pc,  3:android, 4:ios
+                    .addTopicId("BaiduPush");         // 设置类别主题
+            // 5. http request
+            PushBatchUniMsgResponse response = pushClient.pushBatchUniMsg(request);
+            // Http请求结果解析打印
+            logger.info(String.format("android multi push, msgId: %s, sendTime: %d", response.getMsgId(), response.getSendTime()));
+        } catch (PushClientException e) {
+            if (BaiduPushConstants.ERROROPTTYPE) {
+                throw e;
+            } else {
+                e.printStackTrace();
+            }
+        } catch (PushServerException e) {
+            if (BaiduPushConstants.ERROROPTTYPE) {
+                throw e;
+            } else {
+                logger.info(String.format("requestId: %d, errorCode: %d, errorMessage: %s", e.getRequestId(), e.getErrorCode(), e.getErrorMsg()));
+            }
+        }
+    }
+
+    public static void IOSPushNotificationToSingleDevice(String channelId, String title, String content)
+            throws PushClientException, PushServerException {
+        PushKeyPair pair = new PushKeyPair(SystemVar.IOS_APIKEY, SystemVar.IOS_SECRETKEY);
+        BaiduPushClient pushClient = new BaiduPushClient(pair, BaiduPushConstants.CHANNEL_REST_URL);
+        pushClient.setChannelLogHandler(new YunLogHandler() {
+            @Override
+            public void onHandle(YunLogEvent event) {
+                logger.info(event.getMessage());
+            }
+        });
+        try {
+            JSONObject notification = new JSONObject();
+            notification.put("title", title);
+            notification.put("content", content);
+            JSONObject jsonAPS = new JSONObject();
+            jsonAPS.put("alert", content);
+            notification.put("aps", jsonAPS);
+
+            PushMsgToSingleDeviceRequest request = new PushMsgToSingleDeviceRequest()
+                    .addChannelId(channelId)
+                    .addMsgExpires(new Integer(3600)). // 设置message的有效时间
+                            addMessageType(1).// 1：通知,0:透传消息.默认为0 注：IOS只有通知.
+                            addMessage(notification.toString()).addDeployStatus(2). // IOS,
+                            // DeployStatus
+                            // => 1: Developer
+                            // 2: Production.
+                            addDeviceType(PushEnum.DeviceType.IOS);// deviceType => 3:android, 4:ios
+            PushMsgToSingleDeviceResponse response = pushClient.pushMsgToSingleDevice(request);
+            logger.info("ios push, msgId: " + response.getMsgId() + ",sendTime: " + response.getSendTime());
+        } catch (PushClientException e) {
+            if (BaiduPushConstants.ERROROPTTYPE) {
+                throw e;
+            } else {
+                e.printStackTrace();
+            }
+        } catch (PushServerException e) {
+            if (BaiduPushConstants.ERROROPTTYPE) {
+                throw e;
+            } else {
+                logger.info(String.format(
+                        "requestId: %d, errorCode: %d, errorMessage: %s",
+                        e.getRequestId(), e.getErrorCode(), e.getErrorMsg()));
+            }
+        }
+    }
+
+    public static void queryStatisticMsg() throws PushServerException, PushClientException {
+        String apiKey = "Dee2e38EYKBYGlfDmegLs1XZ";
+        String secretKey = "x1tZXkKwxwosl7019pZGu8CCsNy2kmbG";
+        PushKeyPair pair = new PushKeyPair(apiKey, secretKey);
+
+        // 2. build a BaidupushClient object to access released interfaces
+        BaiduPushClient pushClient = new BaiduPushClient(pair,
+                BaiduPushConstants.CHANNEL_REST_URL);
+
+        // 3. register a YunLogHandler to get detail interacting information
+        // in this request.
+        pushClient.setChannelLogHandler(new YunLogHandler() {
+            @Override
+            public void onHandle(YunLogEvent event) {
+                logger.info(event.getMessage());
+            }
+        });
+
+        try {
+            // 4. specify request arguments
+            QueryStatisticMsgRequest request = new QueryStatisticMsgRequest()
+                    .addQueryType(0).addDeviceType(3);
+            // 5. http request
+            QueryStatisticMsgResponse response = pushClient
+                    .queryStatisticMsg(request);
+            // Http请求返回值解析
+            if (null != response) {
+                StringBuilder strBuilder = new StringBuilder();
+                List<MsgStatInfo> msgStats = response.getMsgStats();
+                for (int i = 0; i < msgStats.size(); i++) {
+                    MsgStatInfo msgStatInfo = msgStats.get(i);
+                    strBuilder.append("totalNum:" + msgStatInfo.getTotalNum()
+                            + "\n" + "rangetype:" + msgStatInfo.getRangeType()
+                            + "\n" + "result:{");
+                    List<KeyValueForMsg> result = msgStatInfo.getResult();
+                    for (int j = 0; j < result.size(); j++) {
+                        KeyValueForMsg keyValue = result.get(j);
+                        if (j != 0) {
+                            strBuilder.append(",");
+                        }
+                        strBuilder.append("" + keyValue.getKey() + ":{ "
+                                + "pushNum=" + keyValue.getValue().getPushNum()
+                                + ",ackNum=" + keyValue.getValue().getAckNum()
+                                + ",delNum=" + keyValue.getValue().getDelNum()
+                                + ",clickNum="
+                                + keyValue.getValue().getClickNum() + "}\n");
+                    }
+                    strBuilder.append("\n}");
+                }
+                logger.info(strBuilder.toString());
+            }
+        } catch (PushClientException e) {
+            if (BaiduPushConstants.ERROROPTTYPE) {
+                throw e;
+            } else {
+                e.printStackTrace();
+            }
+        } catch (PushServerException e) {
+            if (BaiduPushConstants.ERROROPTTYPE) {
+                throw e;
+            } else {
+                logger.info(String.format(
+                        "requestId: %d, errorCode: %d, errorMsg: %s",
+                        e.getRequestId(), e.getErrorCode(), e.getErrorMsg()));
+            }
+        }
+    }
+
+//    public static void main(String[] args) throws PushServerException, PushClientException {
+//        AndroidPushMsgToAll();
+//        AndroidPushMsgToSingleDevice("3670047832795003556","http://www.baidu.com");
+
+
+//        IOSPushNotificationToSingleDevice("4840516189722402212", "test", "content");
+//        logger.info(String.format("已推送%1d个用户，无法接收推送%2d个用户", 0, 2));
+//        logger.info("18612787251".substring(5));
+//        Message message = new Message();
+//        message.setTitle("test");
+//        message.setContent("content");
+//        PushUtil.pushHandle(message);
+
+//        String[] channelIds = {"4336769110249287572"};
+//        PushUtil.pushHandle(channelIds, message);
+//        AndroidPushMsgToSingleDevice("3507806735829164224",message.getTitle(),message.getContent());
+//        queryStatisticMsg();
+//    }
+
+    /**
+     * android 或ios 多人推送
+     * @param list
+     * @param message
+     */
+    public static void pushHandle(List<UserPush> list, Message message) {
+        String title = message.getTitle();
+        String content = message.getContent();
+        try {
+            for (UserPush userPush : list) {
+                if (userPush.getPushable() != null && userPush.getPushable() == 0) {
+                    String channel_id = userPush.getChannel_id();
+                    if (StringUtils.isNotEmpty(channel_id)) {
+                        if (ParameterConstant.REGISTER_SOURCE_ANDROID == userPush.getDevice_type()) {
+                            AndroidPushMsgToSingleDevice(channel_id, title, content);
+                        } else if (ParameterConstant.REGISTER_SOURCE_IOS == userPush.getDevice_type()) {
+                            IOSPushNotificationToSingleDevice(channel_id, title, content);
+                        } else {
+                        	logger.error("推送错误，未知设备类型");
+                        }
+                    }
+                }
+            }
+        } catch (PushClientException | PushServerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * android 多人推送
+     * @param channel_ids
+     * @param message
+     */
+    public static void pushHandle(String[] channel_ids, Message message) {
+        try {
+            PushUtil.AndroidPushMultipleMsg(channel_ids, message.getTitle(), message.getContent());
+        } catch (PushClientException | PushServerException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * android 司机端 广播推送
+     * @param message
+     */
+    public static void pushHandle(Message message) {
+        try {
+            PushUtil.AndroidPushMsgToAll(message.getTitle(), message.getContent());
+        } catch (PushClientException | PushServerException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    
+    public static void main(String[] args) {
+    	try {
+			IOSPushNotificationToSingleDevice("5020681912798676303", "123", "1232");
+		} catch (PushClientException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (PushServerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+}
+

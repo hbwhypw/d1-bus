@@ -1,0 +1,228 @@
+package com.tmtc.controller.appAPI;
+
+import com.tmtc.annotation.SystemControllerLog;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.po.*;
+import com.tmtc.service.LineOrderService;
+import com.tmtc.service.ShopOrderService;
+import com.tmtc.service.UserDetailService;
+import com.tmtc.service.appAPI.ProductAppService;
+import com.tmtc.utils.HeepayShortPay.Common.AES;
+import com.tmtc.utils.HeepayShortPay.Common.DataHelper;
+import com.tmtc.utils.HeepayShortPay.Common.HeePayConst;
+import com.tmtc.utils.HeepayShortPay.Common.HeepPayConfig;
+import com.tmtc.utils.HeepayShortPay.HeepayMain.HeepaySubmitOrder;
+import com.tmtc.utils.HeepayShortPay.HeepayReturn.SubmitOrderReturn;
+import com.tmtc.utils.HeepayShortPay.HeepayReturn.SyncNotifyReturn;
+import com.tmtc.utils.IP;
+import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.URLDecoder;
+import java.text.SimpleDateFormat;
+import java.util.*;
+
+/**
+ * Function:
+ * @auther: hbwhypw
+ * Date: 2015-11-17 9:59
+ */
+@Controller
+@RequestMapping("/App/heepay")
+public class HeepayAppController extends BaseController {
+    private static String SUCCESS = "SUCCESS";
+    private static Logger logger = LoggerFactory.getLogger(HeepayAppController.class);
+
+    @Autowired
+    ShopOrderService shopOrderService;
+    @Autowired
+    LineOrderService lineOrderService;
+    @Autowired
+    ProductAppService productAppService;
+    @Autowired
+    UserDetailService userDetailService;
+
+    /**
+     * 汇付宝订单支付 /App/heepay/submit
+     *
+     * @param order_no   订单号
+     * @param channel    支付类型 heepay 汇付宝支付
+     * @param goods_name 商品名称
+     * @param goods_num  商品数量
+     * @param pay_total  总金额
+     * @throws Exception
+     */
+    @ResponseBody
+    @RequestMapping("/submit")
+    @SystemControllerLog("汇付宝订单支付")
+    public Map<String, Object> submit(HttpServletRequest request, String order_no, String channel, String goods_name,
+                                      String goods_num, String pay_total) throws Exception {
+        if (!channel.equals("heepay")) {
+            return getMap(request, "支付方式错误", STATUS_ERROR);
+        }
+        String user_id = getUserId(request);
+        UserDetail userDetail = userDetailService.selectByPrimaryKey(user_id);
+        if (userDetail == null) {
+            return getMap(request, "用户信息错误", STATUS_ERROR);
+        }
+        String agent_id = HeepPayConfig.Const_agent_id;// 汇付宝分配给商户的ID
+        String user_identity = user_id;
+        String mobile = userDetail.getUsername();//银行卡注册手机
+        String hy_auth_uid = "";//如果商户保存用户的授权码 每次将授权码赋值，通提交订单后返回的授权码对比 一致 代表已经授权，直接调用确认支付
+        if (!StringUtils.isEmpty(userDetail.getInvitation_code())) {
+            hy_auth_uid = userDetail.getInvitation_code();
+        }
+        String custom_page = "0";//在汇付宝进行支付 1 为自定义支付 该功能只提供给开通该协议的商户
+        String display = "0";
+        String return_url = "http://app.d1-bus.com/App/heepay/return";
+        String notify_url = "http://app.d1-bus.com/App/heepay/notify";
+        String agent_bill_id = order_no; //商户不重复订单号
+        String agent_bill_time = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());
+        String pay_amt = pay_total;
+//        String goods_name = "商品名称";
+//        String goods_num = "1";//商品数量
+        String user_ip = IP.getIP(request);
+        String ext_param1 = "";
+        String ext_param2 = "";
+        String auth_card_type = "-1"; //0储蓄卡 1信用卡 -1未知
+        String device_type = "0";
+        String device_id = "";
+        String goods_note = "";
+        //如果商户支付需要自定义并汇付宝授权过 调用下单的接口
+        SubmitOrderReturn submitOrderReturn = HeepaySubmitOrder.SubmitOrder(
+                agent_id, user_identity, hy_auth_uid, mobile,
+                device_type, device_id, custom_page, display, return_url, notify_url,
+                agent_bill_id, agent_bill_time, pay_amt, goods_name, goods_note,
+                goods_num, user_ip, ext_param1, ext_param2, auth_card_type);
+        if (!submitOrderReturn.is_Success()) {
+            //错误信息
+            String errorMessage = submitOrderReturn.get_error_message();
+            logger.error(errorMessage);
+            return getMap(request, errorMessage, STATUS_ERROR);
+        }
+        String redirect_url = submitOrderReturn.get_redirect_url();
+        logger.debug(redirect_url);
+//        System.out.println(redirect_url);
+        UserDetail user = new UserDetail();
+        user.setId(user_id);
+        user.setInvitation_code(submitOrderReturn.get_hy_auth_uid());
+        if (userDetailService.update(user) > 0) {
+            return getMap(request, "成功", redirect_url);
+        } else {
+            return getMap(request, "汇付宝授权码更新失败", STATUS_ERROR);
+        }
+    }
+
+    /**
+     * 异步通知
+     */
+    @ResponseBody
+    @RequestMapping("/notify")
+    public String syncNotify(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        logger.info("################异步通知##################");
+        if (SUCCESS.equals(handler(request).getStatus())) {
+            return "ok";
+        } else {
+            return "error";
+        }
+    }
+
+    /**
+     * 同步回调
+     */
+    @ResponseBody
+    @RequestMapping("/return")
+    public void asyncReturn(HttpServletRequest request, HttpServletResponse response) throws IOException {
+        logger.info("################同步回调##################");
+        response.setContentType("text/html;charset=UTF-8");
+        SyncNotifyReturn syncNotifyReturn = handler(request);
+        if (syncNotifyReturn != null && SUCCESS.equals(syncNotifyReturn.getStatus())) {
+            response.sendRedirect("/app/ok.html?orderNo=" + syncNotifyReturn.getAgent_bill_id() +
+                    "&amount=" + syncNotifyReturn.getReal_amt());
+        } else {
+            response.sendRedirect("/app/error.html?orderNo=" + syncNotifyReturn.getAgent_bill_id());
+        }
+    }
+
+    private SyncNotifyReturn handler(HttpServletRequest request) {
+        logger.info("####################             回调测试开始           #################################");
+        Map<String, String> parameterMap = DataHelper.URLRequestParams(request.getQueryString());
+//        Set<Map.Entry<String,String>> entry = parameterMap.entrySet();
+//        for (Iterator<Map.Entry<String, String>> ite = entry.iterator(); ite.hasNext(); ) {
+//            Map.Entry<String, String> kv = ite.next();
+//            String key = kv.getKey();
+//            String value = kv.getValue();
+//            System.out.println("key: "+ key + "value: " + value);
+//        }
+        SyncNotifyReturn syncNotifyReturn = new SyncNotifyReturn();
+        try {
+            String encrypt_data = URLDecoder.decode(parameterMap.get("encrypt_data"), "UTF-8");
+//            System.out.println(encrypt_data);
+            String payheepReturnData = AES.Decrypt(encrypt_data, HeepPayConfig.Const_data_key);
+            Map<String, String> map = DataHelper.URLRequestParams(payheepReturnData);
+            String status = map.get("status");
+            String agent_bill_id = map.get("agent_bill_id");//商户支付订单号码
+
+            syncNotifyReturn.setAgent_bill_id(map.get("agent_bill_id"));
+            syncNotifyReturn.setStatus(map.get("status"));
+            syncNotifyReturn.setHy_deal_note(map.get("hy_deal_note"));
+            syncNotifyReturn.setReal_amt(Double.valueOf(map.get("real_amt")));
+
+            if (HeePayConst.PayStatus.Const_status_success.equals(status)) {
+//                判断订单类型
+                String type = agent_bill_id.substring(0, 2).toUpperCase();
+                if (type.equals("ZX")){
+                    ShopOrderRepository shopOrderRepository1 = new ShopOrderRepository();
+                    ShopOrderRepository.Criteria createCriteria = shopOrderRepository1.createCriteria();
+                    createCriteria.andOrder_noEqualTo(agent_bill_id);
+                    List<ShopOrder> orderList = shopOrderService.select(shopOrderRepository1);
+
+                    if (0 == orderList.size()) {
+                        logger.error("################ error 在线支付错误，订单不存在 agent_bill_id: " + agent_bill_id + "######################");
+                        return null;
+                    }
+                    ShopOrder shopOrder2 = orderList.get(0);
+                    shopOrder2.setPay_type(ParameterConstant.PAY_TYPE_BACK);
+                    if (!shopOrderService.updateOrderPay(shopOrder2)) {
+                        logger.error("################ error 在线支付失败 agent_bill_id: " + agent_bill_id + "######################");
+                        return null;
+                    }
+                } else if (type.equals("XL")){
+                    LineOrderRepository lineOrderRepository = new LineOrderRepository();
+                    lineOrderRepository.or().andOrder_noEqualTo(agent_bill_id);
+                    List<LineOrder> lineOrderList = lineOrderService.select(lineOrderRepository);
+
+                    if (0 == lineOrderList.size()) {
+                        logger.error("################ error 线路支付错误，订单不存在 agent_bill_id: " + agent_bill_id + "######################");
+                        return null;
+                    }
+                    LineOrder lineOrder = lineOrderList.get(0);
+                    lineOrder.setOrder_status(ParameterConstant.ORDER_STATUS_NOT);
+                    int i = lineOrderService.update(lineOrder);
+                    if (0 >= i) {
+                        logger.error("################ error 在线支付失败，订单状态更新错误 agent_bill_id: " + agent_bill_id + "######################");
+                        return null;
+                    }
+                }
+                logger.info("################ notify  ok agent_bill_id: " + agent_bill_id + "######################");
+            } else if (HeePayConst.PayStatus.Const_status_wait.equals(status)){
+                logger.info("################ notify  等待支付 agent_bill_id: " + agent_bill_id + "######################");
+            } else {
+                logger.info("################ notify  支付关闭 agent_bill_id: " + agent_bill_id + "######################");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+        return syncNotifyReturn;
+    }
+
+}

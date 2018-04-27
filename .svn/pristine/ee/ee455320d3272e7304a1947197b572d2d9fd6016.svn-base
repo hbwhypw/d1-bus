@@ -1,0 +1,53 @@
+package com.tmtc.filter;
+
+import java.util.TreeMap;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+import com.tmtc.utils.VerificationUtil;
+import com.tmtc.utils.secret.SRSACoder;
+import com.tmtc.vo.ReCharge;
+
+public class RSAAppFilter extends HandlerInterceptorAdapter {
+
+	@Override
+	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+			throws Exception {
+
+		String string = new String(request.getParameter("key").getBytes(), "utf-8");
+		
+		if (0 == VerificationUtil.length(string)) {
+			return getFalse(request, response);
+		}
+		String string2 = SRSACoder.decryptByPrivateKey(string);
+		if (0 == VerificationUtil.length(string2)) {
+			return getFalse(request, response);
+		}
+		ReCharge reCharge = null;
+		try {
+			reCharge = new Gson().fromJson(string, new TypeToken<ReCharge>() {}.getType());
+		} catch (Exception e) {
+			return getFalse(request, response);
+		}
+		if (null == reCharge) {
+			return getFalse(request, response);
+		}
+
+		TreeMap<String, Object> _params = new TreeMap<String, Object>();
+		_params.put("card_no", reCharge.getCard_no());
+		_params.put("money", reCharge.getMoney());
+		_params.put("timeKey", reCharge.getTimeKey());
+
+		return false;
+	}
+
+	private boolean getFalse(HttpServletRequest request, HttpServletResponse response) throws Exception {
+		request.getRequestDispatcher("/App/error/enc").forward(request, response);
+		return false;
+	}
+}

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>adPic</title>
+</head>
+<body>
+
+<script charset="utf-8" src="/kindeditor/kindeditor.js"></script>
+	<script charset="utf-8" src="/kindeditor/lang/zh_CN.js"></script>
+	<script charset="utf-8" src="/kindeditor/plugins/code/prettify.js"></script>
+	<script src="/dist/lib/jquery/jquery.cookie.js"></script>
+
+<script type="text/javascript" src="/dist/js/subPages/adPic.js"></script>
+
+
+<table id="adPicDg" class="easyui-datagrid" data-options="url:'./../adPic/query',rownumbers:true,toolbar:'#adPicDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: true,selectOnCheck: false,rowStyler: adPic.rowStyler">
+    <thead>
+    <tr>
+        <th data-options="field:'id',width:80">ID</th>
+        <th data-options="field:'city_name',width:80">城市</th>
+        <th data-options="field:'company_name',width:80">所属公司</th>
+        <th data-options="field:'title',width:80">广告标题</th>
+        <th data-options="field:'type_name',width:80">广告类型</th>
+        <th data-options="field:'pic',width:80">广告图片</th>
+        <th data-options="field:'url',width:80">广告url</th>
+        <th data-options="field:'end_time',width:80">到期时间</th>
+        <th data-options="field:'sort',width:80">排序</th>
+        <th data-options="field:'create_time',width:80">创建时间</th>
+        <th data-options="field:'is_check',width:80,formatter: adPic.is_checkFormatter">是否有效</th>
+    </tr>
+    </thead>
+</table>
+<div id="adPicDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+                &nbsp;&nbsp;广告标题：&nbsp;&nbsp;
+                <input id="titleParam" name="title" class="easyui-validatebox" style="width: 150px;">
+                &nbsp;&nbsp;所属公司：&nbsp;&nbsp;
+	            <input id="company_idParam" class="easyui-combobox" name="company_id" data-options="
+									valueField:'id',textField:'name',url:'./../company/query',
+									loader: common.comboBoxLoaderPage,
+									onBeforeLoad: function(param){
+										param.page = 1;param.rows = 100; 
+									} "/>
+                &nbsp;&nbsp;是否有效：&nbsp;&nbsp;
+                <select id="is_checkParam" name="is_check" style="width: 150px;">
+                    <option value="">全部</option>
+                    <option value="1">是</option>
+                    <option value="0">否</option>
+                </select>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查 询</a>
+            </td>
+            <td align="right" width="450px">
+            	<a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查看图片详情</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-add" plain="true">添加</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">修改</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">删除</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-edit" plain="true">恢复使用</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-remove" plain="true">永久删除</a>
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+<div id="adPicDlg" class="easyui-dialog" style="width: 550px; height: 400px;padding:20px"
+     data-options="resizable:true,modal:true" closed="true" buttons="#adPicDlgBtn">
+    <form id="adPicFm" class="fm" method="post" novalidate enctype="multipart/form-data">
+        <div class="fitem">
+            <label> 广告标题： </label>
+            <input id="id" name="id" type="hidden">
+            <input id="title" name="title" class="easyui-validatebox" required="true"
+            	data-options="validType: ['maxLength[18]','specialChar']">
+        </div>
+        <div class="fitem">
+            <label> 广告类型： </label>
+            <input id="type" class="easyui-combobox" name="type" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=19',
+								loader: common.comboBoxLoader,
+								onBeforeLoad: function(param){
+									param.page = 1;param.rows = 100; 
+								},
+								onChange: adPic.typeOnChange " required="true"/>
+        </div>
+        <div class="fitem">
+            <label> 城市： </label>
+            <input id="city_id" class="easyui-combobox" name="city_id" data-options="
+								valueField:'code',textField:'name',url:'./../dictionary/selectByCode?code=10',
+								loader: common.comboBoxLoader,
+								onBeforeLoad: function(param){
+									param.page = 1;param.rows = 100; 
+								} " required="true"/>
+        </div>
+        <div class="fitem">
+            <label> 所属公司： </label>
+            <input id="company_id" class="easyui-combobox" name="company_id" data-options="
+								valueField:'id',textField:'name',url:'./../company/query',
+								loader: common.comboBoxLoaderPage,
+								onBeforeLoad: function(param){
+									param.page = 1;param.rows = 100; 
+								} "/>
+        </div>
+        <div class="fitem">
+            <label> 广告内容： </label>
+            <input id="content" name="content" class="easyui-validatebox">
+        </div>
+        <div class="fitem">
+            <label> 广告图片： </label>
+            <input id="pic" name="picFile" type="file" readonly="readonly">
+        </div>
+        <div class="fitem">
+            <label> 广告url： </label>
+            <input id="url" name="url" class="easyui-validatebox">
+        </div>
+        <div class="fitem">
+            <label> 到期时间： </label>
+            <input id="end_time" name="end_time" class="Wdate" type="text" style="width: 172px" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})">
+        </div>
+        <div class="fitem">
+            <label> 排序： </label>
+            <input id="sort" name="sort" class="easyui-validatebox" required="true"
+            	data-options="validType: ['num']">
+        </div>
+    </form>
+    <div id="adPicDlgBtn">
+        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">确定</a>
+        <a href="#" class="easyui-linkbutton" iconCls="icon-cancel">取消</a>
+    </div>
+    <div id="adPicImg" class="easyui-dialog" style="width:400px;height:450px;padding:20px"
+   			data-options="resizable:true,modal:true,closable: false" closed="true" buttons="#adPicImgBtn">
+    	<div id="img"></div>
+    	<div id="adPicImgBtn">
+	        <a href="#" class="easyui-linkbutton" iconCls="icon-ok">关闭</a>
+    	</div>
+    </div>
+</div>
+<div id="contentDiv" class="easyui-dialog" data-options="resizable:true,modal:true" style="width: 850px;height: 600px" closed="true" buttons="#contentBtn">
+		<iframe id="contents" name="contents" src="../../../kindeditor/jsp/activity.jsp" width="830px" height="510px"></iframe>
+	<div id="contentBtn">
+	     <a href="#" class="easyui-linkbutton" iconCls="icon-ok">关闭</a>
+	</div>
+</div>
+</body>
+</html>

@@ -1,0 +1,181 @@
+package com.tmtc.controller;
+
+import java.text.ParseException;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.tmtc.annotation.SystemControllerLog;
+import com.tmtc.constant.MessageVar;
+import com.tmtc.constant.ParameterConstant;
+import com.tmtc.frame.JsonResult;
+import com.tmtc.frame.PageResult;
+import com.tmtc.po.ExpOrder;
+import com.tmtc.service.ExpOrderService;
+import com.tmtc.vo.CompanyProVo;
+
+@Controller
+@RequestMapping("/expOrder")
+public class ExpOrderController {
+	
+	@Autowired
+	ExpOrderService expOrderService;
+	/**
+	 * 修改商城订单
+	 * @param request
+	 * @param response
+	 * @param id
+	 * @param order_status
+	 * @param consignee
+	 * @param area
+	 * @param address
+	 * @param mobile
+	 * @return
+	 */
+	@RequestMapping("/update")
+	@ResponseBody
+    @SystemControllerLog("积分订单-修改")
+	public JsonResult update(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam String id,
+			@RequestParam(required = false) Integer order_status,
+			@RequestParam(required = false) String consignee,
+			@RequestParam(required = false) String area,
+			@RequestParam(required = false) String address,
+			@RequestParam(required = false) String mobile){
+		int a = expOrderService.update(id, order_status, consignee, area, address, mobile);
+		if(0 == a){
+			return new JsonResult(0,MessageVar.UPDATE_ERROR,0);
+		}
+		return new JsonResult(1,MessageVar.UPDATE_SUCCESS,1);
+	}
+	
+	/**
+	 * 删除订单
+	 * @param request
+	 * @param response
+	 * @param ids
+	 * @return
+	 */
+	@RequestMapping("/delete")
+	@ResponseBody
+    @SystemControllerLog("积分订单-删除")
+	public JsonResult delete(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam String ids){
+		String[] idArr = ids.split(",");
+		for(String id : idArr){
+			ExpOrder expOrder = new ExpOrder();
+			expOrder.setId(id);
+			expOrder.setIs_check(ParameterConstant.IS_NOT_CHECK);
+			int a = expOrderService.update(expOrder);
+			if(0 == a){
+				return new JsonResult(0, MessageVar.DELETE_ERROR, 0);
+			}
+		}
+		return new JsonResult(1, MessageVar.DELETE_SUCCESS, 1);
+	}
+	
+	/**
+	 * 永久删除
+	 * @param request
+	 * @param response
+	 * @param ids
+	 * @return
+	 */
+	@RequestMapping("/forEver")
+	@ResponseBody
+    @SystemControllerLog("积分订单-永久删除")
+	public JsonResult forEver(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam String ids){
+		String[] idArr = ids.split(",");
+		for(String id : idArr){
+			if(0 == expOrderService.delete(id)){
+				return new JsonResult(0, MessageVar.DELETE_ERROR, 0);
+			}
+		}
+		return new JsonResult(1, MessageVar.DELETE_SUCCESS, 1);
+	}
+	
+	/**
+	 * 恢复状态
+	 * @param request
+	 * @param response
+	 * @param ids
+	 * @return
+	 */
+	@RequestMapping("/recover")
+	@ResponseBody
+    @SystemControllerLog("积分订单-恢复")
+	public JsonResult recover(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam String ids){
+		String[] idArr = ids.split(",");
+		for(String id : idArr){
+			ExpOrder expOrder = new ExpOrder();
+			expOrder.setId(id);
+			expOrder.setIs_check(ParameterConstant.IS_CHECK);
+			int a = expOrderService.update(expOrder);
+			if(0 == a){
+				return new JsonResult(0, MessageVar.ISCHECK_ERROR, 0);
+			}
+		}
+		return new JsonResult(1, MessageVar.ISCHECK_SUCCESS, 1);
+	}
+	
+	/**
+	 * 查询所有商城订单
+	 * @param request
+	 * @param response
+	 * @param page
+	 * @param rows
+	 * @param user_name
+	 * @param order_no
+	 * @param consignee
+	 * @param mobile
+	 * @param pro_name
+	 * @param order_status
+	 * @param pay_type
+	 * @param start
+	 * @param end
+	 * @return
+	 * @throws ParseException
+	 */
+	@RequestMapping("/query")
+	@ResponseBody
+    @SystemControllerLog("积分订单-查询")
+	public PageResult query(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam(required = true) Integer page,
+			@RequestParam(required = true) Integer rows,
+			@RequestParam(required = false) String user_name,
+			@RequestParam(required = false) String order_no,
+			@RequestParam(required = false) String consignee,
+			@RequestParam(required = false) String mobile,
+			@RequestParam(required = false) Integer order_status,
+			@RequestParam(required = false) String start,
+			@RequestParam(required = false) String end) throws ParseException{
+		PageResult pageResult = expOrderService.select(page, rows, user_name, order_no, consignee, mobile,order_status,start,end);
+		return pageResult;
+	}
+	
+	@RequestMapping("/selectDetail")
+	@ResponseBody
+    @SystemControllerLog("积分订单-订单详情")
+	public JsonResult selectDetail(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam(required = true) String id){
+		CompanyProVo companyProVo = expOrderService.selectDetail(id);
+		return new JsonResult(1, "", companyProVo);
+	}
+	/*@RequestMapping("/selectSubById")
+	@ResponseBody
+	public PageResult query(HttpServletRequest request,HttpServletResponse response,
+			@RequestParam(required = true) Integer page,
+			@RequestParam(required = true) Integer rows,
+			@RequestParam(required = true) String id){
+		PageResult pageResult = expOrderService.selectSubById(page, rows, id);
+		return pageResult;
+	}*/
+}

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=9"/>
+    <title>上车记录</title>
+    
+</head>
+<body>
+<script type="text/javascript" src="/dist/js/subPages/upCar.js"></script>
+<table id="UpCarDg" class="easyui-datagrid" data-options="url:'./../upCar/query',rownumbers:true,toolbar:'#UpCarDgTbar',
+		pageSize:20,pagination:true,striped:true,fit:true,fitColumns: true,singleSelect: false,selectOnCheck: false">
+    <thead>
+    <tr>
+        <th data-options="field:'username',width:80">手机号</th>
+        <th data-options="field:'real_name',width:80">真实姓名</th>
+        <th data-options="field:'name',width:80">公司名</th>
+        <th data-options="field:'card_num',width:80">卡号</th>
+        <th data-options="field:'station_name',width:80">站点名</th>
+        <th data-options="field:'create_time',width:80">上车时间</th>
+    </tr>
+    </thead>
+</table>
+<div id="UpCarDgTbar">
+    <table width="100%">
+        <tr>
+            <td align="left">
+                &nbsp;&nbsp;手机号：&nbsp;&nbsp;
+                <input id="usernameParam" name="username" class="easyui-validatebox" >
+                &nbsp;&nbsp;真实姓名：&nbsp;&nbsp;
+                <input id="real_nameParam" name="real_name" class="easyui-validatebox" >
+                &nbsp;&nbsp;公司名：&nbsp;&nbsp;
+	            <input id="nameParam" name="name" class="easyui-validatebox">
+               	&nbsp;&nbsp;站点名：&nbsp;&nbsp;
+               	<input id="station_nameParam" name="station_name" class="easyui-validatebox">
+            </td>
+            <td align="right" width="250px">
+            	<!-- <a id="export" class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-excel" plain="true">导 出</a> -->
+            </td>
+            <td align="right" width="10px">&nbsp;</td>
+        </tr>
+        <tr>
+        	<td align="left">
+        		&nbsp;&nbsp;起始时间：&nbsp;&nbsp;
+               	<input id="begin_timeParam" name="begin_time" class="Wdate" type="text"  onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"/>
+               	&nbsp;&nbsp;终止时间：&nbsp;&nbsp;
+               	<input id="end_timeParam" name="end_time" class="Wdate" type="text" onFocus="WdatePicker({dateFmt:'yyyy-MM-dd HH:mm:ss'})"/>
+                <a class="easyui-linkbutton" href="javascript:void(0);" iconCls="icon-search" plain="true">查 询</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" plain="true" name="today">今天</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" plain="true" name="yesterday">昨天</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" plain="true" name="thisWeek">本周</a>
+                <a class="easyui-linkbutton" href="javascript:void(0);" plain="true" name="thisMonth">本月</a>
+        	</td>
+        	<td align="right" width="10px">&nbsp;</td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

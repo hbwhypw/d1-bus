@@ -1,0 +1,529 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.tmtc.dao.LineDao" >
+  <resultMap id="BaseResultMap" type="com.tmtc.po.Line" >
+    <id column="id" property="id" jdbcType="BIGINT" />
+    <result column="line_name" property="line_name" jdbcType="VARCHAR" />
+    <result column="start_id" property="start_id" jdbcType="BIGINT" />
+    <result column="end_id" property="end_id" jdbcType="BIGINT" />
+    <result column="price" property="price" jdbcType="INTEGER" />
+    <result column="km" property="km" jdbcType="DOUBLE" />
+    <result column="on_time_rate" property="on_time_rate" jdbcType="DOUBLE" />
+    <result column="city_id" property="city_id" jdbcType="INTEGER" />
+    <result column="company_id" property="company_id" jdbcType="BIGINT" />
+    <result column="line_category" property="line_category" jdbcType="INTEGER" />
+    <result column="line_type" property="line_type" jdbcType="INTEGER" />
+    <result column="user_type" property="user_type" jdbcType="INTEGER" />
+    <result column="start_time" property="start_time" jdbcType="TIMESTAMP" />
+    <result column="end_time" property="end_time" jdbcType="TIMESTAMP" />
+    <result column="sort" property="sort" jdbcType="INTEGER" />
+    <result column="remark" property="remark" jdbcType="VARCHAR" />
+    <result column="create_time" property="create_time" jdbcType="TIMESTAMP" />
+    <result column="is_check" property="is_check" jdbcType="INTEGER" />
+  </resultMap>
+  <resultMap id="ResultMapWithBLOBs" type="com.tmtc.po.Line" extends="BaseResultMap" >
+    <result column="line_path" property="line_path" jdbcType="LONGVARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, line_name, start_id, end_id, price, km, on_time_rate, city_id, company_id, line_category, 
+    line_type, user_type, start_time, end_time, sort, remark, create_time, is_check
+  </sql>
+  <sql id="Blob_Column_List" >
+    line_path
+  </sql>
+  <select id="selectByExampleWithBLOBs" resultMap="ResultMapWithBLOBs" parameterType="com.tmtc.po.LineRepository" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_line
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <if test="rowIndex!=null and pageSize!=null">
+      limit ${rowIndex},${pageSize}
+    </if>
+  </select>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="com.tmtc.po.LineRepository" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_line
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+    <if test="rowIndex!=null and pageSize!=null">
+      limit ${rowIndex},${pageSize}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="ResultMapWithBLOBs" parameterType="java.lang.Long" >
+    select 
+    <include refid="Base_Column_List" />
+    ,
+    <include refid="Blob_Column_List" />
+    from t_line
+    where id = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long" >
+    delete from t_line
+    where id = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.tmtc.po.LineRepository" >
+    delete from t_line
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.tmtc.po.Line" >
+    insert into t_line (id, line_name, start_id, 
+      end_id, price, km, on_time_rate, 
+      city_id, company_id, line_category, 
+      line_type, user_type, start_time, 
+      end_time, sort, remark, 
+      create_time, is_check, line_path
+      )
+    values (#{id,jdbcType=BIGINT}, #{line_name,jdbcType=VARCHAR}, #{start_id,jdbcType=BIGINT}, 
+      #{end_id,jdbcType=BIGINT}, #{price,jdbcType=INTEGER}, #{km,jdbcType=DOUBLE}, #{on_time_rate,jdbcType=DOUBLE}, 
+      #{city_id,jdbcType=INTEGER}, #{company_id,jdbcType=BIGINT}, #{line_category,jdbcType=INTEGER}, 
+      #{line_type,jdbcType=INTEGER}, #{user_type,jdbcType=INTEGER}, #{start_time,jdbcType=TIMESTAMP}, 
+      #{end_time,jdbcType=TIMESTAMP}, #{sort,jdbcType=INTEGER}, #{remark,jdbcType=VARCHAR}, 
+      #{create_time,jdbcType=TIMESTAMP}, #{is_check,jdbcType=INTEGER}, #{line_path,jdbcType=LONGVARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.tmtc.po.Line" >
+    insert into t_line
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="line_name != null" >
+        line_name,
+      </if>
+      <if test="start_id != null" >
+        start_id,
+      </if>
+      <if test="end_id != null" >
+        end_id,
+      </if>
+      <if test="price != null" >
+        price,
+      </if>
+      <if test="km != null" >
+        km,
+      </if>
+      <if test="on_time_rate != null" >
+        on_time_rate,
+      </if>
+      <if test="city_id != null" >
+        city_id,
+      </if>
+      <if test="company_id != null" >
+        company_id,
+      </if>
+      <if test="line_category != null" >
+        line_category,
+      </if>
+      <if test="line_type != null" >
+        line_type,
+      </if>
+      <if test="user_type != null" >
+        user_type,
+      </if>
+      <if test="start_time != null" >
+        start_time,
+      </if>
+      <if test="end_time != null" >
+        end_time,
+      </if>
+      <if test="sort != null" >
+        sort,
+      </if>
+      <if test="remark != null" >
+        remark,
+      </if>
+      <if test="create_time != null" >
+        create_time,
+      </if>
+      <if test="is_check != null" >
+        is_check,
+      </if>
+      <if test="line_path != null" >
+        line_path,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="line_name != null" >
+        #{line_name,jdbcType=VARCHAR},
+      </if>
+      <if test="start_id != null" >
+        #{start_id,jdbcType=BIGINT},
+      </if>
+      <if test="end_id != null" >
+        #{end_id,jdbcType=BIGINT},
+      </if>
+      <if test="price != null" >
+        #{price,jdbcType=INTEGER},
+      </if>
+      <if test="km != null" >
+        #{km,jdbcType=DOUBLE},
+      </if>
+      <if test="on_time_rate != null" >
+        #{on_time_rate,jdbcType=DOUBLE},
+      </if>
+      <if test="city_id != null" >
+        #{city_id,jdbcType=INTEGER},
+      </if>
+      <if test="company_id != null" >
+        #{company_id,jdbcType=BIGINT},
+      </if>
+      <if test="line_category != null" >
+        #{line_category,jdbcType=INTEGER},
+      </if>
+      <if test="line_type != null" >
+        #{line_type,jdbcType=INTEGER},
+      </if>
+      <if test="user_type != null" >
+        #{user_type,jdbcType=INTEGER},
+      </if>
+      <if test="start_time != null" >
+        #{start_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="end_time != null" >
+        #{end_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sort != null" >
+        #{sort,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="is_check != null" >
+        #{is_check,jdbcType=INTEGER},
+      </if>
+      <if test="line_path != null" >
+        #{line_path,jdbcType=LONGVARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.tmtc.po.LineRepository" resultType="java.lang.Integer" >
+    select count(*) from t_line
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update t_line
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.line_name != null" >
+        line_name = #{record.line_name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.start_id != null" >
+        start_id = #{record.start_id,jdbcType=BIGINT},
+      </if>
+      <if test="record.end_id != null" >
+        end_id = #{record.end_id,jdbcType=BIGINT},
+      </if>
+      <if test="record.price != null" >
+        price = #{record.price,jdbcType=INTEGER},
+      </if>
+      <if test="record.km != null" >
+        km = #{record.km,jdbcType=DOUBLE},
+      </if>
+      <if test="record.on_time_rate != null" >
+        on_time_rate = #{record.on_time_rate,jdbcType=DOUBLE},
+      </if>
+      <if test="record.city_id != null" >
+        city_id = #{record.city_id,jdbcType=INTEGER},
+      </if>
+      <if test="record.company_id != null" >
+        company_id = #{record.company_id,jdbcType=BIGINT},
+      </if>
+      <if test="record.line_category != null" >
+        line_category = #{record.line_category,jdbcType=INTEGER},
+      </if>
+      <if test="record.line_type != null" >
+        line_type = #{record.line_type,jdbcType=INTEGER},
+      </if>
+      <if test="record.user_type != null" >
+        user_type = #{record.user_type,jdbcType=INTEGER},
+      </if>
+      <if test="record.start_time != null" >
+        start_time = #{record.start_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.end_time != null" >
+        end_time = #{record.end_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.sort != null" >
+        sort = #{record.sort,jdbcType=INTEGER},
+      </if>
+      <if test="record.remark != null" >
+        remark = #{record.remark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.create_time != null" >
+        create_time = #{record.create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.is_check != null" >
+        is_check = #{record.is_check,jdbcType=INTEGER},
+      </if>
+      <if test="record.line_path != null" >
+        line_path = #{record.line_path,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExampleWithBLOBs" parameterType="map" >
+    update t_line
+    set id = #{record.id,jdbcType=BIGINT},
+      line_name = #{record.line_name,jdbcType=VARCHAR},
+      start_id = #{record.start_id,jdbcType=BIGINT},
+      end_id = #{record.end_id,jdbcType=BIGINT},
+      price = #{record.price,jdbcType=INTEGER},
+      km = #{record.km,jdbcType=DOUBLE},
+      on_time_rate = #{record.on_time_rate,jdbcType=DOUBLE},
+      city_id = #{record.city_id,jdbcType=INTEGER},
+      company_id = #{record.company_id,jdbcType=BIGINT},
+      line_category = #{record.line_category,jdbcType=INTEGER},
+      line_type = #{record.line_type,jdbcType=INTEGER},
+      user_type = #{record.user_type,jdbcType=INTEGER},
+      start_time = #{record.start_time,jdbcType=TIMESTAMP},
+      end_time = #{record.end_time,jdbcType=TIMESTAMP},
+      sort = #{record.sort,jdbcType=INTEGER},
+      remark = #{record.remark,jdbcType=VARCHAR},
+      create_time = #{record.create_time,jdbcType=TIMESTAMP},
+      is_check = #{record.is_check,jdbcType=INTEGER},
+      line_path = #{record.line_path,jdbcType=LONGVARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update t_line
+    set id = #{record.id,jdbcType=BIGINT},
+      line_name = #{record.line_name,jdbcType=VARCHAR},
+      start_id = #{record.start_id,jdbcType=BIGINT},
+      end_id = #{record.end_id,jdbcType=BIGINT},
+      price = #{record.price,jdbcType=INTEGER},
+      km = #{record.km,jdbcType=DOUBLE},
+      on_time_rate = #{record.on_time_rate,jdbcType=DOUBLE},
+      city_id = #{record.city_id,jdbcType=INTEGER},
+      company_id = #{record.company_id,jdbcType=BIGINT},
+      line_category = #{record.line_category,jdbcType=INTEGER},
+      line_type = #{record.line_type,jdbcType=INTEGER},
+      user_type = #{record.user_type,jdbcType=INTEGER},
+      start_time = #{record.start_time,jdbcType=TIMESTAMP},
+      end_time = #{record.end_time,jdbcType=TIMESTAMP},
+      sort = #{record.sort,jdbcType=INTEGER},
+      remark = #{record.remark,jdbcType=VARCHAR},
+      create_time = #{record.create_time,jdbcType=TIMESTAMP},
+      is_check = #{record.is_check,jdbcType=INTEGER}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.tmtc.po.Line" >
+    update t_line
+    <set >
+      <if test="line_name != null" >
+        line_name = #{line_name,jdbcType=VARCHAR},
+      </if>
+      <if test="start_id != null" >
+        start_id = #{start_id,jdbcType=BIGINT},
+      </if>
+      <if test="end_id != null" >
+        end_id = #{end_id,jdbcType=BIGINT},
+      </if>
+      <if test="price != null" >
+        price = #{price,jdbcType=INTEGER},
+      </if>
+      <if test="km != null" >
+        km = #{km,jdbcType=DOUBLE},
+      </if>
+      <if test="on_time_rate != null" >
+        on_time_rate = #{on_time_rate,jdbcType=DOUBLE},
+      </if>
+      <if test="city_id != null" >
+        city_id = #{city_id,jdbcType=INTEGER},
+      </if>
+      <if test="company_id != null" >
+        company_id = #{company_id,jdbcType=BIGINT},
+      </if>
+      <if test="line_category != null" >
+        line_category = #{line_category,jdbcType=INTEGER},
+      </if>
+      <if test="line_type != null" >
+        line_type = #{line_type,jdbcType=INTEGER},
+      </if>
+      <if test="user_type != null" >
+        user_type = #{user_type,jdbcType=INTEGER},
+      </if>
+      <if test="start_time != null" >
+        start_time = #{start_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="end_time != null" >
+        end_time = #{end_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="sort != null" >
+        sort = #{sort,jdbcType=INTEGER},
+      </if>
+      <if test="remark != null" >
+        remark = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="create_time != null" >
+        create_time = #{create_time,jdbcType=TIMESTAMP},
+      </if>
+      <if test="is_check != null" >
+        is_check = #{is_check,jdbcType=INTEGER},
+      </if>
+      <if test="line_path != null" >
+        line_path = #{line_path,jdbcType=LONGVARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKeyWithBLOBs" parameterType="com.tmtc.po.Line" >
+    update t_line
+    set line_name = #{line_name,jdbcType=VARCHAR},
+      start_id = #{start_id,jdbcType=BIGINT},
+      end_id = #{end_id,jdbcType=BIGINT},
+      price = #{price,jdbcType=INTEGER},
+      km = #{km,jdbcType=DOUBLE},
+      on_time_rate = #{on_time_rate,jdbcType=DOUBLE},
+      city_id = #{city_id,jdbcType=INTEGER},
+      company_id = #{company_id,jdbcType=BIGINT},
+      line_category = #{line_category,jdbcType=INTEGER},
+      line_type = #{line_type,jdbcType=INTEGER},
+      user_type = #{user_type,jdbcType=INTEGER},
+      start_time = #{start_time,jdbcType=TIMESTAMP},
+      end_time = #{end_time,jdbcType=TIMESTAMP},
+      sort = #{sort,jdbcType=INTEGER},
+      remark = #{remark,jdbcType=VARCHAR},
+      create_time = #{create_time,jdbcType=TIMESTAMP},
+      is_check = #{is_check,jdbcType=INTEGER},
+      line_path = #{line_path,jdbcType=LONGVARCHAR}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.tmtc.po.Line" >
+    update t_line
+    set line_name = #{line_name,jdbcType=VARCHAR},
+      start_id = #{start_id,jdbcType=BIGINT},
+      end_id = #{end_id,jdbcType=BIGINT},
+      price = #{price,jdbcType=INTEGER},
+      km = #{km,jdbcType=DOUBLE},
+      on_time_rate = #{on_time_rate,jdbcType=DOUBLE},
+      city_id = #{city_id,jdbcType=INTEGER},
+      company_id = #{company_id,jdbcType=BIGINT},
+      line_category = #{line_category,jdbcType=INTEGER},
+      line_type = #{line_type,jdbcType=INTEGER},
+      user_type = #{user_type,jdbcType=INTEGER},
+      start_time = #{start_time,jdbcType=TIMESTAMP},
+      end_time = #{end_time,jdbcType=TIMESTAMP},
+      sort = #{sort,jdbcType=INTEGER},
+      remark = #{remark,jdbcType=VARCHAR},
+      create_time = #{create_time,jdbcType=TIMESTAMP},
+      is_check = #{is_check,jdbcType=INTEGER}
+    where id = #{id,jdbcType=BIGINT}
+  </update>
+  
+  <update id="updateLineEndId" parameterType="string">
+  	UPDATE t_line
+	SET end_id = (
+		SELECT
+			id
+		FROM
+			t_line_station
+		WHERE
+			line_id = #{lineId}
+		AND sort = (
+			SELECT
+				MAX(sort)
+			FROM
+				t_line_station
+			WHERE
+				line_id = #{lineId}
+		)
+	)
+	WHERE
+		id = #{lineId}
+  </update>
+  
+</mapper>
